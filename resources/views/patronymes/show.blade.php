@@ -1,0 +1,146 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                <i class="mr-2 fas fa-user-circle"></i>{{ __('Détail du patronyme') }} : {{ $patronyme->nom }}
+            </h2>
+            <a href="{{ route('patronymes.index') }}" class="flex items-center text-indigo-600 hover:text-indigo-800">
+                <i class="mr-2 fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="py-6">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
+                        <div>
+                            <h3 class="mb-4 text-lg font-medium text-gray-900">Informations générales</h3>
+                            <dl class="space-y-3">
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Nom</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->nom }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Origine</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->origine ?? 'Non spécifiée' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Région</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->region->name ?? 'Non spécifiée' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Groupe ethnique</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->groupeEthnique->nom ?? 'Non spécifié' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Langue</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->langue->nom ?? 'Non spécifiée' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Mode de transmission</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->modeTransmission->type ?? 'Non spécifié' }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <div>
+                            <h3 class="mb-4 text-lg font-medium text-gray-900">Signification</h3>
+                            <p class="p-4 text-gray-700 rounded-md bg-gray-50">
+                                {{ $patronyme->signification ?? 'Aucune information disponible' }}
+                            </p>
+
+                            <h3 class="mt-6 mb-4 text-lg font-medium text-gray-900">Histoire</h3>
+                            <p class="p-4 text-gray-700 rounded-md bg-gray-50">
+                                {{ $patronyme->histoire ?? 'Aucune information historique disponible' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    @auth
+                        @if(Auth::user()->isAdmin())
+                            <div class="flex justify-end pt-6 mt-6 space-x-3 border-t border-gray-200">
+                                <a href="{{ route('patronymes.edit', $patronyme) }}" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    <i class="mr-2 fas fa-edit"></i> Modifier
+                                </a>
+                                <form action="{{ route('patronymes.destroy', $patronyme) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="flex items-center px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patronyme ?')">
+                                        <i class="mr-2 fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+                    @endauth
+                </div>
+            </div>
+
+            <!-- Section Commentaires -->
+            <div class="mt-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900">Commentaires</h3>
+
+                    @auth
+                        <!-- Formulaire d'ajout de commentaire -->
+                        <form action="{{ route('commentaires.store') }}" method="POST" class="mb-6">
+                            @csrf
+                            <input type="hidden" name="patronyme_id" value="{{ $patronyme->id }}">
+                            <div>
+                                <label for="contenu" class="block mb-2 text-sm font-medium text-gray-700">Ajouter un commentaire</label>
+                                <textarea name="contenu" id="contenu" rows="3" required
+                                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="Partagez vos connaissances sur ce patronyme..."></textarea>
+                            </div>
+                            <div class="mt-2">
+                                <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                                    <i class="mr-2 fas fa-comment"></i> Publier
+                                </button>
+                            </div>
+                        </form>
+                    @else
+                        <div class="p-4 mb-6 border border-blue-200 rounded-md bg-blue-50">
+                            <p class="text-blue-800">
+                                <a href="{{ route('login') }}" class="font-medium text-indigo-600 hover:text-indigo-800">Connectez-vous</a>
+                                pour ajouter un commentaire.
+                            </p>
+                        </div>
+                    @endauth
+
+                    <!-- Liste des commentaires -->
+                    <div class="space-y-4">
+                        @forelse($patronyme->commentaires as $commentaire)
+                            <div class="p-4 border border-gray-200 rounded-md">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ $commentaire->utilisateur->name }}</p>
+                                        <p class="text-sm text-gray-500">{{ $commentaire->date_commentaire->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    @auth
+                                        @if(Auth::user()->isAdmin() || Auth::user()->id === $commentaire->utilisateur_id)
+                                            <form action="{{ route('commentaires.destroy', $commentaire) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endauth
+                                </div>
+                                <p class="mt-2 text-gray-700">{{ $commentaire->contenu }}</p>
+                            </div>
+                        @empty
+                            <div class="py-8 text-center">
+                                <i class="mb-4 text-4xl text-gray-400 fas fa-comments"></i>
+                                <p class="text-gray-500">Aucun commentaire pour le moment.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
