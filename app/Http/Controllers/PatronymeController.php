@@ -22,16 +22,16 @@ class PatronymeController extends Controller
         $ethnieId = $request->input('ethnie_id');
         $langueId = $request->input('langue_id');
 
-        $query = Patronyme::with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue', 'modeTransmission']);
+        $query = Patronyme::with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue', 'modeTransmission'])->whereNotNull('nom');
 
         if ($search) {
             $searchTerm = trim($search);
             $searchWords = array_filter(explode(' ', $searchTerm));
-            
+
             $query->where(function($q) use ($searchWords, $searchTerm) {
                 // Recherche exacte d'abord
                 $q->where('nom', 'like', '%' . $searchTerm . '%');
-                
+
                 // Puis recherche par mots
                 foreach ($searchWords as $word) {
                     $q->orWhere(function($subQuery) use ($word) {
@@ -61,7 +61,7 @@ class PatronymeController extends Controller
                                  });
                     });
                 }
-                
+
                 // Recherche avec variations communes pour les patronymes
                 $variations = $this->getPatronymeVariations($searchTerm);
                 foreach ($variations as $variation) {
@@ -116,7 +116,7 @@ class PatronymeController extends Controller
     {
         $variations = [];
         $term = strtolower(trim($searchTerm));
-        
+
         // Variations communes pour les patronymes burkinabés
         $commonVariations = [
             'ouedraogo' => ['ouédraogo', 'ouedraogo', 'ouedraogo', 'wédraogo', 'wédraogo'],
@@ -132,7 +132,7 @@ class PatronymeController extends Controller
             'kabore' => ['kaboré', 'kabore', 'kaboré'],
             'ouedraogo' => ['ouédraogo', 'ouedraogo', 'wédraogo'],
         ];
-        
+
         // Chercher des variations pour le terme de recherche
         foreach ($commonVariations as $base => $vars) {
             if (in_array($term, $vars) || $term === $base) {
@@ -140,7 +140,7 @@ class PatronymeController extends Controller
                 $variations = array_merge($variations, [$base]);
             }
         }
-        
+
         // Variations phonétiques simples
         $phoneticVariations = [
             'ou' => ['u', 'w'],
@@ -150,7 +150,7 @@ class PatronymeController extends Controller
             'ù' => ['u'],
             'ç' => ['c'],
         ];
-        
+
         foreach ($phoneticVariations as $from => $to) {
             if (strpos($term, $from) !== false) {
                 foreach ($to as $replacement) {
@@ -158,7 +158,7 @@ class PatronymeController extends Controller
                 }
             }
         }
-        
+
         return array_unique($variations);
     }
 
@@ -170,15 +170,15 @@ class PatronymeController extends Controller
         $term = strtolower(trim($searchTerm));
         $allPatronymes = Patronyme::select('nom')->distinct()->get();
         $similarNames = [];
-        
+
         foreach ($allPatronymes as $patronyme) {
             $name = strtolower($patronyme->nom);
-            
+
             // Distance de Levenshtein pour la similarité
             $distance = levenshtein($term, $name);
             $maxLength = max(strlen($term), strlen($name));
             $similarity = 1 - ($distance / $maxLength);
-            
+
             // Si la similarité est suffisante (plus de 70%)
             if ($similarity > 0.7) {
                 $similarNames[] = [
@@ -187,12 +187,12 @@ class PatronymeController extends Controller
                 ];
             }
         }
-        
+
         // Trier par similarité décroissante
         usort($similarNames, function($a, $b) {
             return $b['similarity'] <=> $a['similarity'];
         });
-        
+
         return array_slice($similarNames, 0, $limit);
     }
 
@@ -202,20 +202,20 @@ class PatronymeController extends Controller
     public function getSearchSuggestions(Request $request)
     {
         $query = $request->input('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([]);
         }
-        
+
         $suggestions = [];
-        
+
         // Recherche dans les noms de patronymes
         $patronymes = Patronyme::where('nom', 'like', '%' . $query . '%')
             ->select('nom')
             ->distinct()
             ->limit(10)
             ->get();
-            
+
         foreach ($patronymes as $patronyme) {
             $suggestions[] = [
                 'type' => 'patronyme',
@@ -223,14 +223,14 @@ class PatronymeController extends Controller
                 'label' => $patronyme->nom
             ];
         }
-        
+
         // Recherche dans les régions
         $regions = Region::where('name', 'like', '%' . $query . '%')
             ->select('name')
             ->distinct()
             ->limit(5)
             ->get();
-            
+
         foreach ($regions as $region) {
             $suggestions[] = [
                 'type' => 'region',
@@ -238,14 +238,14 @@ class PatronymeController extends Controller
                 'label' => 'Région: ' . $region->name
             ];
         }
-        
+
         // Recherche dans les groupes ethniques
         $groupes = GroupeEthnique::where('nom', 'like', '%' . $query . '%')
             ->select('nom')
             ->distinct()
             ->limit(5)
             ->get();
-            
+
         foreach ($groupes as $groupe) {
             $suggestions[] = [
                 'type' => 'groupe',
@@ -253,7 +253,7 @@ class PatronymeController extends Controller
                 'label' => 'Groupe: ' . $groupe->nom
             ];
         }
-        
+
         // Recherche par similarité si peu de résultats
         if (count($suggestions) < 5) {
             $similarNames = $this->getSimilarNames($query, 5);
@@ -265,7 +265,7 @@ class PatronymeController extends Controller
                 ];
             }
         }
-        
+
         return response()->json(array_slice($suggestions, 0, 15));
     }
 

@@ -276,14 +276,14 @@
 
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
-            
+
             clearTimeout(searchTimeout);
-            
+
             if (query.length < 2) {
                 suggestionsDiv.classList.add('hidden');
                 return;
             }
-            
+
             searchTimeout = setTimeout(() => {
                 fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
@@ -303,7 +303,7 @@
 
         function displaySuggestions(suggestions) {
             suggestionsDiv.innerHTML = '';
-            
+
             suggestions.forEach(suggestion => {
                 const div = document.createElement('div');
                 div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
@@ -313,16 +313,16 @@
                         <span class="text-xs text-gray-500">${suggestion.type}</span>
                     </div>
                 `;
-                
+
                 div.addEventListener('click', function() {
                     searchInput.value = suggestion.value;
                     suggestionsDiv.classList.add('hidden');
                     searchInput.form.submit();
                 });
-                
+
                 suggestionsDiv.appendChild(div);
             });
-            
+
             suggestionsDiv.classList.remove('hidden');
         }
 
