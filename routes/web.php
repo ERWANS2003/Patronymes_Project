@@ -31,7 +31,7 @@ Route::get('patronymes', [PatronymeController::class, 'index'])->name('patronyme
 Route::get('patronymes/{patronyme}', [PatronymeController::class, 'show'])->name('patronymes.show');
 
 // Routes protégées (contribution)
-Route::middleware(['auth', 'can.contribute'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
     Route::get('patronymes/create', [PatronymeController::class, 'create'])->name('patronymes.create');
     Route::post('patronymes', [PatronymeController::class, 'store'])->name('patronymes.store');
     Route::get('patronymes/{patronyme}/edit', [PatronymeController::class, 'edit'])->name('patronymes.edit');
@@ -66,7 +66,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
 
     // Gestion des rôles (seuls les admins)
-    Route::middleware(['can.manage.roles'])->group(function () {
+    Route::middleware([\App\Http\Middleware\CanManageRolesMiddleware::class])->group(function () {
         Route::get('/roles', [\App\Http\Controllers\RoleManagementController::class, 'index'])->name('roles');
         Route::put('/roles/{user}', [\App\Http\Controllers\RoleManagementController::class, 'updateRole'])->name('roles.update');
         Route::post('/roles/{user}/toggle-contribution', [\App\Http\Controllers\RoleManagementController::class, 'toggleContribution'])->name('roles.toggle-contribution');
@@ -79,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
 
     // Contributions routes (for contributors)
-    Route::middleware(['can.contribute'])->group(function () {
+    Route::middleware([\App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
         Route::get('/contributions', [\App\Http\Controllers\UserContributionsController::class, 'index'])->name('contributions.index');
     });
 });
