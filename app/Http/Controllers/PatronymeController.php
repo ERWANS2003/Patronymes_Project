@@ -9,104 +9,80 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use App\Models\Province;
 use App\Models\Commune;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use App\Services\SearchService;
+use App\Services\StatisticsService;
 
 class PatronymeController extends Controller
 {
+    protected $searchService;
+    protected $statisticsService;
+
+    public function __construct(SearchService $searchService, StatisticsService $statisticsService)
+    {
+        $this->searchService = $searchService;
+        $this->statisticsService = $statisticsService;
+    }
     public function index(Request $request)
     {
-        $search = $request->input('search');
-        $regionId = $request->input('region_id');
-        $provinceId = $request->input('province_id');
-        $communeId = $request->input('commune_id');
-        $groupeEthniqueId = $request->input('groupe_ethnique_id');
-        $ethnieId = $request->input('ethnie_id');
-        $langueId = $request->input('langue_id');
+        try {
+            $filters = $request->only([
+                'search', 'region_id', 'province_id', 'commune_id', 
+                'groupe_ethnique_id', 'ethnie_id', 'langue_id',
+                'patronyme_sexe', 'transmission', 'min_frequence', 'max_frequence'
+            ]);
 
-        $query = Patronyme::with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue', 'modeTransmission'])->whereNotNull('nom');
-
-        if ($search) {
-            $searchTerm = trim($search);
-            $searchWords = array_filter(explode(' ', $searchTerm));
-
-            $query->where(function($q) use ($searchWords, $searchTerm) {
-                // Recherche exacte d'abord
-                $q->where('nom', 'like', '%' . $searchTerm . '%');
-
-                // Puis recherche par mots
-                foreach ($searchWords as $word) {
-                    $q->orWhere(function($subQuery) use ($word) {
-                        $subQuery->where('nom', 'like', '%' . $word . '%')
-                                 ->orWhere('signification', 'like', '%' . $word . '%')
-                                 ->orWhere('origine', 'like', '%' . $word . '%')
-                                 ->orWhere('histoire', 'like', '%' . $word . '%')
-                                 ->orWhere('enquete_nom', 'like', '%' . $word . '%')
-                                 ->orWhere('totem', 'like', '%' . $word . '%')
-                                 ->orWhere('parents_plaisanterie', 'like', '%' . $word . '%')
-                                 ->orWhere('justification_totem', 'like', '%' . $word . '%')
-                                 ->orWhere('patronyme_sexe', 'like', '%' . $word . '%')
-                                 ->orWhereHas('region', function($regionQuery) use ($word) {
-                                     $regionQuery->where('name', 'like', '%' . $word . '%');
-                                 })
-                                 ->orWhereHas('province', function($provinceQuery) use ($word) {
-                                     $provinceQuery->where('nom', 'like', '%' . $word . '%');
-                                 })
-                                 ->orWhereHas('commune', function($communeQuery) use ($word) {
-                                     $communeQuery->where('nom', 'like', '%' . $word . '%');
-                                 })
-                                 ->orWhereHas('groupeEthnique', function($groupeQuery) use ($word) {
-                                     $groupeQuery->where('nom', 'like', '%' . $word . '%');
-                                 })
-                                 ->orWhereHas('langue', function($langueQuery) use ($word) {
-                                     $langueQuery->where('nom', 'like', '%' . $word . '%');
-                                 });
-                    });
-                }
-
-                // Recherche avec variations communes pour les patronymes
-                $variations = $this->getPatronymeVariations($searchTerm);
-                foreach ($variations as $variation) {
-                    $q->orWhere('nom', 'like', '%' . $variation . '%');
-                }
+            // Utiliser le service de recherche optimisé
+            $patronymes = $this->searchService->search($filters['search'] ?? '', $filters);
+            
+            // Cache des données de référence
+            $regions = Cache::remember('regions_list', 3600, function () {
+                return Region::orderBy('name')->get();
             });
-        }
-        if ($regionId) {
-            $query->where('region_id', $regionId);
-        }
-        if ($provinceId) {
-            $query->where('province_id', $provinceId);
-        }
-        if ($communeId) {
-            $query->where('commune_id', $communeId);
-        }
-        if (Schema::hasColumn('patronymes', 'groupe_ethnique_id') && $groupeEthniqueId) {
-            $query->where('groupe_ethnique_id', $groupeEthniqueId);
-        }
-        if (Schema::hasColumn('patronymes', 'ethnie_id') && $ethnieId) {
-            $query->where('ethnie_id', $ethnieId);
-        }
-        if (Schema::hasColumn('patronymes', 'langue_id') && $langueId) {
-            $query->where('langue_id', $langueId);
-        }
+            
+            $provinces = $filters['region_id'] 
+                ? Cache::remember("provinces_region_{$filters['region_id']}", 1800, function () use ($filters) {
+                    return Province::where('region_id', $filters['region_id'])->orderBy('nom')->get();
+                })
+                : collect();
+                
+            $communes = $filters['province_id'] 
+                ? Cache::remember("communes_province_{$filters['province_id']}", 1800, function () use ($filters) {
+                    return Commune::where('province_id', $filters['province_id'])->orderBy('nom')->get();
+                })
+                : collect();
+                
+            $groupesEthniques = Cache::remember('groupes_ethniques_list', 3600, function () {
+                return GroupeEthnique::orderBy('nom')->get();
+            });
+            
+            $ethnies = Cache::remember('ethnies_list', 3600, function () {
+                return \App\Models\Ethnie::orderBy('nom')->get();
+            });
+            
+            $langues = Cache::remember('langues_list', 3600, function () {
+                return \App\Models\Langue::orderBy('nom')->get();
+            });
 
-        $patronymes = $query->paginate(10)->withQueryString();
+            Log::info('Patronyme search performed', [
+                'filters' => $filters,
+                'results_count' => $patronymes->count(),
+                'user_id' => auth()->id()
+            ]);
 
-        $regions = Region::orderBy('name')->get();
-        $provinces = $regionId ? Province::where('region_id', $regionId)->orderBy('nom')->get() : collect();
-        $communes = $provinceId ? Commune::where('province_id', $provinceId)->orderBy('nom')->get() : collect();
-        $groupesEthniques = class_exists(\App\Models\GroupeEthnique::class)
-            ? GroupeEthnique::orderBy('nom')->get()
-            : collect();
-        $ethnies = class_exists(\App\Models\Ethnie::class)
-            ? \App\Models\Ethnie::orderBy('nom')->get()
-            : collect();
-        $langues = class_exists(\App\Models\Langue::class)
-            ? \App\Models\Langue::orderBy('nom')->get()
-            : collect();
-
-        return view('patronymes.index', compact(
-            'patronymes', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues',
-            'search', 'regionId', 'provinceId', 'communeId', 'groupeEthniqueId', 'ethnieId', 'langueId'
-        ));
+            return view('patronymes.index', compact(
+                'patronymes', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues'
+            ))->with($filters);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in PatronymeController@index', [
+                'error' => $e->getMessage(),
+                'filters' => $request->all()
+            ]);
+            
+            return redirect()->back()->with('error', 'Une erreur est survenue lors de la recherche.');
+        }
     }
 
     /**
@@ -279,36 +255,58 @@ class PatronymeController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            // Informations sur l'enquêté
-            'enquete_nom' => 'required|string|max:255',
-            'enquete_age' => 'nullable|integer|min:1|max:120',
-            'enquete_sexe' => 'nullable|in:M,F',
-            'enquete_fonction' => 'nullable|string|max:255',
-            'enquete_contact' => 'nullable|string|max:255',
+        try {
+            $validated = $request->validate([
+                // Informations sur l'enquêté
+                'enquete_nom' => 'required|string|max:255',
+                'enquete_age' => 'nullable|integer|min:1|max:120',
+                'enquete_sexe' => 'nullable|in:M,F',
+                'enquete_fonction' => 'nullable|string|max:255',
+                'enquete_contact' => 'nullable|string|max:255',
 
-            // Informations sur le patronyme
-            'nom' => 'required|string|max:255',
-            'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
-            'origine' => 'nullable|string',
-            'signification' => 'nullable|string',
-            'histoire' => 'nullable|string',
-            'langue_id' => 'nullable|exists:langues,id',
-            'transmission' => 'nullable|in:pere,mere',
-            'patronyme_sexe' => 'nullable|string',
-            'totem' => 'nullable|string|max:255',
-            'justification_totem' => 'nullable|string',
-            'parents_plaisanterie' => 'nullable|string',
+                // Informations sur le patronyme
+                'nom' => 'required|string|max:255|unique:patronymes,nom',
+                'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
+                'origine' => 'nullable|string',
+                'signification' => 'nullable|string',
+                'histoire' => 'nullable|string',
+                'langue_id' => 'nullable|exists:langues,id',
+                'transmission' => 'nullable|in:pere,mere,autre',
+                'patronyme_sexe' => 'nullable|in:M,F,mixte',
+                'totem' => 'nullable|string|max:255',
+                'justification_totem' => 'nullable|string',
+                'parents_plaisanterie' => 'nullable|string',
 
-            // Localisation
-            'region_id' => 'nullable|exists:regions,id',
-            'province_id' => 'nullable|exists:provinces,id',
-            'commune_id' => 'nullable|exists:communes,id',
-        ]);
+                // Localisation
+                'region_id' => 'nullable|exists:regions,id',
+                'province_id' => 'nullable|exists:provinces,id',
+                'commune_id' => 'nullable|exists:communes,id',
+            ]);
 
-        Patronyme::create($validated);
+            $patronyme = Patronyme::create($validated);
 
-        return redirect()->route('patronymes.index')->with('success', 'Patronyme ajouté avec succès.');
+            // Log de la création
+            Log::info('Patronyme created', [
+                'patronyme_id' => $patronyme->id,
+                'nom' => $patronyme->nom,
+                'user_id' => auth()->id()
+            ]);
+
+            // Nettoyer le cache
+            Cache::forget('popular_patronymes_*');
+            Cache::forget('recent_patronymes_*');
+            Cache::forget('featured_patronymes_*');
+
+            return redirect()->route('patronymes.index')->with('success', 'Patronyme ajouté avec succès.');
+            
+        } catch (\Exception $e) {
+            Log::error('Error creating patronyme', [
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+            
+            return redirect()->back()->with('error', 'Une erreur est survenue lors de la création du patronyme.');
+        }
     }
 
     public function edit(Patronyme $patronyme)

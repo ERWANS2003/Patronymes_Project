@@ -16,20 +16,20 @@ class CacheMiddleware
         // Cache pour les pages statiques
         if ($request->isMethod('GET') && !$request->has('no-cache')) {
             $cacheKey = 'page_' . md5($request->fullUrl());
-            
+
             if (Cache::has($cacheKey)) {
                 return response(Cache::get($cacheKey));
             }
-            
+
             $response = $next($request);
-            
+
             if ($response->getStatusCode() === 200) {
                 Cache::put($cacheKey, $response->getContent(), $ttl);
             }
-            
+
             return $response;
         }
-        
+
         return $next($request);
     }
 }

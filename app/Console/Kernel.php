@@ -16,24 +16,24 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:database')
                  ->dailyAt('02:00')
                  ->withoutOverlapping();
-        
+
         // Nettoyage du cache toutes les heures
         $schedule->command('cache:clear')
                  ->hourly();
-        
+
         // Nettoyage des logs anciens (plus de 30 jours)
         $schedule->command('log:clear')
                  ->daily()
                  ->when(function () {
-                     return \Storage::exists('logs/laravel.log') && 
+                     return \Storage::exists('logs/laravel.log') &&
                             \Storage::lastModified('logs/laravel.log') < now()->subDays(30)->timestamp;
                  });
-        
+
         // Préchargement du cache toutes les 6 heures
         $schedule->call(function () {
             app(\App\Services\CacheService::class)->warmUp();
         })->everySixHours();
-        
+
         // Génération de statistiques quotidiennes
         $schedule->call(function () {
             \App\Models\Patronyme::whereDate('created_at', today())->count();

@@ -74,6 +74,10 @@ class Kernel extends HttpKernel
         'cache' => \App\Http\Middleware\CacheMiddleware::class,
         'logging' => \App\Http\Middleware\LoggingMiddleware::class,
         'security' => \App\Http\Middleware\SecurityMiddleware::class,
+        'performance' => \App\Http\Middleware\PerformanceMiddleware::class,
+        'api.response' => \App\Http\Middleware\ApiResponseMiddleware::class,
+        'request.validation' => \App\Http\Middleware\RequestValidationMiddleware::class,
+        'query.optimization' => \App\Http\Middleware\QueryOptimizationMiddleware::class,
     ];
 
 }

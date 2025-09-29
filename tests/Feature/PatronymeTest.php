@@ -7,7 +7,11 @@ use App\Models\Region;
 use App\Models\Departement;
 use App\Models\GroupeEthnique;
 use App\Models\Langue;
+use App\Models\User;
+use App\Models\Commentaire;
+use App\Models\Favorite;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class PatronymeTest extends TestCase
@@ -118,5 +122,250 @@ class PatronymeTest extends TestCase
 
         $this->assertCount(2, $results);
         $this->assertEquals($region1->id, $results->first()->region_id);
+    }
+
+    public function test_patronyme_soft_delete()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+        ]);
+
+        $patronyme->delete();
+
+        $this->assertSoftDeleted('patronymes', ['id' => $patronyme->id]);
+        $this->assertDatabaseHas('patronymes', ['id' => $patronyme->id]);
+    }
+
+    public function test_patronyme_views_increment()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'views_count' => 0,
+        ]);
+
+        $patronyme->incrementViews();
+
+        $this->assertEquals(1, $patronyme->fresh()->views_count);
+    }
+
+    public function test_patronyme_search_scopes()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        Patronyme::create([
+            'nom' => 'Popular Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'views_count' => 100,
+            'is_featured' => true,
+        ]);
+
+        Patronyme::create([
+            'nom' => 'Regular Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'views_count' => 10,
+            'is_featured' => false,
+        ]);
+
+        // Test popular scope
+        $popular = Patronyme::popular()->get();
+        $this->assertCount(2, $popular);
+        $this->assertEquals('Popular Patronyme', $popular->first()->nom);
+
+        // Test featured scope
+        $featured = Patronyme::featured()->get();
+        $this->assertCount(1, $featured);
+        $this->assertEquals('Popular Patronyme', $featured->first()->nom);
+    }
+
+    public function test_patronyme_advanced_search()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        Patronyme::create([
+            'nom' => 'Male Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'patronyme_sexe' => 'M',
+            'transmission' => 'pere',
+            'frequence' => 50,
+        ]);
+
+        Patronyme::create([
+            'nom' => 'Female Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'patronyme_sexe' => 'F',
+            'transmission' => 'mere',
+            'frequence' => 30,
+        ]);
+
+        // Test advanced search with filters
+        $filters = [
+            'patronyme_sexe' => 'M',
+            'transmission' => 'pere',
+            'min_frequence' => 40,
+        ];
+
+        $results = Patronyme::advancedSearch($filters)->get();
+        $this->assertCount(1, $results);
+        $this->assertEquals('Male Patronyme', $results->first()->nom);
+    }
+
+    public function test_patronyme_cache_methods()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        Patronyme::create([
+            'nom' => 'Cached Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'views_count' => 100,
+        ]);
+
+        // Test cache methods
+        $popular = Patronyme::getCachedPopular(5);
+        $this->assertCount(1, $popular);
+
+        $recent = Patronyme::getCachedRecent(5);
+        $this->assertCount(1, $recent);
+
+        $featured = Patronyme::getCachedFeatured(5);
+        $this->assertCount(0, $featured);
+    }
+
+    public function test_patronyme_relationships()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+        ]);
+
+        // Test relationships
+        $this->assertInstanceOf(Region::class, $patronyme->region);
+        $this->assertInstanceOf(Departement::class, $patronyme->departement);
+        $this->assertInstanceOf(GroupeEthnique::class, $patronyme->groupeEthnique);
+        $this->assertInstanceOf(Langue::class, $patronyme->langue);
+    }
+
+    public function test_patronyme_accessors()
+    {
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+            'views_count' => 100,
+            'frequence' => 50,
+        ]);
+
+        // Test accessors
+        $this->assertIsString($patronyme->full_location);
+        $this->assertIsFloat($patronyme->search_score);
+        $this->assertIsBool($patronyme->is_popular);
+    }
+
+    public function test_patronyme_comment_relationship()
+    {
+        $user = User::factory()->create();
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+        ]);
+
+        Commentaire::create([
+            'contenu' => 'Test comment',
+            'patronyme_id' => $patronyme->id,
+            'utilisateur_id' => $user->id,
+            'date_commentaire' => now(),
+        ]);
+
+        $this->assertCount(1, $patronyme->commentaires);
+        $this->assertEquals('Test comment', $patronyme->commentaires->first()->contenu);
+    }
+
+    public function test_patronyme_favorite_relationship()
+    {
+        $user = User::factory()->create();
+        $region = Region::first();
+        $departement = Departement::first();
+        $groupeEthnique = GroupeEthnique::first();
+        $langue = Langue::first();
+
+        $patronyme = Patronyme::create([
+            'nom' => 'Test Patronyme',
+            'region_id' => $region->id,
+            'departement_id' => $departement->id,
+            'groupe_ethnique_id' => $groupeEthnique->id,
+            'langue_id' => $langue->id,
+        ]);
+
+        Favorite::create([
+            'user_id' => $user->id,
+            'patronyme_id' => $patronyme->id,
+        ]);
+
+        $this->assertTrue($patronyme->isFavoritedBy($user->id));
+        $this->assertCount(1, $patronyme->favorites);
     }
 }

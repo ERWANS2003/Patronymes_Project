@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens, SoftDeletes;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
@@ -28,6 +30,9 @@ class User extends Authenticatable
         'role',
         'can_contribute',
         'can_manage_roles',
+        'last_login_at',
+        'login_count',
+        'is_active',
     ];
 
     /**
@@ -61,6 +66,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'can_contribute' => 'boolean',
+            'can_manage_roles' => 'boolean',
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
+            'login_count' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 
@@ -121,5 +134,114 @@ class User extends Authenticatable
     public function canManageRoles(): bool
     {
         return $this->can_manage_roles || $this->isAdmin();
+    }
+
+    // Accessor methods
+    public function getFullNameAttribute()
+    {
+        return $this->name;
+    }
+
+    public function getInitialsAttribute()
+    {
+        $names = explode(' ', $this->name);
+        $initials = '';
+        foreach ($names as $name) {
+            $initials .= strtoupper(substr($name, 0, 1));
+        }
+        return $initials;
+    }
+
+    public function getActivityScoreAttribute()
+    {
+        $score = 0;
+        
+        // Score basé sur les contributions
+        $score += $this->contributions()->count() * 2;
+        
+        // Score basé sur les commentaires
+        $score += $this->commentaires()->count() * 1;
+        
+        // Score basé sur les favoris
+        $score += $this->favorites()->count() * 0.5;
+        
+        // Score basé sur les connexions
+        $score += $this->login_count * 0.1;
+        
+        return round($score, 2);
+    }
+
+    public function getIsActiveAttribute()
+    {
+        return $this->is_active ?? true;
+    }
+
+    // Cache methods
+    public static function getCachedActiveUsers($limit = 10)
+    {
+        return Cache::remember("active_users_{$limit}", 3600, function () use ($limit) {
+            return static::where('is_active', true)
+                        ->orderBy('login_count', 'desc')
+                        ->limit($limit)
+                        ->get();
+        });
+    }
+
+    public static function getCachedRecentUsers($limit = 10)
+    {
+        return Cache::remember("recent_users_{$limit}", 1800, function () use ($limit) {
+            return static::orderBy('created_at', 'desc')
+                        ->limit($limit)
+                        ->get();
+        });
+    }
+
+    // Event handlers
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            Cache::forget('active_users_*');
+            Cache::forget('recent_users_*');
+        });
+
+        static::updated(function ($user) {
+            Cache::forget('active_users_*');
+            Cache::forget('recent_users_*');
+        });
+
+        static::deleted(function ($user) {
+            Cache::forget('active_users_*');
+            Cache::forget('recent_users_*');
+        });
+    }
+
+    // Login tracking
+    public function trackLogin()
+    {
+        $this->update([
+            'last_login_at' => now(),
+            'login_count' => $this->login_count + 1,
+        ]);
+    }
+
+    // Scope methods
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeByRole($query, $role)
+    {
+        return $query->where('role', $role);
+    }
+
+    public function scopeContributors($query)
+    {
+        return $query->where('can_contribute', true);
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', self::ROLE_ADMIN);
     }
 }

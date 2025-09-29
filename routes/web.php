@@ -65,7 +65,7 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::get('/import', [ImportExportController::class, 'showImportForm'])->name('import');
     Route::post('/import', [ImportExportController::class, 'import'])->name('import.run');
     Route::get('/export', [ImportExportController::class, 'export'])->name('export');
-    
+
     // Routes de santé et monitoring
     Route::get('/health', [\App\Http\Controllers\HealthController::class, 'check'])->name('health.check');
     Route::get('/metrics', [\App\Http\Controllers\HealthController::class, 'metrics'])->name('metrics');

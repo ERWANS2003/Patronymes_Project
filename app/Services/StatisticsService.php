@@ -26,7 +26,7 @@ class StatisticsService
             ];
         });
     }
-    
+
     public function getRegionStats()
     {
         return Cache::remember('region_stats', 600, function () {
@@ -35,7 +35,7 @@ class StatisticsService
                         ->get();
         });
     }
-    
+
     public function getEthnicGroupStats()
     {
         return Cache::remember('ethnic_stats', 600, function () {
@@ -44,7 +44,7 @@ class StatisticsService
                                ->get();
         });
     }
-    
+
     public function getUserActivityStats($userId)
     {
         return Cache::remember("user_activity_{$userId}", 300, function () use ($userId) {
@@ -64,7 +64,7 @@ class StatisticsService
             ];
         });
     }
-    
+
     public function getTrendingPatronymes($days = 7)
     {
         return Cache::remember("trending_patronymes_{$days}", 1800, function () use ($days) {

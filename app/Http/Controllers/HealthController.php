@@ -16,7 +16,7 @@ class HealthController extends Controller
             'timestamp' => now()->toISOString(),
             'checks' => []
         ];
-        
+
         // Vérification de la base de données
         try {
             DB::connection()->getPdo();
@@ -31,7 +31,7 @@ class HealthController extends Controller
                 'message' => 'Database connection failed: ' . $e->getMessage()
             ];
         }
-        
+
         // Vérification du cache
         try {
             Cache::put('health_check', 'ok', 60);
@@ -47,7 +47,7 @@ class HealthController extends Controller
                 'message' => 'Cache error: ' . $e->getMessage()
             ];
         }
-        
+
         // Vérification du stockage
         try {
             Storage::disk('local')->put('health_check.txt', 'ok');
@@ -64,7 +64,7 @@ class HealthController extends Controller
                 'message' => 'Storage error: ' . $e->getMessage()
             ];
         }
-        
+
         // Statistiques système
         $health['system'] = [
             'memory_usage' => memory_get_usage(true),
@@ -72,10 +72,10 @@ class HealthController extends Controller
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),
         ];
-        
+
         return response()->json($health, $health['status'] === 'healthy' ? 200 : 503);
     }
-    
+
     public function metrics()
     {
         return response()->json([
@@ -87,7 +87,7 @@ class HealthController extends Controller
             'uptime' => $this->getUptime(),
         ]);
     }
-    
+
     private function getCacheHitRate()
     {
         try {
@@ -96,13 +96,13 @@ class HealthController extends Controller
             $hits = $info['keyspace_hits'] ?? 0;
             $misses = $info['keyspace_misses'] ?? 0;
             $total = $hits + $misses;
-            
+
             return $total > 0 ? round(($hits / $total) * 100, 2) : 0;
         } catch (\Exception $e) {
             return 0;
         }
     }
-    
+
     private function getUptime()
     {
         try {
