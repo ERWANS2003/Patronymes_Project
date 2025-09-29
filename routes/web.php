@@ -26,7 +26,11 @@ Route::middleware('auth')->group(function () {
 });
 
 // Routes pour les patronymes avec permissions
-Route::resource('patronymes', PatronymeController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+// Routes publiques (lecture seule)
+Route::get('patronymes', [PatronymeController::class, 'index'])->name('patronymes.index');
+Route::get('patronymes/{patronyme}', [PatronymeController::class, 'show'])->name('patronymes.show');
+
+// Routes protégées (contribution)
 Route::middleware(['auth', 'can.contribute'])->group(function () {
     Route::get('patronymes/create', [PatronymeController::class, 'create'])->name('patronymes.create');
     Route::post('patronymes', [PatronymeController::class, 'store'])->name('patronymes.store');
@@ -60,7 +64,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/import', [ImportExportController::class, 'import'])->name('import.run');
     Route::get('/export', [ImportExportController::class, 'export'])->name('export');
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
-    
+
     // Gestion des rôles (seuls les admins)
     Route::middleware(['can.manage.roles'])->group(function () {
         Route::get('/roles', [\App\Http\Controllers\RoleManagementController::class, 'index'])->name('roles');

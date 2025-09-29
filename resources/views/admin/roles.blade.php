@@ -85,7 +85,7 @@
                             Gestion des Rôles
                         </h1>
                         <p class="lead text-white mb-4">
-                            Gérez les rôles et permissions des utilisateurs. 
+                            Gérez les rôles et permissions des utilisateurs.
                             Seuls les administrateurs peuvent modifier les rôles et autoriser les contributions.
                         </p>
                     </div>
