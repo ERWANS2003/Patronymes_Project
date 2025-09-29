@@ -102,11 +102,11 @@
                             <form action="{{ route('admin.users.update', $user) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                
+
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="name" class="form-label">Nom complet *</label>
-                                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                        <input type="text" class="form-control @error('name') is-invalid @enderror"
                                                id="name" name="name" value="{{ old('name', $user->name) }}" required>
                                         @error('name')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -114,7 +114,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="email" class="form-label">Email *</label>
-                                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                        <input type="email" class="form-control @error('email') is-invalid @enderror"
                                                id="email" name="email" value="{{ old('email', $user->email) }}" required>
                                         @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -125,7 +125,7 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="password" class="form-label">Nouveau mot de passe (optionnel)</label>
-                                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                                        <input type="password" class="form-control @error('password') is-invalid @enderror"
                                                id="password" name="password">
                                         <div class="form-text">Laissez vide pour conserver le mot de passe actuel</div>
                                         @error('password')
@@ -134,7 +134,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="password_confirmation" class="form-label">Confirmer le nouveau mot de passe</label>
-                                        <input type="password" class="form-control" 
+                                        <input type="password" class="form-control"
                                                id="password_confirmation" name="password_confirmation">
                                     </div>
                                 </div>
@@ -157,14 +157,14 @@
                                 <div class="mb-4">
                                     <h6 class="mb-3">Permissions spéciales</h6>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="can_contribute" id="can_contribute" 
+                                        <input class="form-check-input" type="checkbox" name="can_contribute" id="can_contribute"
                                                value="1" {{ old('can_contribute', $user->can_contribute) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="can_contribute">
                                             Peut contribuer (ajouter/modifier des patronymes)
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="can_manage_roles" id="can_manage_roles" 
+                                        <input class="form-check-input" type="checkbox" name="can_manage_roles" id="can_manage_roles"
                                                value="1" {{ old('can_manage_roles', $user->can_manage_roles) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="can_manage_roles">
                                             Peut gérer les rôles et permissions

@@ -13,7 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RegionProvinceCommuneSeeder::class,
+            ProvinceSeeder::class,
             CommuneSeeder::class,
+            DepartementSeeder::class,
             EthnieSeeder::class,
             GroupeEthniqueEthnieSeeder::class,
             LangueModeTransmissionSeeder::class,

@@ -90,7 +90,7 @@
                             Gestion des Utilisateurs
                         </h1>
                         <p class="lead text-white mb-4">
-                            Créez et gérez les utilisateurs de la plateforme. 
+                            Créez et gérez les utilisateurs de la plateforme.
                             Attribuez des rôles et permissions selon les besoins.
                         </p>
                     </div>

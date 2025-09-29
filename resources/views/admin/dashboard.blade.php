@@ -127,7 +127,7 @@
                             Tableau de bord Administrateur
                         </h1>
                         <p class="lead text-white mb-4">
-                            Gérez et administrez le répertoire des patronymes. 
+                            Gérez et administrez le répertoire des patronymes.
                             Surveillez les statistiques, modérez le contenu et maintenez la qualité de la base de données.
                         </p>
                         <div class="d-flex gap-3">
