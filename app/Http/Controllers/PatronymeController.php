@@ -316,10 +316,10 @@ class PatronymeController extends Controller
         $regions = Region::orderBy('name')->get();
         $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
         $langues = \App\Models\Langue::orderBy('nom')->get();
-        
+
         // Load the patronyme with its relations
         $patronyme->load(['region', 'province', 'commune', 'groupeEthnique', 'langue']);
-        
+
         return view('patronymes.edit', compact('patronyme', 'regions', 'groupesEthniques', 'langues'));
     }
 
@@ -332,7 +332,7 @@ class PatronymeController extends Controller
             'enquete_sexe' => 'nullable|in:M,F',
             'enquete_fonction' => 'nullable|string|max:255',
             'enquete_contact' => 'nullable|string|max:255',
-            
+
             // Informations sur le patronyme
             'nom' => 'required|string|max:255',
             'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
@@ -345,7 +345,7 @@ class PatronymeController extends Controller
             'totem' => 'nullable|string|max:255',
             'justification_totem' => 'nullable|string',
             'parents_plaisanterie' => 'nullable|string',
-            
+
             // Localisation
             'region_id' => 'nullable|exists:regions,id',
             'province_id' => 'nullable|exists:provinces,id',
