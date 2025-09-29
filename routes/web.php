@@ -25,7 +25,15 @@ Route::middleware('auth')->group(function () {
     })->name('profile.info');
 });
 
-Route::resource('patronymes', PatronymeController::class);
+// Routes pour les patronymes avec permissions
+Route::resource('patronymes', PatronymeController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+Route::middleware(['auth', 'can.contribute'])->group(function () {
+    Route::get('patronymes/create', [PatronymeController::class, 'create'])->name('patronymes.create');
+    Route::post('patronymes', [PatronymeController::class, 'store'])->name('patronymes.store');
+    Route::get('patronymes/{patronyme}/edit', [PatronymeController::class, 'edit'])->name('patronymes.edit');
+    Route::put('patronymes/{patronyme}', [PatronymeController::class, 'update'])->name('patronymes.update');
+    Route::delete('patronymes/{patronyme}', [PatronymeController::class, 'destroy'])->name('patronymes.destroy');
+});
 
 // Routes pour les commentaires
 Route::resource('commentaires', \App\Http\Controllers\CommentaireController::class)->only(['store', 'destroy']);
@@ -52,6 +60,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/import', [ImportExportController::class, 'import'])->name('import.run');
     Route::get('/export', [ImportExportController::class, 'export'])->name('export');
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics');
+    
+    // Gestion des rôles (seuls les admins)
+    Route::middleware(['can.manage.roles'])->group(function () {
+        Route::get('/roles', [\App\Http\Controllers\RoleManagementController::class, 'index'])->name('roles');
+        Route::put('/roles/{user}', [\App\Http\Controllers\RoleManagementController::class, 'updateRole'])->name('roles.update');
+        Route::post('/roles/{user}/toggle-contribution', [\App\Http\Controllers\RoleManagementController::class, 'toggleContribution'])->name('roles.toggle-contribution');
+    });
 });
 
 // Favorites routes

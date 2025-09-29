@@ -30,6 +30,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'can_contribute',
+        'can_manage_roles',
     ];
 
     /**
@@ -68,6 +70,7 @@ class User extends Authenticatable
 
     // Constants for user roles
     const ROLE_USER = 'user';
+    const ROLE_CONTRIBUTEUR = 'contributeur';
     const ROLE_ADMIN = 'admin';
 
     // Relationships
@@ -104,8 +107,23 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function isContributeur(): bool
+    {
+        return $this->role === self::ROLE_CONTRIBUTEUR;
+    }
+
     public function isUser(): bool
     {
         return $this->role === self::ROLE_USER;
+    }
+
+    public function canContribute(): bool
+    {
+        return $this->can_contribute || $this->isAdmin() || $this->isContributeur();
+    }
+
+    public function canManageRoles(): bool
+    {
+        return $this->can_manage_roles || $this->isAdmin();
     }
 }

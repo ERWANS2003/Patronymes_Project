@@ -5,7 +5,7 @@
                 <i class="mr-2 fas fa-users"></i>{{ __('Répertoire des Patronymes') }}
             </h2>
             @auth
-                @if(Auth::user()->isAdmin())
+                @if(Auth::user()->canContribute())
                     <a href="{{ route('patronymes.create') }}" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                         <i class="mr-2 fas fa-plus"></i> Ajouter un patronyme
                     </a>
@@ -169,20 +169,22 @@
                                                     <button class="mr-3 text-red-600 hover:text-red-900 favorite-btn"
                                                             data-patronyme-id="{{ $patronyme->id }}"
                                                             data-favorited="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'true' : 'false' }}">
-                                                        <i class="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i> 
+                                                        <i class="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i>
                                                         {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Favoris' }}
                                                     </button>
-                                                    @if(Auth::user()->isAdmin())
+                                                    @if(Auth::user()->canContribute())
                                                         <a href="{{ route('patronymes.edit', $patronyme) }}" class="mr-3 text-yellow-600 hover:text-yellow-900">
                                                             <i class="fas fa-edit"></i> Modifier
                                                         </a>
-                                                        <form action="{{ route('patronymes.destroy', $patronyme) }}" method="POST" class="inline-block">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patronyme ?')">
-                                                                <i class="fas fa-trash"></i> Supprimer
-                                                            </button>
-                                                        </form>
+                                                        @if(Auth::user()->isAdmin())
+                                                            <form action="{{ route('patronymes.destroy', $patronyme) }}" method="POST" class="inline-block">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patronyme ?')">
+                                                                    <i class="fas fa-trash"></i> Supprimer
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     @endif
                                                 @endauth
                                             </td>

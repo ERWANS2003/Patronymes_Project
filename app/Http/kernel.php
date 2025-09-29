@@ -69,6 +69,8 @@ class Kernel extends HttpKernel
         'example' => ExampleMiddleware::class,
         'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'can.contribute' => \App\Http\Middleware\CanContributeMiddleware::class,
+        'can.manage.roles' => \App\Http\Middleware\CanManageRolesMiddleware::class,
     ];
 
 }
