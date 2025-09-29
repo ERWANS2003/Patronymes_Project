@@ -55,9 +55,9 @@
                             <i class="mr-2 fas fa-user"></i>{{ __('Profil') }}
                         </x-dropdown-link>
 
-                        @if(Auth::user()->isContributeur())
-                            <x-dropdown-link :href="route('contributions.index')">
-                                <i class="mr-2 fas fa-edit"></i>{{ __('Mes contributions') }}
+                        @if(Auth::user()->isAdmin())
+                            <x-dropdown-link :href="route('admin.dashboard')">
+                                <i class="mr-2 fas fa-tools"></i>{{ __('Administration') }}
                             </x-dropdown-link>
                         @endif
 
@@ -118,9 +118,9 @@
                     <i class="mr-2 fas fa-user"></i>{{ __('Profil') }}
                 </x-responsive-nav-link>
 
-                @if(Auth::user()->isContributeur())
-                    <x-responsive-nav-link :href="route('contributions.index')">
-                        <i class="mr-2 fas fa-edit"></i>{{ __('Mes contributions') }}
+                @if(Auth::user()->isAdmin())
+                    <x-responsive-nav-link :href="route('admin.dashboard')">
+                        <i class="mr-2 fas fa-tools"></i>{{ __('Administration') }}
                     </x-responsive-nav-link>
                 @endif
 

@@ -5,7 +5,7 @@
                 <i class="mr-2 fas fa-users"></i>{{ __('Répertoire des Patronymes') }}
             </h2>
             @auth
-                @if(Auth::user()->isAdmin() || Auth::user()->isContributeur())
+                @if(Auth::user()->isAdmin())
                     <a href="{{ route('patronymes.create') }}" class="flex items-center px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                         <i class="mr-2 fas fa-plus"></i> Ajouter un patronyme
                     </a>
