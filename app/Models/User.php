@@ -90,7 +90,7 @@ class User extends Authenticatable
 
     public function contributions()
     {
-        return $this->hasMany(Contribution::class);
+        return $this->hasManyThrough(Contribution::class, Contributeur::class, 'utilisateur_id', 'contributeur_id');
     }
 
     public function commentaires()
