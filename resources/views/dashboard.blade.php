@@ -137,19 +137,40 @@
                     <div class="animate__animated animate__fadeInLeft">
                         <h1 class="display-4 fw-bold text-white mb-4">
                             <i class="fas fa-tachometer-alt me-3"></i>
-                            Bienvenue sur votre tableau de bord
+                            @if(Auth::user()->isAdmin())
+                                Tableau de bord Administrateur
+                            @elseif(Auth::user()->isContributeur())
+                                Tableau de bord Contributeur
+                            @else
+                                Bienvenue sur votre tableau de bord
+                            @endif
                         </h1>
                         <p class="lead text-white mb-4">
-                            Explorez, contribuez et découvrez l'histoire fascinante des patronymes du Burkina Faso.
-                            Votre espace personnel pour gérer vos favoris et suivre vos contributions.
+                            @if(Auth::user()->isAdmin())
+                                Gérez l'ensemble de la plateforme, les utilisateurs et les données. 
+                                Vous avez un accès complet à toutes les fonctionnalités.
+                            @elseif(Auth::user()->isContributeur())
+                                Contribuez à l'enrichissement du répertoire des patronymes. 
+                                Ajoutez, modifiez et partagez vos connaissances.
+                            @else
+                                Explorez et découvrez l'histoire fascinante des patronymes du Burkina Faso.
+                                Votre espace personnel pour gérer vos favoris et suivre vos découvertes.
+                            @endif
                         </p>
                         <div class="d-flex gap-3">
                             <a href="{{ route('patronymes.index') }}" class="btn btn-light btn-lg">
                                 <i class="fas fa-search me-2"></i>Explorer les patronymes
                             </a>
-                            <a href="{{ route('patronymes.create') }}" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-plus me-2"></i>Ajouter un patronyme
-                            </a>
+                            @if(Auth::user()->canContribute())
+                                <a href="{{ route('patronymes.create') }}" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-plus me-2"></i>Ajouter un patronyme
+                                </a>
+                            @endif
+                            @if(Auth::user()->isAdmin())
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-cog me-2"></i>Administration
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -245,22 +266,24 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 mb-4">
-                    <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-3">
-                                <i class="fas fa-plus fa-3x text-success"></i>
+                @if(Auth::user()->canContribute())
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-plus fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Contribuer</h5>
+                                <p class="card-text">
+                                    Ajoutez de nouveaux patronymes et enrichissez notre patrimoine culturel.
+                                </p>
+                                <a href="{{ route('patronymes.create') }}" class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Ajouter un patronyme
+                                </a>
                             </div>
-                            <h5 class="card-title">Contribuer</h5>
-                            <p class="card-text">
-                                Ajoutez de nouveaux patronymes et enrichissez notre patrimoine culturel.
-                            </p>
-                            <a href="{{ route('patronymes.create') }}" class="btn btn-success">
-                                <i class="fas fa-plus me-2"></i>Ajouter un patronyme
-                            </a>
                         </div>
                     </div>
-                </div>
+                @endif
 
                 <div class="col-md-4 mb-4">
                     <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
@@ -279,6 +302,82 @@
                     </div>
                 </div>
             </div>
+
+            @if(Auth::user()->isAdmin())
+                <!-- Admin Quick Actions -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <h2 class="text-center mb-4">
+                            <i class="fas fa-crown text-warning me-2"></i>
+                            Actions Administrateur
+                        </h2>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card feature-card h-100 animate__animated animate__fadeInUp">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-users-cog fa-3x text-danger"></i>
+                                </div>
+                                <h5 class="card-title">Gestion des Rôles</h5>
+                                <p class="card-text">
+                                    Gérez les rôles et permissions des utilisateurs.
+                                </p>
+                                <a href="{{ route('admin.roles') }}" class="btn btn-danger">
+                                    <i class="fas fa-users-cog me-2"></i>Gérer les rôles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-upload fa-3x text-info"></i>
+                                </div>
+                                <h5 class="card-title">Import/Export</h5>
+                                <p class="card-text">
+                                    Importez et exportez les données de patronymes.
+                                </p>
+                                <a href="{{ route('admin.import') }}" class="btn btn-info">
+                                    <i class="fas fa-upload me-2"></i>Import/Export
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-chart-line fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Statistiques</h5>
+                                <p class="card-text">
+                                    Consultez les statistiques détaillées de la plateforme.
+                                </p>
+                                <a href="{{ route('admin.statistics') }}" class="btn btn-success">
+                                    <i class="fas fa-chart-line me-2"></i>Statistiques
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-tachometer-alt fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Tableau de bord</h5>
+                                <p class="card-text">
+                                    Accédez au tableau de bord administrateur complet.
+                                </p>
+                                <a href="{{ route('admin.dashboard') }}" class="btn btn-primary">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard Admin
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Dashboard Content -->
             <div class="row">

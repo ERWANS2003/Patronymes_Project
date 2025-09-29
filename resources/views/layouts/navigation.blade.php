@@ -25,6 +25,18 @@
                         <a href="{{ route('favorites.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
                             <i class="fas fa-heart mr-2"></i>Mes Favoris
                         </a>
+                        
+                        @if(Auth::user()->canContribute())
+                            <a href="{{ route('patronymes.create') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-green-600 hover:text-green-700 hover:border-green-300 focus:outline-none focus:text-green-700 focus:border-green-300 transition duration-150 ease-in-out">
+                                <i class="fas fa-plus mr-2"></i>Ajouter
+                            </a>
+                        @endif
+                        
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-red-600 hover:text-red-700 hover:border-red-300 focus:outline-none focus:text-red-700 focus:border-red-300 transition duration-150 ease-in-out">
+                                <i class="fas fa-cog mr-2"></i>Administration
+                            </a>
+                        @endif
                     @endauth
                 </div>
             </div>
@@ -40,19 +52,59 @@
                             </button>
                         </div>
 
-                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div class="py-1">
+                                <!-- User info -->
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <div class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</div>
+                                    <div class="text-xs text-gray-500">
+                                        @if(Auth::user()->isAdmin())
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-crown mr-1"></i>Administrateur
+                                            </span>
+                                        @elseif(Auth::user()->isContributeur())
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-edit mr-1"></i>Contributeur
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-user mr-1"></i>Utilisateur
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <!-- Menu items -->
                                 <a href="{{ route('profile.info') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-user mr-2"></i>Mon Profil
                                 </a>
                                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-cog mr-2"></i>Paramètres
                                 </a>
+                                
+                        @if(Auth::user()->canContribute())
+                            <a href="{{ route('patronymes.create') }}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-50">
+                                <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
+                            </a>
+                            <a href="{{ route('contributions.index') }}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-50">
+                                <i class="fas fa-edit mr-2"></i>Mes contributions
+                            </a>
+                        @endif
+                                
                                 @if(Auth::user()->isAdmin())
-                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-tools mr-2"></i>Administration
+                                    <div class="border-t border-gray-100"></div>
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                        <i class="fas fa-tachometer-alt mr-2"></i>Tableau de bord
+                                    </a>
+                                    <a href="{{ route('admin.roles') }}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                        <i class="fas fa-users-cog mr-2"></i>Gestion des rôles
+                                    </a>
+                                    <a href="{{ route('admin.import') }}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                        <i class="fas fa-upload mr-2"></i>Import/Export
                                     </a>
                                 @endif
+                                
+                                <div class="border-t border-gray-100"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

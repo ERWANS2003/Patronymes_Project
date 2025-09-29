@@ -77,6 +77,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware(['auth'])->group(function () {
     Route::post('/patronymes/{patronyme}/favorite', [FavoriteController::class, 'toggle'])->name('patronymes.favorite.toggle');
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    
+    // Contributions routes (for contributors)
+    Route::middleware(['can.contribute'])->group(function () {
+        Route::get('/contributions', [\App\Http\Controllers\UserContributionsController::class, 'index'])->name('contributions.index');
+    });
 });
 
 // Statistics routes
