@@ -31,6 +31,9 @@ Route::resource('patronymes', PatronymeController::class);
 Route::get('get-provinces', [PatronymeController::class, 'getProvinces'])->name('get.provinces');
 Route::get('get-communes', [PatronymeController::class, 'getCommunes'])->name('get.communes');
 
+// Route pour les suggestions de recherche
+Route::get('search-suggestions', [PatronymeController::class, 'getSearchSuggestions'])->name('search.suggestions');
+
 // Minimal API docs route
 Route::get('/docs', function () {
     return view('api.docs');

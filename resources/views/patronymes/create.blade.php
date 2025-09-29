@@ -17,7 +17,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 mb-4 bg-gray-100 p-3 rounded">
                                 I. IDENTITÉ DE L'ENQUÊTÉ
                             </h3>
-                            
+
                             <div class="grid grid-cols-1 gap-6">
                                 <div>
                                     <label for="enquete_nom" class="block text-sm font-medium text-gray-700">NOM ET PRÉNOM:</label>
@@ -87,7 +87,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 mb-4 bg-gray-100 p-3 rounded">
                                 II. INFORMATIONS SUR LE PATRONYME
                             </h3>
-                            
+
                             <div class="space-y-6">
                                 <div>
                                     <label for="nom" class="block text-sm font-medium text-gray-700">1. Patronyme:</label>
@@ -221,7 +221,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 mb-4 bg-gray-100 p-3 rounded">
                                 III. LOCALISATION
                             </h3>
-                            
+
                             <div class="grid grid-cols-1 gap-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>

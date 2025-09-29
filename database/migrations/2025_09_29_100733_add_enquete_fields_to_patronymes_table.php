@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('enquete_sexe', ['M', 'F'])->nullable()->after('enquete_age');
             $table->string('enquete_fonction')->nullable()->after('enquete_sexe');
             $table->string('enquete_contact')->nullable()->after('enquete_fonction');
-            
+
             // Informations sur le patronyme
             $table->enum('transmission', ['pere', 'mere'])->nullable()->after('langue_id');
             $table->text('patronyme_sexe')->nullable()->after('transmission');

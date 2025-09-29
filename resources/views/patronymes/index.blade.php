@@ -22,10 +22,19 @@
                     <form action="{{ route('patronymes.index') }}" method="GET" class="space-y-4">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Recherche</label>
-                                <input type="text" name="search" value="{{ $search ?? '' }}"
-                                    placeholder="Nom du patronyme..."
-                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label class="block text-sm font-medium text-gray-700">Recherche avancée</label>
+                                <div class="relative">
+                                    <input type="text" name="search" id="search-input" value="{{ $search ?? '' }}"
+                                        placeholder="Nom, signification, origine, région, groupe ethnique..."
+                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        autocomplete="off">
+                                    <div id="search-suggestions" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                                        <!-- Les suggestions apparaîtront ici -->
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Recherche dans le nom, signification, origine, histoire, région, province, commune, groupe ethnique, langue...
+                                </p>
                             </div>
 
                             <div>
@@ -257,6 +266,77 @@
                     // Delay to ensure provinces load first
                     setTimeout(() => loadCommunes(selectedProvinceId, selectedCommuneId), 200);
                 }
+            }
+        });
+
+        // Autocomplétion pour la recherche
+        const searchInput = document.getElementById('search-input');
+        const suggestionsDiv = document.getElementById('search-suggestions');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                suggestionsDiv.classList.add('hidden');
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(suggestions => {
+                        if (suggestions.length > 0) {
+                            displaySuggestions(suggestions);
+                        } else {
+                            suggestionsDiv.classList.add('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la recherche:', error);
+                        suggestionsDiv.classList.add('hidden');
+                    });
+            }, 300);
+        });
+
+        function displaySuggestions(suggestions) {
+            suggestionsDiv.innerHTML = '';
+            
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">${suggestion.label}</span>
+                        <span class="text-xs text-gray-500">${suggestion.type}</span>
+                    </div>
+                `;
+                
+                div.addEventListener('click', function() {
+                    searchInput.value = suggestion.value;
+                    suggestionsDiv.classList.add('hidden');
+                    searchInput.form.submit();
+                });
+                
+                suggestionsDiv.appendChild(div);
+            });
+            
+            suggestionsDiv.classList.remove('hidden');
+        }
+
+        // Masquer les suggestions quand on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.classList.add('hidden');
+            }
+        });
+
+        // Masquer les suggestions avec Escape
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                suggestionsDiv.classList.add('hidden');
             }
         });
     </script>

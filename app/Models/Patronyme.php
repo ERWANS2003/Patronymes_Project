@@ -16,7 +16,7 @@ class Patronyme extends Model
         'enquete_sexe',
         'enquete_fonction',
         'enquete_contact',
-        
+
         // Informations sur le patronyme
         'nom',
         'groupe_ethnique_id',
@@ -29,12 +29,12 @@ class Patronyme extends Model
         'totem',
         'justification_totem',
         'parents_plaisanterie',
-        
+
         // Localisation
         'region_id',
         'province_id',
         'commune_id',
-        
+
         // Champs existants
         'departement_id',
         'frequence',
