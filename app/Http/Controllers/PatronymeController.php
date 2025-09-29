@@ -70,20 +70,38 @@ class PatronymeController extends Controller
     public function create()
     {
         $regions = Region::orderBy('name')->get();
-        $departements = Departement::orderBy('name')->get();
-        return view('patronymes.create', compact('regions', 'departements'));
+        $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
+        $langues = \App\Models\Langue::orderBy('nom')->get();
+        return view('patronymes.create', compact('regions', 'groupesEthniques', 'langues'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            // Informations sur l'enquêté
+            'enquete_nom' => 'required|string|max:255',
+            'enquete_age' => 'nullable|integer|min:1|max:120',
+            'enquete_sexe' => 'nullable|in:M,F',
+            'enquete_fonction' => 'nullable|string|max:255',
+            'enquete_contact' => 'nullable|string|max:255',
+            
+            // Informations sur le patronyme
             'nom' => 'required|string|max:255',
-            'region_id' => 'nullable|exists:regions,id',
-            'departement_id' => 'nullable|exists:departements,id',
-            'frequence' => 'nullable|integer|min:0',
+            'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
             'origine' => 'nullable|string',
             'signification' => 'nullable|string',
             'histoire' => 'nullable|string',
+            'langue_id' => 'nullable|exists:langues,id',
+            'transmission' => 'nullable|in:pere,mere',
+            'patronyme_sexe' => 'nullable|string',
+            'totem' => 'nullable|string|max:255',
+            'justification_totem' => 'nullable|string',
+            'parents_plaisanterie' => 'nullable|string',
+            
+            // Localisation
+            'region_id' => 'nullable|exists:regions,id',
+            'province_id' => 'nullable|exists:provinces,id',
+            'commune_id' => 'nullable|exists:communes,id',
         ]);
 
         Patronyme::create($validated);

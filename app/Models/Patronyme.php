@@ -10,19 +10,37 @@ class Patronyme extends Model
     use HasFactory;
 
     protected $fillable = [
+        // Informations sur l'enquêté
+        'enquete_nom',
+        'enquete_age',
+        'enquete_sexe',
+        'enquete_fonction',
+        'enquete_contact',
+        
+        // Informations sur le patronyme
         'nom',
-        'signification',
+        'groupe_ethnique_id',
         'origine',
+        'signification',
+        'histoire',
+        'langue_id',
+        'transmission',
+        'patronyme_sexe',
+        'totem',
+        'justification_totem',
+        'parents_plaisanterie',
+        
+        // Localisation
         'region_id',
-        'departement_id',
         'province_id',
         'commune_id',
+        
+        // Champs existants
+        'departement_id',
         'frequence',
         'views_count',
         'is_featured',
-        'groupe_ethnique_id',
         'ethnie_id',
-        'langue_id',
         'mode_transmission_id',
     ];
 
