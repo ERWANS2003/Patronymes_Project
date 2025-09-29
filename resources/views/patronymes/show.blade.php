@@ -160,4 +160,42 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle favorite toggle
+            document.querySelectorAll('.favorite-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const patronymeId = this.dataset.patronymeId;
+                    const isFavorited = this.dataset.favorited === 'true';
+
+                    fetch(`/patronymes/${patronymeId}/favorite`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isFavorited) {
+                            this.innerHTML = '<i class="mr-2 fas fa-heart"></i>Favori';
+                            this.classList.remove('text-red-600', 'bg-red-50', 'border-red-200', 'hover:bg-red-100');
+                            this.classList.add('text-red-700', 'bg-red-100', 'border-red-300', 'hover:bg-red-200');
+                            this.dataset.favorited = 'true';
+                        } else {
+                            this.innerHTML = '<i class="mr-2 far fa-heart"></i>Favoris';
+                            this.classList.remove('text-red-700', 'bg-red-100', 'border-red-300', 'hover:bg-red-200');
+                            this.classList.add('text-red-600', 'bg-red-50', 'border-red-200', 'hover:bg-red-100');
+                            this.dataset.favorited = 'false';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue lors de la mise à jour des favoris.');
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>

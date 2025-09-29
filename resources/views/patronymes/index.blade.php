@@ -166,6 +166,12 @@
                                                     <i class="fas fa-eye"></i> Voir
                                                 </a>
                                                 @auth
+                                                    <button class="mr-3 text-red-600 hover:text-red-900 favorite-btn"
+                                                            data-patronyme-id="{{ $patronyme->id }}"
+                                                            data-favorited="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'true' : 'false' }}">
+                                                        <i class="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i> 
+                                                        {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Favoris' }}
+                                                    </button>
                                                     @if(Auth::user()->isAdmin())
                                                         <a href="{{ route('patronymes.edit', $patronyme) }}" class="mr-3 text-yellow-600 hover:text-yellow-900">
                                                             <i class="fas fa-edit"></i> Modifier
@@ -338,6 +344,40 @@
             if (e.key === 'Escape') {
                 suggestionsDiv.classList.add('hidden');
             }
+        });
+
+        // Handle favorite toggle
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const patronymeId = this.dataset.patronymeId;
+                const isFavorited = this.dataset.favorited === 'true';
+
+                fetch(`/patronymes/${patronymeId}/favorite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isFavorited) {
+                        this.innerHTML = '<i class="fas fa-heart"></i> Favori';
+                        this.classList.add('text-red-700');
+                        this.classList.remove('text-red-600');
+                        this.dataset.favorited = 'true';
+                    } else {
+                        this.innerHTML = '<i class="far fa-heart"></i> Favoris';
+                        this.classList.add('text-red-600');
+                        this.classList.remove('text-red-700');
+                        this.dataset.favorited = 'false';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la mise à jour des favoris.');
+                });
+            });
         });
     </script>
     @endpush
