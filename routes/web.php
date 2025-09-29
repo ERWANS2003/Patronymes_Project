@@ -28,9 +28,8 @@ Route::middleware('auth')->group(function () {
 // Routes pour les patronymes avec permissions
 // Routes publiques (lecture seule)
 Route::get('patronymes', [PatronymeController::class, 'index'])->name('patronymes.index');
-Route::get('patronymes/{patronyme}', [PatronymeController::class, 'show'])->name('patronymes.show');
 
-// Routes protégées (contribution)
+// Routes protégées (contribution) - DOIT être avant les routes avec paramètres
 Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
     Route::get('patronymes/create', [PatronymeController::class, 'create'])->name('patronymes.create');
     Route::post('patronymes', [PatronymeController::class, 'store'])->name('patronymes.store');
@@ -38,6 +37,9 @@ Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])
     Route::put('patronymes/{patronyme}', [PatronymeController::class, 'update'])->name('patronymes.update');
     Route::delete('patronymes/{patronyme}', [PatronymeController::class, 'destroy'])->name('patronymes.destroy');
 });
+
+// Route publique avec paramètre (DOIT être après les routes spécifiques)
+Route::get('patronymes/{patronyme}', [PatronymeController::class, 'show'])->name('patronymes.show');
 
 // Routes pour les commentaires
 Route::resource('commentaires', \App\Http\Controllers\CommentaireController::class)->only(['store', 'destroy']);
