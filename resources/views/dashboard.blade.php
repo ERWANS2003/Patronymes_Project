@@ -147,10 +147,10 @@
                         </h1>
                         <p class="lead text-white mb-4">
                             @if(Auth::user()->isAdmin())
-                                Gérez l'ensemble de la plateforme, les utilisateurs et les données. 
+                                Gérez l'ensemble de la plateforme, les utilisateurs et les données.
                                 Vous avez un accès complet à toutes les fonctionnalités.
                             @elseif(Auth::user()->isContributeur())
-                                Contribuez à l'enrichissement du répertoire des patronymes. 
+                                Contribuez à l'enrichissement du répertoire des patronymes.
                                 Ajoutez, modifiez et partagez vos connaissances.
                             @else
                                 Explorez et découvrez l'histoire fascinante des patronymes du Burkina Faso.

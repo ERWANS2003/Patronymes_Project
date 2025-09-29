@@ -25,7 +25,7 @@
                                 Voici les patronymes que vous avez contribués à la plateforme.
                             </p>
                         </div>
-                        
+
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -85,7 +85,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Pagination -->
                         <div class="mt-6">
                             {{ $contributions->links() }}

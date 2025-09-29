@@ -25,13 +25,13 @@
                         <a href="{{ route('favorites.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
                             <i class="fas fa-heart mr-2"></i>Mes Favoris
                         </a>
-                        
+
                         @if(Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-green-600 hover:text-green-700 hover:border-green-300 focus:outline-none focus:text-green-700 focus:border-green-300 transition duration-150 ease-in-out">
                                 <i class="fas fa-plus mr-2"></i>Ajouter
                             </a>
                         @endif
-                        
+
                         @if(Auth::user()->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-red-600 hover:text-red-700 hover:border-red-300 focus:outline-none focus:text-red-700 focus:border-red-300 transition duration-150 ease-in-out">
                                 <i class="fas fa-cog mr-2"></i>Administration
@@ -73,7 +73,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                
+
                                 <!-- Menu items -->
                                 <a href="{{ route('profile.info') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-user mr-2"></i>Mon Profil
@@ -81,7 +81,7 @@
                                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-cog mr-2"></i>Paramètres
                                 </a>
-                                
+
                         @if(Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-50">
                                 <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
@@ -90,7 +90,7 @@
                                 <i class="fas fa-edit mr-2"></i>Mes contributions
                             </a>
                         @endif
-                                
+
                                 @if(Auth::user()->isAdmin())
                                     <div class="border-t border-gray-100"></div>
                                     <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-50">
@@ -103,7 +103,7 @@
                                         <i class="fas fa-upload mr-2"></i>Import/Export
                                     </a>
                                 @endif
-                                
+
                                 <div class="border-t border-gray-100"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf

@@ -19,13 +19,13 @@
                         <i class="mr-2 {{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i>
                         {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Favoris' }}
                     </button>
-                    
+
                     @if(Auth::user()->canContribute())
                         <a href="{{ route('patronymes.edit', $patronyme) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100">
                             <i class="mr-2 fas fa-edit"></i> Modifier
                         </a>
                     @endif
-                    
+
                     @if(Auth::user()->isAdmin())
                         <form action="{{ route('patronymes.destroy', $patronyme) }}" method="POST" class="inline-block">
                             @csrf
@@ -36,7 +36,7 @@
                         </form>
                     @endif
                 @endauth
-                
+
                 <a href="{{ route('patronymes.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                     <i class="mr-2 fas fa-arrow-left"></i> Retour à la liste
                 </a>
