@@ -43,20 +43,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox"
-                           class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                    <label for="remember-me" class="block ml-2 text-sm text-gray-900">
-                        Se souvenir de moi
-                    </label>
-                </div>
-
-                <div class="text-sm">
-                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
-                        Mot de passe oublié?
-                    </a>
-                </div>
+            <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox"
+                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                <label for="remember-me" class="block ml-2 text-sm text-gray-900">
+                    Se souvenir de moi
+                </label>
             </div>
 
             <div>

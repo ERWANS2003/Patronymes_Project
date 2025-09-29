@@ -145,7 +145,7 @@ return [
 
     'features' => [
         Features::registration(),
-        Features::resetPasswords(),
+        // Features::resetPasswords(), // Désactivé - pas de réinitialisation de mot de passe
         // Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
