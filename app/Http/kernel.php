@@ -71,6 +71,9 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'can.contribute' => \App\Http\Middleware\CanContributeMiddleware::class,
         'can.manage.roles' => \App\Http\Middleware\CanManageRolesMiddleware::class,
+        'cache' => \App\Http\Middleware\CacheMiddleware::class,
+        'logging' => \App\Http\Middleware\LoggingMiddleware::class,
+        'security' => \App\Http\Middleware\SecurityMiddleware::class,
     ];
 
 }
