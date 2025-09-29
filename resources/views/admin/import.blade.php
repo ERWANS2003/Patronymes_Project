@@ -139,7 +139,7 @@
                         <div class="card-body">
                             <form action="{{ route('admin.import.run') }}" method="POST" enctype="multipart/form-data" id="importForm">
                                 @csrf
-                                
+
                                 <!-- Upload Area -->
                                 <div class="upload-area" id="uploadArea">
                                     <i class="fas fa-cloud-upload-alt fa-3x text-success mb-3"></i>
@@ -232,7 +232,7 @@
             uploadArea.addEventListener('drop', function(e) {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
-                
+
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
                     handleFile(files[0]);
@@ -255,7 +255,7 @@
                 // Validate file type
                 const allowedTypes = ['.xlsx', '.csv'];
                 const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-                
+
                 if (!allowedTypes.includes(fileExtension)) {
                     alert('Veuillez sélectionner un fichier .xlsx ou .csv');
                     return;

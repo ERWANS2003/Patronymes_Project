@@ -354,8 +354,8 @@
                                 <div class="col-6 mb-3">
                                     <div class="border rounded p-3">
                                         <i class="fas fa-eye text-primary fa-2x mb-2"></i>
-                                        <h4 class="mb-1">{{ Auth::user()->patronymes()->count() ?? 0 }}</h4>
-                                        <small class="text-muted">Patronymes consultés</small>
+                                        <h4 class="mb-1">{{ Auth::user()->favorites()->count() ?? 0 }}</h4>
+                                        <small class="text-muted">Favoris</small>
                                     </div>
                                 </div>
                                 <div class="col-6 mb-3">

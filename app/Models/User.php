@@ -81,6 +81,23 @@ class User extends Authenticatable
         return $this->belongsToMany(Patronyme::class, 'favorites');
     }
 
+    public function patronymes()
+    {
+        // Relation temporaire - retourne une collection vide pour l'instant
+        // TODO: Ajouter la colonne created_by à la table patronymes
+        return collect([]);
+    }
+
+    public function contributions()
+    {
+        return $this->hasMany(Contribution::class);
+    }
+
+    public function commentaires()
+    {
+        return $this->hasMany(Commentaire::class, 'utilisateur_id');
+    }
+
     // Helper methods
     public function isAdmin(): bool
     {
