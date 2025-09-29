@@ -27,6 +27,9 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('patronymes', PatronymeController::class);
 
+// Routes pour les commentaires
+Route::resource('commentaires', \App\Http\Controllers\CommentaireController::class)->only(['store', 'destroy']);
+
 // Routes AJAX pour les listes dépendantes
 Route::get('get-provinces', [PatronymeController::class, 'getProvinces'])->name('get.provinces');
 Route::get('get-communes', [PatronymeController::class, 'getCommunes'])->name('get.communes');

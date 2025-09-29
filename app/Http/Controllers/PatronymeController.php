@@ -340,6 +340,9 @@ class PatronymeController extends Controller
         // Increment view count
         $patronyme->incrementViews();
 
+        // Load the patronyme with its relations including comments
+        $patronyme->load(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue', 'modeTransmission', 'commentaires.utilisateur']);
+
         return view('patronymes.show', compact('patronyme'));
     }
 

@@ -28,7 +28,17 @@ class CommentaireController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'contenu' => 'required|string|max:1000',
+            'patronyme_id' => 'required|exists:patronymes,id',
+        ]);
+
+        $validated['utilisateur_id'] = auth()->id();
+        $validated['date_commentaire'] = now();
+
+        Commentaire::create($validated);
+
+        return redirect()->back()->with('success', 'Commentaire ajouté avec succès.');
     }
 
     /**
@@ -60,6 +70,13 @@ class CommentaireController extends Controller
      */
     public function destroy(Commentaire $commentaire)
     {
-        //
+        // Vérifier que l'utilisateur peut supprimer ce commentaire
+        if (auth()->id() !== $commentaire->utilisateur_id && !auth()->user()->isAdmin()) {
+            abort(403, 'Vous ne pouvez pas supprimer ce commentaire.');
+        }
+
+        $commentaire->delete();
+
+        return redirect()->back()->with('success', 'Commentaire supprimé avec succès.');
     }
 }
