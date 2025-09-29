@@ -1,0 +1,16 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Patronymes API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/login": {"post": {"summary": "Login", "responses": {"200": {"description": "OK"}}}},
+    "/api/register": {"post": {"summary": "Register", "responses": {"201": {"description": "Created"}}}},
+    "/api/patronymes": {"get": {"summary": "List patronymes", "parameters": [{"name": "search", "in": "query", "schema": {"type": "string"}}, {"name": "region_id", "in": "query", "schema": {"type": "integer"}}, {"name": "departement_id", "in": "query", "schema": {"type": "integer"}}, {"name": "per_page", "in": "query", "schema": {"type": "integer", "default": 20}}], "responses": {"200": {"description": "OK"}}}, "post": {"summary": "Create patronyme", "responses": {"201": {"description": "Created"}}}},
+    "/api/patronymes/{id}": {"get": {"summary": "Get patronyme", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}], "responses": {"200": {"description": "OK"}}}, "put": {"summary": "Update patronyme", "responses": {"200": {"description": "OK"}}}, "delete": {"summary": "Delete patronyme", "responses": {"204": {"description": "No Content"}}}},
+    "/api/regions": {"get": {"summary": "List regions", "responses": {"200": {"description": "OK"}}}},
+    "/api/departements": {"get": {"summary": "List departements", "parameters": [{"name": "region_id", "in": "query", "schema": {"type": "integer"}}], "responses": {"200": {"description": "OK"}}}}
+  }
+}
+

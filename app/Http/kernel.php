@@ -30,6 +30,7 @@ class Kernel extends HttpKernel
         ValidatePostSize::class,
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\SecurityHeadersMiddleware::class,
     ];
 
     /**
@@ -66,10 +67,8 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'example' => ExampleMiddleware::class,
+        'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
 
-    protected $middleware = [
-    // ...
-    \App\Http\Middleware\Cors::class,
-];
 }

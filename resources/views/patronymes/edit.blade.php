@@ -1,4 +1,5 @@
 <x-app-layout>
+    @extends('layouts.app')
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
             <i class="mr-2 fas fa-edit"></i>{{ __('Modifier le patronyme') }} : {{ $patronyme->nom }}
@@ -70,17 +71,12 @@
                                 </div>
 
                                 <div>
-                                    <label for="groupe_ethnique_id" class="block text-sm font-medium text-gray-700">Groupe ethnique</label>
-                                    <select name="groupe_ethnique_id" id="groupe_ethnique_id"
+                                    <label for="departement_id" class="block text-sm font-medium text-gray-700">Département</label>
+                                    <select name="departement_id" id="departement_id"
                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Sélectionnez un groupe</option>
-                                        @foreach($groupesEthniques as $groupe)
-                                            <option value="{{ $groupe->id }}" {{ old('groupe_ethnique_id', $patronyme->groupe_ethnique_id) == $groupe->id ? 'selected' : '' }}>
-                                                {{ $groupe->nom }}
-                                            </option>
-                                        @endforeach
+                                        <option value="">Sélectionnez un département</option>
                                     </select>
-                                    @error('groupe_ethnique_id')
+                                    @error('departement_id')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -88,36 +84,36 @@
 
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
-                                    <label for="langue_id" class="block text-sm font-medium text-gray-700">Langue</label>
-                                    <select name="langue_id" id="langue_id"
+                                    <label for="province_id" class="block text-sm font-medium text-gray-700">Province</label>
+                                    <select name="province_id" id="province_id"
                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Sélectionnez une langue</option>
-                                        @foreach($langues as $langue)
-                                            <option value="{{ $langue->id }}" {{ old('langue_id', $patronyme->langue_id) == $langue->id ? 'selected' : '' }}>
-                                                {{ $langue->nom }}
-                                            </option>
-                                        @endforeach
+                                        <option value="">Sélectionnez une province</option>
                                     </select>
-                                    @error('langue_id')
+                                    @error('province_id')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="mode_transmission_id" class="block text-sm font-medium text-gray-700">Mode de transmission</label>
-                                    <select name="mode_transmission_id" id="mode_transmission_id"
+                                    <label for="commune_id" class="block text-sm font-medium text-gray-700">Commune</label>
+                                    <select name="commune_id" id="commune_id"
                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Sélectionnez un mode</option>
-                                        @foreach($modesTransmission as $mode)
-                                            <option value="{{ $mode->id }}" {{ old('mode_transmission_id', $patronyme->mode_transmission_id) == $mode->id ? 'selected' : '' }}>
-                                                {{ $mode->type }}
-                                            </option>
-                                        @endforeach
+                                        <option value="">Sélectionnez une commune</option>
                                     </select>
-                                    @error('mode_transmission_id')
+                                    @error('commune_id')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
+                            </div>
+
+                            <div>
+                                <label for="frequence" class="block text-sm font-medium text-gray-700">Fréquence</label>
+                                <input type="number" min="0" name="frequence" id="frequence"
+                                    value="{{ old('frequence', $patronyme->frequence) }}"
+                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                @error('frequence')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -135,3 +131,54 @@
         </div>
     </div>
 </x-app-layout>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const regionSelect = document.querySelector('select[name="region_id"]');
+    const departementSelect = document.querySelector('select[name="departement_id"]');
+    const provinceSelect = document.querySelector('select[name="province_id"]');
+    const communeSelect = document.querySelector('select[name="commune_id"]');
+
+    regionSelect?.addEventListener('change', function () {
+        const regionId = this.value;
+        if (!departementSelect) return;
+        departementSelect.innerHTML = '<option value="">Sélectionnez un département</option>';
+        provinceSelect && (provinceSelect.innerHTML = '<option value="">Sélectionnez une province</option>');
+        communeSelect && (communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>');
+        if (!regionId) return;
+        fetch(`/api/departements?region_id=${regionId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(dep => {
+                    departementSelect.innerHTML += `<option value="${dep.id}">${dep.name}</option>`;
+                });
+            });
+    });
+
+    departementSelect?.addEventListener('change', function () {
+        const regionId = regionSelect?.value;
+        if (!regionId || !provinceSelect) return;
+        provinceSelect.innerHTML = '<option value="">Sélectionnez une province</option>';
+        communeSelect && (communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>');
+        fetch(`/get-provinces?region_id=${regionId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(province => {
+                    provinceSelect.innerHTML += `<option value="${province.id}">${province.nom}</option>`;
+                });
+            });
+    });
+
+    provinceSelect?.addEventListener('change', function () {
+        const provinceId = this.value;
+        if (!provinceId || !communeSelect) return;
+        communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>';
+        fetch(`/get-communes?province_id=${provinceId}`)
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(commune => {
+                    communeSelect.innerHTML += `<option value="${commune.id}">${commune.nom}</option>`;
+                });
+            });
+    });
+});
+</script>

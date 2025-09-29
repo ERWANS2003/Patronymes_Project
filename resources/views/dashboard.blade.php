@@ -35,6 +35,12 @@
                                 <span class="ml-2 text-sm font-medium text-gray-700">Utilisateur</span>
                             </button>
                         </div>
+                        <form method="POST" action="{{ route('logout') }}" class="ml-4 inline-block">
+                            @csrf
+                            <button type="submit" class="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                                <i class="mr-1 fas fa-sign-out-alt"></i> Déconnexion
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -9,7 +9,7 @@ class Region extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom'];
+    protected $fillable = ['name', 'code'];
 
     public function provinces()
     {
@@ -19,5 +19,10 @@ class Region extends Model
     public function patronymes()
     {
         return $this->hasMany(Patronyme::class);
+    }
+
+    public function departements()
+    {
+        return $this->hasMany(Departement::class);
     }
 }

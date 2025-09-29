@@ -20,7 +20,7 @@
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form action="{{ route('patronymes.index') }}" method="GET" class="space-y-4">
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Recherche</label>
                                 <input type="text" name="search" value="{{ $search ?? '' }}"
@@ -41,12 +41,60 @@
                             </div>
 
                             <div>
+                                <label class="block text-sm font-medium text-gray-700">Province</label>
+                                <select name="province_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Toutes les provinces</option>
+                                    @foreach(($provinces ?? []) as $province)
+                                        <option value="{{ $province->id }}" {{ ($provinceId ?? '') == $province->id ? 'selected' : '' }}>
+                                            {{ $province->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Commune</label>
+                                <select name="commune_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Toutes les communes</option>
+                                    @foreach(($communes ?? []) as $commune)
+                                        <option value="{{ $commune->id }}" {{ ($communeId ?? '') == $commune->id ? 'selected' : '' }}>
+                                            {{ $commune->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Groupe ethnique</label>
                                 <select name="groupe_ethnique_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Tous les groupes</option>
                                     @foreach($groupesEthniques as $groupe)
                                         <option value="{{ $groupe->id }}" {{ ($groupeEthniqueId ?? '') == $groupe->id ? 'selected' : '' }}>
                                             {{ $groupe->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Ethnie</label>
+                                <select name="ethnie_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Toutes les ethnies</option>
+                                    @foreach(($ethnies ?? []) as $ethnie)
+                                        <option value="{{ $ethnie->id }}" {{ ($ethnieId ?? '') == $ethnie->id ? 'selected' : '' }}>
+                                            {{ $ethnie->nom }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Langue</label>
+                                <select name="langue_id" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Toutes les langues</option>
+                                    @foreach(($langues ?? []) as $langue)
+                                        <option value="{{ $langue->id }}" {{ ($langueId ?? '') == $langue->id ? 'selected' : '' }}>
+                                            {{ $langue->nom }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -151,20 +199,64 @@
 
     @push('scripts')
     <script>
-        // Mise à jour dynamique des départements selon la région sélectionnée
+        // Mise à jour dynamique des provinces et communes selon la région / province sélectionnée
+        function loadProvinces(regionId, selectedProvinceId) {
+            const provinceSelect = document.querySelector('select[name="province_id"]');
+            const communeSelect = document.querySelector('select[name="commune_id"]');
+            if (!provinceSelect) return;
+            provinceSelect.innerHTML = '<option value="">Toutes les provinces</option>';
+            communeSelect && (communeSelect.innerHTML = '<option value="">Toutes les communes</option>');
+            if (!regionId) return;
+            fetch(`/get-provinces?region_id=${regionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(province => {
+                        const selected = selectedProvinceId && String(selectedProvinceId) === String(province.id) ? 'selected' : '';
+                        provinceSelect.innerHTML += `<option value="${province.id}" ${selected}>${province.nom}</option>`;
+                    });
+                });
+        }
+
+        function loadCommunes(provinceId, selectedCommuneId) {
+            const communeSelect = document.querySelector('select[name="commune_id"]');
+            if (!communeSelect) return;
+            communeSelect.innerHTML = '<option value="">Toutes les communes</option>';
+            if (!provinceId) return;
+            fetch(`/get-communes?province_id=${provinceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(commune => {
+                        const selected = selectedCommuneId && String(selectedCommuneId) === String(commune.id) ? 'selected' : '';
+                        communeSelect.innerHTML += `<option value="${commune.id}" ${selected}>${commune.nom}</option>`;
+                    });
+                });
+        }
+
         document.querySelector('select[name="region_id"]')?.addEventListener('change', function() {
             const regionId = this.value;
-            const departementSelect = document.querySelector('select[name="departement_id"]');
+            loadProvinces(regionId, null);
+        });
 
-            if (regionId && departementSelect) {
-                fetch(`/api/departements?region_id=${regionId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        departementSelect.innerHTML = '<option value="">Tous les départements</option>';
-                        data.forEach(departement => {
-                            departementSelect.innerHTML += `<option value="${departement.id}">${departement.name}</option>`;
-                        });
-                    });
+        document.querySelector('select[name="province_id"]')?.addEventListener('change', function() {
+            const provinceId = this.value;
+            loadCommunes(provinceId, null);
+        });
+
+        // Prefill on page load when region/province already selected
+        document.addEventListener('DOMContentLoaded', function () {
+            const regionSelect = document.querySelector('select[name="region_id"]');
+            const provinceSelect = document.querySelector('select[name="province_id"]');
+            const communeSelect = document.querySelector('select[name="commune_id"]');
+            const selectedRegionId = regionSelect ? regionSelect.value : '';
+            const selectedProvinceId = provinceSelect ? provinceSelect.getAttribute('data-selected') || provinceSelect.value : '';
+            const selectedCommuneId = communeSelect ? communeSelect.getAttribute('data-selected') || communeSelect.value : '';
+
+            if (selectedRegionId) {
+                loadProvinces(selectedRegionId, selectedProvinceId);
+                if (selectedProvinceId) {
+                    // Delay to ensure provinces load first
+                    setTimeout(() => loadCommunes(selectedProvinceId, selectedCommuneId), 200);
+                }
             }
         });
     </script>

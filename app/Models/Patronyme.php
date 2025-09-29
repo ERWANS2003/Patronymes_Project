@@ -14,16 +14,26 @@ class Patronyme extends Model
         'signification',
         'origine',
         'region_id',
+        'departement_id',
         'province_id',
         'commune_id',
+        'frequence',
+        'views_count',
+        'is_featured',
         'groupe_ethnique_id',
+        'ethnie_id',
         'langue_id',
-        'mode_transmission_id'
+        'mode_transmission_id',
     ];
 
     public function region()
     {
         return $this->belongsTo(Region::class);
+    }
+
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class);
     }
 
     public function province()
@@ -39,6 +49,11 @@ class Patronyme extends Model
     public function groupeEthnique()
     {
         return $this->belongsTo(GroupeEthnique::class);
+    }
+
+    public function ethnie()
+    {
+        return $this->belongsTo(Ethnie::class);
     }
 
     public function langue()
@@ -73,13 +88,75 @@ class Patronyme extends Model
         return $query->where('region_id', $regionId);
     }
 
+    public function scopeByDepartement($query, $departementId)
+    {
+        return $query->where('departement_id', $departementId);
+    }
+
+    public function scopeByProvince($query, $provinceId)
+    {
+        return $query->where('province_id', $provinceId);
+    }
+
+    public function scopeByCommune($query, $communeId)
+    {
+        return $query->where('commune_id', $communeId);
+    }
+
     public function scopeByGroupeEthnique($query, $groupeEthniqueId)
     {
         return $query->where('groupe_ethnique_id', $groupeEthniqueId);
     }
 
+    public function scopeByEthnie($query, $ethnieId)
+    {
+        return $query->where('ethnie_id', $ethnieId);
+    }
+
     public function scopeByLangue($query, $langueId)
     {
         return $query->where('langue_id', $langueId);
+    }
+
+    public function scopeByModeTransmission($query, $modeTransmissionId)
+    {
+        return $query->where('mode_transmission_id', $modeTransmissionId);
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->orderBy('views_count', 'desc');
+    }
+
+    public function scopeRecent($query)
+    {
+        return $query->orderBy('created_at', 'desc');
+    }
+
+    // Favorites relationship
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    // Helper methods
+    public function incrementViews()
+    {
+        $this->increment('views_count');
+    }
+
+    public function isFavoritedBy($userId)
+    {
+        return $this->favorites()->where('user_id', $userId)->exists();
     }
 }

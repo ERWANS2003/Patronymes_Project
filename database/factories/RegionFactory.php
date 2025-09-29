@@ -17,7 +17,8 @@ class RegionFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->state,
+            'code' => $this->faker->unique()->regexify('[A-Z]{2}'),
         ];
     }
 }

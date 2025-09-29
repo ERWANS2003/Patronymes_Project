@@ -8,17 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('contributeurs', function (Blueprint $table) {
+        Schema::create('mode_transmissions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('utilisateur_id');
-$table->foreign('utilisateur_id')->references('id')->on('users')->onDelete('cascade');
-
+            $table->string('type');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('contributeurs');
+        Schema::dropIfExists('mode_transmissions');
     }
 };

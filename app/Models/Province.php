@@ -23,6 +23,7 @@ class Province extends Model
 
     public function patronymes()
     {
-        return $this->hasMany(Patronyme::class);
+        // Patronymes no longer reference province directly
+        return $this->hasMany(Patronyme::class, 'province_id');
     }
 }

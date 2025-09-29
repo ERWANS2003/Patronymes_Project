@@ -39,7 +39,6 @@ return new class extends Migration
             if (Schema::hasColumn('patronymes', 'frequence')) {
                 $table->dropColumn('frequence');
             }
-            // Columns province_id and commune_id are not recreated here
         });
     }
 };

@@ -29,6 +29,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -63,5 +64,31 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Constants for user roles
+    const ROLE_USER = 'user';
+    const ROLE_ADMIN = 'admin';
+
+    // Relationships
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoritePatronymes()
+    {
+        return $this->belongsToMany(Patronyme::class, 'favorites');
+    }
+
+    // Helper methods
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === self::ROLE_USER;
     }
 }

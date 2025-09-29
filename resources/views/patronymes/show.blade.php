@@ -1,12 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                <i class="mr-2 fas fa-user-circle"></i>{{ __('Détail du patronyme') }} : {{ $patronyme->nom }}
-            </h2>
-            <a href="{{ route('patronymes.index') }}" class="flex items-center text-indigo-600 hover:text-indigo-800">
-                <i class="mr-2 fas fa-arrow-left"></i> Retour à la liste
-            </a>
+            <div class="flex-1">
+                <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    <i class="mr-2 fas fa-user-circle"></i>{{ __('Détail du patronyme') }} : {{ $patronyme->nom }}
+                </h2>
+                @if($patronyme->views_count)
+                    <p class="mt-1 text-sm text-gray-500">
+                        <i class="fas fa-eye"></i> {{ number_format($patronyme->views_count) }} vues
+                    </p>
+                @endif
+            </div>
+            <div class="flex space-x-2">
+                @auth
+                    <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 favorite-btn"
+                            data-patronyme-id="{{ $patronyme->id }}"
+                            data-favorited="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'true' : 'false' }}">
+                        <i class="mr-2 {{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i>
+                        {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Favoris' }}
+                    </button>
+                @endauth
+                <a href="{{ route('patronymes.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    <i class="mr-2 fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
         </div>
     </x-slot>
 

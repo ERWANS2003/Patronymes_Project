@@ -6,15 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::create('ethnies', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom');
-            $table->foreignId('groupe_ethnique_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-    }
+   public function up()
+{
+    Schema::create('ethnies', function (Blueprint $table) {
+        $table->id();
+        $table->string('nom');
+       $table->foreignId('groupe_ethnique_id')
+      ->constrained('groupe_ethniques')
+      ->onDelete('cascade');
+
+        $table->timestamps();
+    });
+}
 
     public function down(): void
     {

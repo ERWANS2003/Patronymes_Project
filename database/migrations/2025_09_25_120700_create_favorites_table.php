@@ -8,20 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('commentaires', function (Blueprint $table) {
+        Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-            $table->text('contenu');
-            $table->unsignedBigInteger('utilisateur_id');
-$table->foreign('utilisateur_id')->references('id')->on('users')->onDelete('cascade');
-
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('patronyme_id')->constrained()->onDelete('cascade');
-            $table->timestamp('date_commentaire')->useCurrent();
             $table->timestamps();
+            
+            $table->unique(['user_id', 'patronyme_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('commentaires');
+        Schema::dropIfExists('favorites');
     }
 };

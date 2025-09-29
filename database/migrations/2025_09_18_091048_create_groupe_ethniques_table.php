@@ -8,16 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('groupes_ethniques', function (Blueprint $table) {
+        Schema::create('groupe_ethniques', function (Blueprint $table) {
             $table->id();
-            $table->string('nom');
-            $table->text('description')->nullable();
+            $table->string('nom')->unique();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('groupes_ethniques');
+        Schema::dropIfExists('groupe_ethniques');
     }
 };
