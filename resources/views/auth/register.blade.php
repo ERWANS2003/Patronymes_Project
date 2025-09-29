@@ -79,34 +79,6 @@
                 </button>
             </div>
 
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 text-gray-500 bg-gray-50">
-                            Ou inscrivez-vous avec
-                        </span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 mt-6">
-                    <div>
-                        <a href="#" class="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
-                            <i class="text-red-500 fab fa-google"></i>
-                            <span class="ml-2">Google</span>
-                        </a>
-                    </div>
-
-                    <div>
-                        <a href="#" class="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
-                            <i class="text-blue-600 fab fa-facebook-f"></i>
-                            <span class="ml-2">Facebook</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
         </form>
     </div>
 </body>
