@@ -267,6 +267,49 @@
                 </div>
             </div>
 
+            <!-- User Management Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h2 class="display-6 fw-bold text-center mb-5 animate__animated animate__fadeInUp">
+                        <i class="fas fa-users text-primary me-3"></i>
+                        Gestion des Utilisateurs
+                    </h2>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 animate__animated animate__fadeInUp">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-plus fa-3x text-success"></i>
+                            </div>
+                            <h5 class="card-title">Créer un Utilisateur</h5>
+                            <p class="card-text">
+                                Ajoutez de nouveaux utilisateurs avec des rôles et permissions spécifiques.
+                            </p>
+                            <a href="{{ route('admin.users.create') }}" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i>Créer un utilisateur
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-users fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">Gérer les Utilisateurs</h5>
+                            <p class="card-text">
+                                Consultez, modifiez et gérez tous les utilisateurs de la plateforme.
+                            </p>
+                            <a href="{{ route('admin.users.index') }}" class="btn btn-primary">
+                                <i class="fas fa-users me-2"></i>Liste des utilisateurs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Dashboard Content -->
             <div class="row">
                 <!-- Recent Patronymes -->

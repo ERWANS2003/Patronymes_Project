@@ -71,6 +71,11 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
         Route::put('/roles/{user}', [\App\Http\Controllers\RoleManagementController::class, 'updateRole'])->name('roles.update');
         Route::post('/roles/{user}/toggle-contribution', [\App\Http\Controllers\RoleManagementController::class, 'toggleContribution'])->name('roles.toggle-contribution');
     });
+    
+    // Gestion des utilisateurs (seuls les admins)
+    Route::middleware([\App\Http\Middleware\CanManageRolesMiddleware::class])->group(function () {
+        Route::resource('users', \App\Http\Controllers\AdminUserController::class);
+    });
 });
 
 // Favorites routes
