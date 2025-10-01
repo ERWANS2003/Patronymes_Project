@@ -1,214 +1,111 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Répertoire des Patronymes') }} - Import</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Animate.css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <style>
-        .hero-section {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            min-height: 50vh;
-            display: flex;
-            align-items: center;
-        }
-        .upload-area {
-            border: 2px dashed #28a745;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .upload-area:hover {
-            border-color: #20c997;
-            background-color: #f8f9fa;
-        }
-        .upload-area.dragover {
-            border-color: #20c997;
-            background-color: #e8f5e8;
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('admin.dashboard') }}">
-                <i class="fas fa-cog me-2"></i>Administration
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Tableau de bord
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('patronymes.index') }}">
-                            <i class="fas fa-search me-1"></i>Patronymes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('admin.import') }}">
-                            <i class="fas fa-upload me-1"></i>Import
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.export') }}">
-                            <i class="fas fa-download me-1"></i>Export
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('dashboard') }}">
-                            <i class="fas fa-arrow-left me-1"></i>Retour au dashboard
-                        </a>
-                    </li>
-                </ul>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-upload text-green-600 mr-2"></i>
+                    Import de Patronymes
+                </h1>
+                <p class="text-gray-600 mt-1">
+                    Importez des patronymes en masse depuis des fichiers Excel ou CSV
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour au dashboard
+                </a>
             </div>
         </div>
-    </nav>
+    </x-slot>
 
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <div class="animate__animated animate__fadeInLeft">
-                        <h1 class="display-4 fw-bold text-white mb-4">
-                            <i class="fas fa-upload me-3"></i>
-                            Import de Patronymes
-                        </h1>
-                        <p class="lead text-white mb-4">
-                            Importez des patronymes en masse depuis des fichiers Excel ou CSV.
-                            Assurez-vous que vos fichiers respectent le format requis pour un import optimal.
-                        </p>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Format Requirements -->
+        <div class="card mb-8">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                    Format requis pour l'import
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Fichier .xlsx ou .csv</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Colonnes: nom, origine, signification</span>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="animate__animated animate__fadeInRight">
-                        <div class="card shadow-lg">
-                            <div class="card-body p-4">
-                                <h3 class="card-title text-center mb-4">
-                                    <i class="fas fa-info-circle text-success"></i> Format Requis
-                                </h3>
-                                <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-success me-2"></i>Fichier .xlsx ou .csv</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Colonnes: nom, origine, signification</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Encodage UTF-8</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>Maximum 1000 lignes</li>
-                                </ul>
-                            </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Encodage UTF-8</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Maximum 1000 lignes</span>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="card">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">
+                    <i class="fas fa-file-upload text-green-600 mr-2"></i>
+                    Sélectionner un fichier à importer
+                </h3>
+
+                <form action="{{ route('admin.import.run') }}" method="POST" enctype="multipart/form-data" id="importForm">
+                    @csrf
+
+                    <!-- Upload Area -->
+                    <div class="upload-area border-2 border-dashed border-green-300 rounded-lg p-8 text-center hover:border-green-400 hover:bg-green-50 transition-colors cursor-pointer" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-green-600 mb-4"></i>
+                        <h4 class="text-lg font-medium text-gray-900 mb-2">Glissez-déposez votre fichier ici</h4>
+                        <p class="text-gray-600 mb-4">ou cliquez pour sélectionner un fichier</p>
+                        <input type="file" name="file" id="fileInput" class="hidden" accept=".xlsx,.csv" required>
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open mr-2"></i>Parcourir les fichiers
+                        </button>
+                    </div>
+
+                    <!-- File Info -->
+                    <div id="fileInfo" class="mt-4 hidden">
+                        <div class="alert alert-info flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-file mr-2"></i>
+                                <span id="fileName"></span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="clearFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center space-x-4 mt-6">
+                        <button type="submit" class="btn btn-success" id="submitBtn" disabled>
+                            <i class="fas fa-upload mr-2"></i>Lancer l'import
+                        </button>
+                        <a href="{{ route('admin.export') }}" class="btn btn-outline">
+                            <i class="fas fa-download mr-2"></i>Télécharger un modèle
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card animate__animated animate__fadeInUp">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-file-upload text-success me-2"></i>
-                                Sélectionner un fichier à importer
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('admin.import.run') }}" method="POST" enctype="multipart/form-data" id="importForm">
-                                @csrf
-
-                                <!-- Upload Area -->
-                                <div class="upload-area" id="uploadArea">
-                                    <i class="fas fa-cloud-upload-alt fa-3x text-success mb-3"></i>
-                                    <h5>Glissez-déposez votre fichier ici</h5>
-                                    <p class="text-muted">ou cliquez pour sélectionner un fichier</p>
-                                    <input type="file" name="file" id="fileInput" class="d-none" accept=".xlsx,.csv" required>
-                                    <button type="button" class="btn btn-outline-success" onclick="document.getElementById('fileInput').click()">
-                                        <i class="fas fa-folder-open me-2"></i>Parcourir les fichiers
-                                    </button>
-                                </div>
-
-                                <!-- File Info -->
-                                <div id="fileInfo" class="mt-3 d-none">
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-file me-2"></i>
-                                        <span id="fileName"></span>
-                                        <span class="float-end">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <div class="text-center mt-4">
-                                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
-                                        <i class="fas fa-upload me-2"></i>Lancer l'import
-                                    </button>
-                                    <a href="{{ route('admin.export') }}" class="btn btn-outline-primary btn-lg ms-3">
-                                        <i class="fas fa-download me-2"></i>Télécharger un modèle
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">
-                        &copy; {{ date('Y') }} Répertoire des Patronymes - Administration. Tous droits réservés.
-                    </p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <div class="d-flex justify-content-end gap-3">
-                        <a href="#" class="text-white">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-white">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-white">
-                            <i class="fab fa-github"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .upload-area.dragover {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -268,7 +165,7 @@
                 }
 
                 fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
-                fileInfo.classList.remove('d-none');
+                fileInfo.classList.remove('hidden');
                 submitBtn.disabled = false;
             }
 
@@ -282,7 +179,7 @@
 
             window.clearFile = function() {
                 fileInput.value = '';
-                fileInfo.classList.add('d-none');
+                fileInfo.classList.add('hidden');
                 submitBtn.disabled = true;
             };
 
@@ -294,10 +191,9 @@
                     return;
                 }
 
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Import en cours...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Import en cours...';
                 submitBtn.disabled = true;
             });
         });
     </script>
-</body>
-</html>
+</x-app-layout>

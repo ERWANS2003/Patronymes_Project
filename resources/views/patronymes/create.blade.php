@@ -12,13 +12,58 @@
                     <form action="{{ route('patronymes.store') }}" method="POST">
                         @csrf
 
-                        <!-- Informations sur l'enquêté -->
+                        <!-- Section I: IDENTITÉ DE L'ENQUÊTÉ -->
                         <div class="mb-8">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4 bg-gray-100 p-3 rounded">
                                 I. IDENTITÉ DE L'ENQUÊTÉ
                             </h3>
 
                             <div class="grid grid-cols-1 gap-6">
+                                <!-- Première ligne : DATE, Collecteur, CODE FICHE -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label for="date_collecte" class="block text-sm font-medium text-gray-700">DATE:</label>
+                                        <input type="date" name="date_collecte" id="date_collecte" required
+                                            value="{{ old('date_collecte', date('Y-m-d')) }}"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @error('date_collecte')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="collecteur" class="block text-sm font-medium text-gray-700">Collecteur:</label>
+                                        <input type="text" name="collecteur" id="collecteur" required
+                                            value="{{ old('collecteur') }}"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @error('collecteur')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="code_fiche" class="block text-sm font-medium text-gray-700">CODE FICHE:</label>
+                                        <input type="text" name="code_fiche" id="code_fiche" required
+                                            value="{{ old('code_fiche') }}"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @error('code_fiche')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Contact -->
+                                <div>
+                                    <label for="contact" class="block text-sm font-medium text-gray-700">Contact:</label>
+                                    <input type="text" name="contact" id="contact"
+                                        value="{{ old('contact') }}"
+                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    @error('contact')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- NOM ET PRÉNOM -->
                                 <div>
                                     <label for="enquete_nom" class="block text-sm font-medium text-gray-700">NOM ET PRÉNOM:</label>
                                     <input type="text" name="enquete_nom" id="enquete_nom" required
@@ -29,6 +74,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- ÂGE et SEXE -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label for="enquete_age" class="block text-sm font-medium text-gray-700">ÂGE:</label>
@@ -60,6 +106,7 @@
                                     </div>
                                 </div>
 
+                                <!-- FONCTION -->
                                 <div>
                                     <label for="enquete_fonction" class="block text-sm font-medium text-gray-700">FONCTION:</label>
                                     <input type="text" name="enquete_fonction" id="enquete_fonction"
@@ -70,25 +117,39 @@
                                     @enderror
                                 </div>
 
-                                <div>
-                                    <label for="enquete_contact" class="block text-sm font-medium text-gray-700">TÉLÉPHONE/EMAIL:</label>
-                                    <input type="text" name="enquete_contact" id="enquete_contact"
-                                        value="{{ old('enquete_contact') }}"
-                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @error('enquete_contact')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
+                                <!-- TÉLÉPHONE et EMAIL -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="enquete_telephone" class="block text-sm font-medium text-gray-700">TÉLÉPHONE:</label>
+                                        <input type="tel" name="enquete_telephone" id="enquete_telephone"
+                                            value="{{ old('enquete_telephone') }}"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @error('enquete_telephone')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="enquete_email" class="block text-sm font-medium text-gray-700">EMAIL:</label>
+                                        <input type="email" name="enquete_email" id="enquete_email"
+                                            value="{{ old('enquete_email') }}"
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @error('enquete_email')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Informations sur le patronyme -->
+                        <!-- Section II: INFORMATIONS SUR LE PATRONYME -->
                         <div class="mb-8">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4 bg-gray-100 p-3 rounded">
                                 II. INFORMATIONS SUR LE PATRONYME
                             </h3>
 
                             <div class="space-y-6">
+                                <!-- Question 1 -->
                                 <div>
                                     <label for="nom" class="block text-sm font-medium text-gray-700">1. Patronyme:</label>
                                     <input type="text" name="nom" id="nom" required
@@ -99,6 +160,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 2 -->
                                 <div>
                                     <label for="groupe_ethnique_id" class="block text-sm font-medium text-gray-700">2. Groupe ethnoculturel:</label>
                                     <select name="groupe_ethnique_id" id="groupe_ethnique_id"
@@ -115,6 +177,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 3 -->
                                 <div>
                                     <label for="origine" class="block text-sm font-medium text-gray-700">3. Origine du patronyme:</label>
                                     <textarea name="origine" id="origine" rows="3"
@@ -124,6 +187,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 4 -->
                                 <div>
                                     <label for="signification" class="block text-sm font-medium text-gray-700">4. Signification du patronyme:</label>
                                     <textarea name="signification" id="signification" rows="3"
@@ -133,6 +197,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 5 -->
                                 <div>
                                     <label for="histoire" class="block text-sm font-medium text-gray-700">5. Histoire étiologique:</label>
                                     <textarea name="histoire" id="histoire" rows="4"
@@ -142,6 +207,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 6 -->
                                 <div>
                                     <label for="langue_id" class="block text-sm font-medium text-gray-700">6. Langue parlée:</label>
                                     <select name="langue_id" id="langue_id"
@@ -158,6 +224,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 7 -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">7. Comment ce patronyme se transmet-il ?</label>
                                     <div class="space-y-2">
@@ -177,6 +244,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 8 -->
                                 <div>
                                     <label for="patronyme_sexe" class="block text-sm font-medium text-gray-700">8. Les hommes et les femmes ont-ils le même patronyme ? Sinon quels sont-ils ?</label>
                                     <textarea name="patronyme_sexe" id="patronyme_sexe" rows="3"
@@ -186,6 +254,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 9 -->
                                 <div>
                                     <label for="totem" class="block text-sm font-medium text-gray-700">9. Existe-t-il un totem lié à votre patronyme ?</label>
                                     <input type="text" name="totem" id="totem"
@@ -196,6 +265,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 10 -->
                                 <div>
                                     <label for="justification_totem" class="block text-sm font-medium text-gray-700">10. Qu'est-ce qui justifie ce totem ?</label>
                                     <textarea name="justification_totem" id="justification_totem" rows="3"
@@ -205,6 +275,7 @@
                                     @enderror
                                 </div>
 
+                                <!-- Question 11 -->
                                 <div>
                                     <label for="parents_plaisanterie" class="block text-sm font-medium text-gray-700">11. Quels sont vos parents à plaisanterie/alliances ?</label>
                                     <textarea name="parents_plaisanterie" id="parents_plaisanterie" rows="3"

@@ -1,14 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                <i class="mr-2 fas fa-edit"></i>{{ __('Mes Contributions') }}
-            </h2>
-            @if(Auth::user()->canContribute())
-                <a href="{{ route('patronymes.create') }}" class="flex items-center px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
-                    <i class="mr-2 fas fa-plus"></i> Ajouter un patronyme
-                </a>
-            @endif
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-edit text-green-600 mr-2"></i>
+                    Mes Contributions
+                </h1>
+                <p class="text-gray-600 mt-1">
+                    Les patronymes que vous avez contribués à la plateforme
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                @if(Auth::user()->canContribute())
+                    <a href="{{ route('patronymes.create') }}" class="btn btn-success">
+                        <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
+                    </a>
+                @endif
+            </div>
         </div>
     </x-slot>
 

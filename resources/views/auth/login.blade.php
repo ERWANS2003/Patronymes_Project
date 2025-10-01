@@ -1,67 +1,74 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Répertoire des Patronymes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="flex items-center justify-center min-h-screen px-4 py-12 bg-gray-50 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
-        <div>
-            <div class="flex justify-center">
-                <div class="flex-shrink-0">
-                    <i class="text-5xl text-indigo-600 fas fa-book-open"></i>
-                </div>
-            </div>
-            <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900">
-                Connexion à votre compte
-            </h2>
-            <p class="mt-2 text-sm text-center text-gray-600">
-                Ou
-                <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
-                    créez un nouveau compte
-                </a>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-900">
+                <i class="fas fa-sign-in-alt text-blue-600 mr-2"></i>
+                Connexion
+            </h1>
+            <p class="text-gray-600 mt-1">
+                Accédez à votre compte pour contribuer au répertoire
             </p>
         </div>
+    </x-slot>
 
-        <form class="mt-8 space-y-6" action="/login" method="POST">
-            @csrf
-            <div class="-space-y-px rounded-md shadow-sm">
+    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="card p-8">
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book text-white text-2xl"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                    Connexion à votre compte
+                </h2>
+                <p class="text-gray-600">
+                    Ou
+                    <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-500 font-medium">
+                        créez un nouveau compte
+                    </a>
+                </p>
+            </div>
+
+            <form class="space-y-6" action="{{ route('login') }}" method="POST">
+                @csrf
+
                 <div>
-                    <label for="email" class="sr-only">Adresse email</label>
+                    <label for="email" class="form-label">Adresse email</label>
                     <input id="email" name="email" type="email" autocomplete="email" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Adresse email">
+                           class="form-input"
+                           placeholder="votre@email.com"
+                           value="{{ old('email') }}">
+                    @error('email')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
-                    <label for="password" class="sr-only">Mot de passe</label>
+                    <label for="password" class="form-label">Mot de passe</label>
                     <input id="password" name="password" type="password" autocomplete="current-password" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-none appearance-none rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Mot de passe">
+                           class="form-input"
+                           placeholder="Votre mot de passe">
+                    @error('password')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
 
-            <div class="flex items-center">
-                <input id="remember-me" name="remember-me" type="checkbox"
-                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <label for="remember-me" class="block ml-2 text-sm text-gray-900">
-                    Se souvenir de moi
-                </label>
-            </div>
+                <div class="flex items-center">
+                    <input id="remember" name="remember" type="checkbox"
+                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="remember" class="block ml-2 text-sm text-gray-900">
+                        Se souvenir de moi
+                    </label>
+                </div>
 
-            <div>
-                <button type="submit"
-                        class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="text-indigo-500 fas fa-lock group-hover:text-indigo-400"></i>
-                    </span>
-                    Se connecter
-                </button>
-            </div>
-
-        </form>
+                <div>
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Se connecter
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+</x-app-layout>

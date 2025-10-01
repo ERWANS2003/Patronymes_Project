@@ -11,7 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Middlewares globaux
+        $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+        $middleware->append(\App\Http\Middleware\InputSanitizationMiddleware::class);
+        $middleware->append(\App\Http\Middleware\PerformanceMonitoringMiddleware::class);
+
+        // Middlewares de rate limiting
+        $middleware->alias([
+            'rate.limit' => \App\Http\Middleware\RateLimitMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

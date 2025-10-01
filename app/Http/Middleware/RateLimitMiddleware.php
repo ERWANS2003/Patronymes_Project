@@ -9,28 +9,46 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RateLimitMiddleware
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next, int $maxAttempts = 60, int $decayMinutes = 1): Response
     {
         $key = $this->resolveRequestSignature($request);
 
-        if (Cache::has($key)) {
-            $attempts = Cache::get($key);
-            if ($attempts >= $maxAttempts) {
-                return response()->json([
-                    'error' => 'Too Many Requests',
-                    'message' => 'Vous avez dépassé la limite de requêtes autorisées. Veuillez réessayer plus tard.'
-                ], 429);
-            }
-            Cache::increment($key);
-        } else {
-            Cache::put($key, 1, $decayMinutes * 60);
+        $attempts = Cache::get($key, 0);
+
+        if ($attempts >= $maxAttempts) {
+            return response()->json([
+                'error' => 'Trop de requêtes. Veuillez patienter.',
+                'retry_after' => $decayMinutes * 60
+            ], 429);
         }
 
-        return $next($request);
+        Cache::put($key, $attempts + 1, now()->addMinutes($decayMinutes));
+
+        $response = $next($request);
+
+        // Ajouter les headers de rate limiting
+        $response->headers->set('X-RateLimit-Limit', $maxAttempts);
+        $response->headers->set('X-RateLimit-Remaining', max(0, $maxAttempts - $attempts - 1));
+        $response->headers->set('X-RateLimit-Reset', now()->addMinutes($decayMinutes)->timestamp);
+
+        return $response;
     }
 
+    /**
+     * Resolve request signature.
+     */
     protected function resolveRequestSignature(Request $request): string
     {
-        return 'rate_limit:' . $request->ip() . ':' . $request->route()->getName();
+        $user = $request->user();
+        $ip = $request->ip();
+
+        if ($user) {
+            return 'rate_limit:user:' . $user->id;
+        }
+
+        return 'rate_limit:ip:' . $ip;
     }
 }

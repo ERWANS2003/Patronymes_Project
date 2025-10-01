@@ -11,17 +11,25 @@
                     </p>
                 @endif
             </div>
-            <div class="flex space-x-2">
+            <div class="flex flex-wrap gap-2">
                 @auth
-                    <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 favorite-btn"
+                    <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors favorite-btn"
                             data-patronyme-id="{{ $patronyme->id }}"
                             data-favorited="{{ $patronyme->isFavoritedBy(auth()->id()) ? 'true' : 'false' }}">
                         <i class="mr-2 {{ $patronyme->isFavoritedBy(auth()->id()) ? 'fas' : 'far' }} fa-heart"></i>
-                        {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Favoris' }}
+                        {{ $patronyme->isFavoritedBy(auth()->id()) ? 'Favori' : 'Ajouter aux favoris' }}
+                    </button>
+
+                    <button onclick="sharePatronyme()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                        <i class="mr-2 fas fa-share"></i> Partager
+                    </button>
+
+                    <button onclick="printPatronyme()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="mr-2 fas fa-print"></i> Imprimer
                     </button>
 
                     @if(Auth::user()->canContribute())
-                        <a href="{{ route('patronymes.edit', $patronyme) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md hover:bg-yellow-100">
+                        <a href="{{ route('patronymes.edit', $patronyme) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors">
                             <i class="mr-2 fas fa-edit"></i> Modifier
                         </a>
                     @endif
@@ -30,15 +38,19 @@
                         <form action="{{ route('patronymes.destroy', $patronyme) }}" method="POST" class="inline-block">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patronyme ?')">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce patronyme ?')">
                                 <i class="mr-2 fas fa-trash"></i> Supprimer
                             </button>
                         </form>
                     @endif
                 @endauth
 
-                <a href="{{ route('patronymes.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                <a href="{{ route('patronymes.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="mr-2 fas fa-arrow-left"></i> Retour à la liste
+                </a>
+
+                <a href="{{ route('statistics.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors">
+                    <i class="mr-2 fas fa-chart-bar"></i> Statistiques
                 </a>
             </div>
         </div>
@@ -47,7 +59,7 @@
     <div class="py-6">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
+                <div class="p-6 patronyme-content">
                     <div class="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
                         <div>
                             <h3 class="mb-4 text-lg font-medium text-gray-900">Informations générales</h3>
@@ -214,5 +226,64 @@
                 });
             });
         });
+
+        // Fonction pour partager un patronyme
+        function sharePatronyme() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ $patronyme->nom }} - Répertoire des Patronymes',
+                    text: 'Découvrez l\'origine et la signification du patronyme {{ $patronyme->nom }}',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Lien copié dans le presse-papiers !');
+                }).catch(() => {
+                    // Fallback pour les navigateurs plus anciens
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Lien copié dans le presse-papiers !');
+                });
+            }
+        }
+
+        // Fonction pour imprimer un patronyme
+        function printPatronyme() {
+            const printContent = document.querySelector('.patronyme-content');
+            const printWindow = window.open('', '_blank');
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>{{ $patronyme->nom }} - Répertoire des Patronymes</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .section { margin-bottom: 20px; }
+                            .section h3 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+                            .info { margin: 10px 0; }
+                            .label { font-weight: bold; color: #666; }
+                            .value { margin-left: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>{{ $patronyme->nom }}</h1>
+                            <p>Répertoire des Patronymes du Burkina Faso</p>
+                        </div>
+                        ${printContent.innerHTML}
+                    </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+            printWindow.print();
+        }
     </script>
 </x-app-layout>

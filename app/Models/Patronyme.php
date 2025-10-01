@@ -13,14 +13,19 @@ class Patronyme extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        // Informations sur l'enquêté
+        // Section I: Informations sur l'enquêté
+        'date_collecte',
+        'collecteur',
+        'code_fiche',
+        'contact',
         'enquete_nom',
         'enquete_age',
         'enquete_sexe',
         'enquete_fonction',
-        'enquete_contact',
+        'enquete_telephone',
+        'enquete_email',
 
-        // Informations sur le patronyme
+        // Section II: Informations sur le patronyme
         'nom',
         'groupe_ethnique_id',
         'origine',
@@ -48,6 +53,7 @@ class Patronyme extends Model
     ];
 
     protected $casts = [
+        'date_collecte' => 'date',
         'enquete_age' => 'integer',
         'frequence' => 'integer',
         'views_count' => 'integer',
@@ -120,13 +126,13 @@ class Patronyme extends Model
         }
 
         return $query->where(function ($q) use ($search) {
-            $q->where('nom', 'ILIKE', "%{$search}%")
-              ->orWhere('signification', 'ILIKE', "%{$search}%")
-              ->orWhere('origine', 'ILIKE', "%{$search}%")
-              ->orWhere('histoire', 'ILIKE', "%{$search}%")
-              ->orWhere('totem', 'ILIKE', "%{$search}%")
-              ->orWhere('justification_totem', 'ILIKE', "%{$search}%")
-              ->orWhere('parents_plaisanterie', 'ILIKE', "%{$search}%");
+            $q->where('nom', 'LIKE', "%{$search}%")
+              ->orWhere('signification', 'LIKE', "%{$search}%")
+              ->orWhere('origine', 'LIKE', "%{$search}%")
+              ->orWhere('histoire', 'LIKE', "%{$search}%")
+              ->orWhere('totem', 'LIKE', "%{$search}%")
+              ->orWhere('justification_totem', 'LIKE', "%{$search}%")
+              ->orWhere('parents_plaisanterie', 'LIKE', "%{$search}%");
         });
     }
 
@@ -140,8 +146,20 @@ class Patronyme extends Model
             $query->byRegion($filters['region_id']);
         }
 
+        if (!empty($filters['province_id'])) {
+            $query->byProvince($filters['province_id']);
+        }
+
+        if (!empty($filters['commune_id'])) {
+            $query->byCommune($filters['commune_id']);
+        }
+
         if (!empty($filters['groupe_ethnique_id'])) {
             $query->byGroupeEthnique($filters['groupe_ethnique_id']);
+        }
+
+        if (!empty($filters['ethnie_id'])) {
+            $query->byEthnie($filters['ethnie_id']);
         }
 
         if (!empty($filters['langue_id'])) {
@@ -248,38 +266,38 @@ class Patronyme extends Model
     public function getFullLocationAttribute()
     {
         $location = [];
-        
+
         if ($this->region) {
             $location[] = $this->region->name;
         }
-        
+
         if ($this->province) {
             $location[] = $this->province->nom;
         }
-        
+
         if ($this->commune) {
             $location[] = $this->commune->nom;
         }
-        
+
         return implode(', ', $location);
     }
 
     public function getSearchScoreAttribute()
     {
         $score = 0;
-        
+
         // Score basé sur les vues
         $score += $this->views_count * 0.1;
-        
+
         // Score basé sur la fréquence
         $score += $this->frequence * 0.05;
-        
+
         // Score basé sur les commentaires
         $score += $this->commentaires()->count() * 0.2;
-        
+
         // Score basé sur les favoris
         $score += $this->favorites()->count() * 0.3;
-        
+
         return round($score, 2);
     }
 

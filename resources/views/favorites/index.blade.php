@@ -1,98 +1,104 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Mes Favoris') }}
-        </h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">
+                    <i class="fas fa-heart text-red-600 mr-2"></i>
+                    Mes Favoris
+                </h1>
+                <p class="text-gray-600 mt-1">
+                    Vos patronymes préférés sauvegardés
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ route('patronymes.index') }}" class="btn btn-outline">
+                    <i class="fas fa-search mr-2"></i>Explorer les patronymes
+                </a>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if($favorites->count() > 0)
-                <div class="row">
-                    @foreach($favorites as $patronyme)
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100 animate__animated animate__fadeInUp">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <h5 class="card-title text-primary">{{ $patronyme->nom }}</h5>
-                                        <button class="btn btn-outline-danger btn-sm favorite-btn"
-                                                data-patronyme-id="{{ $patronyme->id }}"
-                                                data-favorited="true">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if($favorites->count() > 0)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($favorites as $patronyme)
+                    <div class="card card-hover">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ $patronyme->nom }}</h3>
+                                <button class="btn btn-sm btn-danger favorite-btn"
+                                        data-patronyme-id="{{ $patronyme->id }}"
+                                        data-favorited="true">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+
+                            @if($patronyme->signification)
+                                <p class="text-gray-600 mb-3">
+                                    <strong>Signification:</strong> {{ Str::limit($patronyme->signification, 100) }}
+                                </p>
+                            @endif
+
+                            @if($patronyme->origine)
+                                <p class="text-gray-600 mb-4">
+                                    <strong>Origine:</strong> {{ Str::limit($patronyme->origine, 100) }}
+                                </p>
+                            @endif
+
+                            <div class="grid grid-cols-2 gap-2 text-sm text-gray-500 mb-4">
+                                @if($patronyme->region)
+                                    <div class="flex items-center">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>
+                                        {{ $patronyme->region->name }}
                                     </div>
-
-                                    @if($patronyme->signification)
-                                        <p class="card-text">
-                                            <strong>Signification:</strong> {{ Str::limit($patronyme->signification, 100) }}
-                                        </p>
-                                    @endif
-
-                                    @if($patronyme->origine)
-                                        <p class="card-text">
-                                            <strong>Origine:</strong> {{ Str::limit($patronyme->origine, 100) }}
-                                        </p>
-                                    @endif
-
-                                    <div class="row text-muted small">
-                                        @if($patronyme->region)
-                                            <div class="col-6">
-                                                <i class="fas fa-map-marker-alt"></i> {{ $patronyme->region->name }}
-                                            </div>
-                                        @endif
-                                        @if($patronyme->province)
-                                            <div class="col-6">
-                                                <i class="fas fa-building"></i> {{ $patronyme->province->nom }}
-                                            </div>
-                                        @endif
-                                        @if($patronyme->commune)
-                                            <div class="col-6">
-                                                <i class="fas fa-home"></i> {{ $patronyme->commune->nom }}
-                                            </div>
-                                        @endif
-                                        @if($patronyme->groupeEthnique)
-                                            <div class="col-6">
-                                                <i class="fas fa-users"></i> {{ $patronyme->groupeEthnique->nom }}
-                                            </div>
-                                        @endif
+                                @endif
+                                @if($patronyme->province)
+                                    <div class="flex items-center">
+                                        <i class="fas fa-building mr-2"></i>
+                                        {{ $patronyme->province->nom }}
                                     </div>
-
-                                    <div class="mt-3">
-                                        <a href="{{ route('patronymes.show', $patronyme) }}" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-eye"></i> Voir détails
-                                        </a>
+                                @endif
+                                @if($patronyme->commune)
+                                    <div class="flex items-center">
+                                        <i class="fas fa-home mr-2"></i>
+                                        {{ $patronyme->commune->nom }}
                                     </div>
-                                </div>
-                                <div class="card-footer text-muted">
-                                    <small>
-                                        <i class="fas fa-eye"></i> {{ number_format($patronyme->views_count ?? 0) }} vues
-                                        <span class="ms-3">
-                                            <i class="fas fa-heart"></i> {{ $patronyme->favorites()->count() }} favoris
-                                        </span>
-                                    </small>
+                                @endif
+                                @if($patronyme->groupeEthnique)
+                                    <div class="flex items-center">
+                                        <i class="fas fa-users mr-2"></i>
+                                        {{ $patronyme->groupeEthnique->nom }}
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <a href="{{ route('patronymes.show', $patronyme) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye mr-1"></i>Voir détails
+                                </a>
+                                <div class="text-sm text-gray-500">
+                                    <i class="fas fa-eye mr-1"></i>{{ number_format($patronyme->views_count ?? 0) }} vues
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-                </div>
-
-                <!-- Pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $favorites->links() }}
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <div class="animate__animated animate__fadeIn">
-                        <i class="fas fa-heart-broken fa-5x text-muted mb-4"></i>
-                        <h3 class="text-muted">Aucun favori pour le moment</h3>
-                        <p class="text-muted">Commencez à explorer les patronymes et ajoutez vos favoris !</p>
-                        <a href="{{ route('patronymes.index') }}" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Explorer les patronymes
-                        </a>
                     </div>
-                </div>
-            @endif
-        </div>
+                @endforeach
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8">
+                {{ $favorites->links() }}
+            </div>
+        @else
+            <div class="text-center py-12">
+                <i class="fas fa-heart-broken text-6xl text-gray-300 mb-6"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Aucun favori pour le moment</h3>
+                <p class="text-gray-500 mb-6">Commencez à explorer les patronymes et ajoutez vos favoris !</p>
+                <a href="{{ route('patronymes.index') }}" class="btn btn-primary">
+                    <i class="fas fa-search mr-2"></i>Explorer les patronymes
+                </a>
+            </div>
+        @endif
     </div>
 
     <script>

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Services\SearchService;
 use App\Services\StatisticsService;
+use App\Http\Requests\StorePatronymeRequest;
+use App\Http\Requests\UpdatePatronymeRequest;
 
 class PatronymeController extends Controller
 {
@@ -26,61 +28,76 @@ class PatronymeController extends Controller
     }
     public function index(Request $request)
     {
+        $startTime = microtime(true);
+
         try {
             $filters = $request->only([
-                'search', 'region_id', 'province_id', 'commune_id', 
+                'search', 'region_id', 'province_id', 'commune_id',
                 'groupe_ethnique_id', 'ethnie_id', 'langue_id',
                 'patronyme_sexe', 'transmission', 'min_frequence', 'max_frequence'
             ]);
 
             // Utiliser le service de recherche optimisé
             $patronymes = $this->searchService->search($filters['search'] ?? '', $filters);
-            
-            // Cache des données de référence
+
+            // Cache des données de référence avec TTL optimisé
             $regions = Cache::remember('regions_list', 3600, function () {
                 return Region::orderBy('name')->get();
             });
-            
-            $provinces = $filters['region_id'] 
+
+            $provinces = $filters['region_id']
                 ? Cache::remember("provinces_region_{$filters['region_id']}", 1800, function () use ($filters) {
                     return Province::where('region_id', $filters['region_id'])->orderBy('nom')->get();
                 })
                 : collect();
-                
-            $communes = $filters['province_id'] 
+
+            $communes = $filters['province_id']
                 ? Cache::remember("communes_province_{$filters['province_id']}", 1800, function () use ($filters) {
                     return Commune::where('province_id', $filters['province_id'])->orderBy('nom')->get();
                 })
                 : collect();
-                
+
             $groupesEthniques = Cache::remember('groupes_ethniques_list', 3600, function () {
                 return GroupeEthnique::orderBy('nom')->get();
             });
-            
+
             $ethnies = Cache::remember('ethnies_list', 3600, function () {
                 return \App\Models\Ethnie::orderBy('nom')->get();
             });
-            
+
             $langues = Cache::remember('langues_list', 3600, function () {
                 return \App\Models\Langue::orderBy('nom')->get();
             });
 
+            // Log de la recherche avec temps de réponse
+            $responseTime = round((microtime(true) - $startTime) * 1000, 3);
+
+            if (!empty($filters['search'])) {
+                $this->searchService->logSearch(
+                    $filters['search'],
+                    $patronymes->total(),
+                    auth()->id()
+                );
+            }
+
             Log::info('Patronyme search performed', [
                 'filters' => $filters,
-                'results_count' => $patronymes->count(),
+                'results_count' => $patronymes->total(),
+                'response_time_ms' => $responseTime,
                 'user_id' => auth()->id()
             ]);
 
             return view('patronymes.index', compact(
                 'patronymes', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues'
             ))->with($filters);
-            
+
         } catch (\Exception $e) {
             Log::error('Error in PatronymeController@index', [
                 'error' => $e->getMessage(),
-                'filters' => $request->all()
+                'filters' => $request->all(),
+                'response_time_ms' => round((microtime(true) - $startTime) * 1000, 3)
             ]);
-            
+
             return redirect()->back()->with('error', 'Une erreur est survenue lors de la recherche.');
         }
     }
@@ -179,70 +196,70 @@ class PatronymeController extends Controller
     {
         $query = $request->input('q', '');
 
-        if (strlen($query) < 2) {
+        if (strlen($query) < 1) {
             return response()->json([]);
         }
 
-        $suggestions = [];
+        try {
+            // Utiliser le service de suggestions amélioré
+            $suggestions = $this->searchService->getAdvancedSuggestions($query, 15);
 
-        // Recherche dans les noms de patronymes
-        $patronymes = Patronyme::where('nom', 'like', '%' . $query . '%')
-            ->select('nom')
-            ->distinct()
-            ->limit(10)
-            ->get();
+            return response()->json($suggestions);
 
-        foreach ($patronymes as $patronyme) {
-            $suggestions[] = [
-                'type' => 'patronyme',
-                'value' => $patronyme->nom,
-                'label' => $patronyme->nom
-            ];
+        } catch (\Exception $e) {
+            Log::error('Error in getSearchSuggestions', [
+                'error' => $e->getMessage(),
+                'query' => $query
+            ]);
+
+            return response()->json([]);
         }
+    }
 
-        // Recherche dans les régions
-        $regions = Region::where('name', 'like', '%' . $query . '%')
-            ->select('name')
-            ->distinct()
-            ->limit(5)
-            ->get();
+    /**
+     * Obtenir les patronymes populaires
+     */
+    public function getPopularPatronymes()
+    {
+        try {
+            $popular = Cache::remember('popular_patronymes_list', 1800, function () {
+                return Patronyme::orderBy('views_count', 'desc')
+                    ->orderBy('frequence', 'desc')
+                    ->limit(20)
+                    ->get(['nom', 'signification', 'views_count']);
+            });
 
-        foreach ($regions as $region) {
-            $suggestions[] = [
-                'type' => 'region',
-                'value' => $region->name,
-                'label' => 'Région: ' . $region->name
-            ];
+            return response()->json($popular);
+        } catch (\Exception $e) {
+            Log::error('Error in getPopularPatronymes', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([]);
         }
+    }
 
-        // Recherche dans les groupes ethniques
-        $groupes = GroupeEthnique::where('nom', 'like', '%' . $query . '%')
-            ->select('nom')
-            ->distinct()
-            ->limit(5)
-            ->get();
+    /**
+     * Obtenir les patronymes par lettre
+     */
+    public function getPatronymesByLetter($letter)
+    {
+        try {
+            $patronymes = Cache::remember("patronymes_letter_{$letter}", 3600, function () use ($letter) {
+                return Patronyme::where('nom', 'LIKE', "{$letter}%")
+                    ->orderBy('nom')
+                    ->get(['nom', 'signification', 'views_count']);
+            });
 
-        foreach ($groupes as $groupe) {
-            $suggestions[] = [
-                'type' => 'groupe',
-                'value' => $groupe->nom,
-                'label' => 'Groupe: ' . $groupe->nom
-            ];
+            return response()->json($patronymes);
+        } catch (\Exception $e) {
+            Log::error('Error in getPatronymesByLetter', [
+                'error' => $e->getMessage(),
+                'letter' => $letter
+            ]);
+
+            return response()->json([]);
         }
-
-        // Recherche par similarité si peu de résultats
-        if (count($suggestions) < 5) {
-            $similarNames = $this->getSimilarNames($query, 5);
-            foreach ($similarNames as $similar) {
-                $suggestions[] = [
-                    'type' => 'similar',
-                    'value' => $similar['name'],
-                    'label' => 'Similaire: ' . $similar['name'] . ' (' . round($similar['similarity'] * 100) . '%)'
-                ];
-            }
-        }
-
-        return response()->json(array_slice($suggestions, 0, 15));
     }
 
     public function create()
@@ -253,35 +270,10 @@ class PatronymeController extends Controller
         return view('patronymes.create', compact('regions', 'groupesEthniques', 'langues'));
     }
 
-    public function store(Request $request)
+    public function store(StorePatronymeRequest $request)
     {
         try {
-            $validated = $request->validate([
-                // Informations sur l'enquêté
-                'enquete_nom' => 'required|string|max:255',
-                'enquete_age' => 'nullable|integer|min:1|max:120',
-                'enquete_sexe' => 'nullable|in:M,F',
-                'enquete_fonction' => 'nullable|string|max:255',
-                'enquete_contact' => 'nullable|string|max:255',
-
-                // Informations sur le patronyme
-                'nom' => 'required|string|max:255|unique:patronymes,nom',
-                'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
-                'origine' => 'nullable|string',
-                'signification' => 'nullable|string',
-                'histoire' => 'nullable|string',
-                'langue_id' => 'nullable|exists:langues,id',
-                'transmission' => 'nullable|in:pere,mere,autre',
-                'patronyme_sexe' => 'nullable|in:M,F,mixte',
-                'totem' => 'nullable|string|max:255',
-                'justification_totem' => 'nullable|string',
-                'parents_plaisanterie' => 'nullable|string',
-
-                // Localisation
-                'region_id' => 'nullable|exists:regions,id',
-                'province_id' => 'nullable|exists:provinces,id',
-                'commune_id' => 'nullable|exists:communes,id',
-            ]);
+            $validated = $request->validated();
 
             $patronyme = Patronyme::create($validated);
 
@@ -289,7 +281,9 @@ class PatronymeController extends Controller
             Log::info('Patronyme created', [
                 'patronyme_id' => $patronyme->id,
                 'nom' => $patronyme->nom,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
             ]);
 
             // Nettoyer le cache
@@ -298,13 +292,14 @@ class PatronymeController extends Controller
             Cache::forget('featured_patronymes_*');
 
             return redirect()->route('patronymes.index')->with('success', 'Patronyme ajouté avec succès.');
-            
+
         } catch (\Exception $e) {
             Log::error('Error creating patronyme', [
                 'error' => $e->getMessage(),
-                'data' => $request->all()
+                'data' => $request->validated(),
+                'user_id' => auth()->id()
             ]);
-            
+
             return redirect()->back()->with('error', 'Une erreur est survenue lors de la création du patronyme.');
         }
     }
@@ -321,38 +316,39 @@ class PatronymeController extends Controller
         return view('patronymes.edit', compact('patronyme', 'regions', 'groupesEthniques', 'langues'));
     }
 
-    public function update(Request $request, Patronyme $patronyme)
+    public function update(UpdatePatronymeRequest $request, Patronyme $patronyme)
     {
-        $validated = $request->validate([
-            // Informations sur l'enquêté
-            'enquete_nom' => 'required|string|max:255',
-            'enquete_age' => 'nullable|integer|min:1|max:120',
-            'enquete_sexe' => 'nullable|in:M,F',
-            'enquete_fonction' => 'nullable|string|max:255',
-            'enquete_contact' => 'nullable|string|max:255',
+        try {
+            $validated = $request->validated();
 
-            // Informations sur le patronyme
-            'nom' => 'required|string|max:255',
-            'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
-            'origine' => 'nullable|string',
-            'signification' => 'nullable|string',
-            'histoire' => 'nullable|string',
-            'langue_id' => 'nullable|exists:langues,id',
-            'transmission' => 'nullable|in:pere,mere',
-            'patronyme_sexe' => 'nullable|string',
-            'totem' => 'nullable|string|max:255',
-            'justification_totem' => 'nullable|string',
-            'parents_plaisanterie' => 'nullable|string',
+            $patronyme->update($validated);
 
-            // Localisation
-            'region_id' => 'nullable|exists:regions,id',
-            'province_id' => 'nullable|exists:provinces,id',
-            'commune_id' => 'nullable|exists:communes,id',
-        ]);
+            // Log de la mise à jour
+            Log::info('Patronyme updated', [
+                'patronyme_id' => $patronyme->id,
+                'nom' => $patronyme->nom,
+                'user_id' => auth()->id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
 
-        $patronyme->update($validated);
+            // Nettoyer le cache
+            Cache::forget('popular_patronymes_*');
+            Cache::forget('recent_patronymes_*');
+            Cache::forget('featured_patronymes_*');
 
-        return redirect()->route('patronymes.index')->with('success', 'Patronyme mis à jour avec succès.');
+            return redirect()->route('patronymes.index')->with('success', 'Patronyme mis à jour avec succès.');
+
+        } catch (\Exception $e) {
+            Log::error('Error updating patronyme', [
+                'error' => $e->getMessage(),
+                'patronyme_id' => $patronyme->id,
+                'data' => $request->validated(),
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->back()->with('error', 'Une erreur est survenue lors de la mise à jour du patronyme.');
+        }
     }
 
     public function show(Patronyme $patronyme)

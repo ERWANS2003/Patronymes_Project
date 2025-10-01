@@ -21,7 +21,7 @@ class PatronymeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Créer les données de référence nécessaires
         $this->artisan('db:seed', ['--class' => 'RegionProvinceCommuneSeeder']);
         $this->artisan('db:seed', ['--class' => 'EthnieSeeder']);

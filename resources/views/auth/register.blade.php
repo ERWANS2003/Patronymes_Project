@@ -1,85 +1,95 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - Répertoire des Patronymes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="flex items-center justify-center min-h-screen px-4 py-12 bg-gray-50 sm:px-6 lg:px-8">
-    <div class="w-full max-w-md space-y-8">
-        <div>
-            <div class="flex justify-center">
-                <div class="flex-shrink-0">
-                    <i class="text-5xl text-indigo-600 fas fa-book-open"></i>
-                </div>
-            </div>
-            <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900">
-                Créer votre compte
-            </h2>
-            <p class="mt-2 text-sm text-center text-gray-600">
-                Ou
-                <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
-                    connectez-vous à votre compte existant
-                </a>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold text-gray-900">
+                <i class="fas fa-user-plus text-blue-600 mr-2"></i>
+                Inscription
+            </h1>
+            <p class="text-gray-600 mt-1">
+                Créez votre compte pour contribuer au répertoire
             </p>
         </div>
+    </x-slot>
 
-        <form class="mt-8 space-y-6" action="/register" method="POST">
-            @csrf
-            <div class="space-y-4 rounded-md shadow-sm">
+    <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="card p-8">
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-plus text-white text-2xl"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                    Créer votre compte
+                </h2>
+                <p class="text-gray-600">
+                    Ou
+                    <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-500 font-medium">
+                        connectez-vous à votre compte existant
+                    </a>
+                </p>
+            </div>
+
+            <form class="space-y-6" action="{{ route('register') }}" method="POST">
+                @csrf
+
                 <div>
-                    <label for="name" class="block mb-1 text-sm font-medium text-gray-700">Nom complet</label>
+                    <label for="name" class="form-label">Nom complet</label>
                     <input id="name" name="name" type="text" autocomplete="name" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Votre nom complet">
+                           class="form-input"
+                           placeholder="Votre nom complet"
+                           value="{{ old('name') }}">
+                    @error('name')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="email" class="block mb-1 text-sm font-medium text-gray-700">Adresse email</label>
+                    <label for="email" class="form-label">Adresse email</label>
                     <input id="email" name="email" type="email" autocomplete="email" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Adresse email">
+                           class="form-input"
+                           placeholder="votre@email.com"
+                           value="{{ old('email') }}">
+                    @error('email')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="password" class="block mb-1 text-sm font-medium text-gray-700">Mot de passe</label>
+                    <label for="password" class="form-label">Mot de passe</label>
                     <input id="password" name="password" type="password" autocomplete="new-password" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Mot de passe">
+                           class="form-input"
+                           placeholder="Votre mot de passe">
+                    @error('password')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
-                    <label for="password_confirmation" class="block mb-1 text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                    <label for="password_confirmation" class="form-label">Confirmer le mot de passe</label>
                     <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required
-                           class="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                           class="form-input"
                            placeholder="Confirmer le mot de passe">
                 </div>
-            </div>
 
-            <div class="flex items-center">
-                <input id="terms" name="terms" type="checkbox" required
-                       class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <label for="terms" class="block ml-2 text-sm text-gray-900">
-                    J'accepte les
-                    <a href="#" class="text-indigo-600 hover:text-indigo-500">conditions d'utilisation</a>
-                    et la
-                    <a href="#" class="text-indigo-600 hover:text-indigo-500">politique de confidentialité</a>
-                </label>
-            </div>
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" required
+                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="terms" class="block ml-2 text-sm text-gray-900">
+                        J'accepte les
+                        <a href="#" class="text-blue-600 hover:text-blue-500">conditions d'utilisation</a>
+                        et la
+                        <a href="#" class="text-blue-600 hover:text-blue-500">politique de confidentialité</a>
+                    </label>
+                </div>
 
-            <div>
-                <button type="submit"
-                        class="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="text-indigo-500 fas fa-user-plus group-hover:text-indigo-400"></i>
-                    </span>
-                    Créer mon compte
-                </button>
-            </div>
-
-        </form>
+                <div>
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Créer mon compte
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+</x-app-layout>

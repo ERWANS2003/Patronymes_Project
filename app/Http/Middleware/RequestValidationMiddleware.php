@@ -16,16 +16,16 @@ class RequestValidationMiddleware
     {
         // Validation des paramètres de requête
         $this->validateRequestParameters($request);
-        
+
         // Rate limiting pour les requêtes sensibles
         $this->applyRateLimiting($request);
-        
+
         // Sanitisation des entrées
         $this->sanitizeInputs($request);
-        
+
         return $next($request);
     }
-    
+
     private function validateRequestParameters(Request $request)
     {
         // Vérifier la taille de la requête
@@ -36,11 +36,11 @@ class RequestValidationMiddleware
                 'ip' => $request->ip()
             ]);
         }
-        
+
         // Vérifier les paramètres suspects
         $suspiciousParams = ['<script', 'javascript:', 'onload=', 'onerror='];
         $allInput = $request->all();
-        
+
         foreach ($allInput as $key => $value) {
             if (is_string($value)) {
                 foreach ($suspiciousParams as $suspicious) {
@@ -57,39 +57,39 @@ class RequestValidationMiddleware
             }
         }
     }
-    
+
     private function applyRateLimiting(Request $request)
     {
         $key = 'request_validation:' . $request->ip();
-        
+
         if (RateLimiter::tooManyAttempts($key, 100)) {
             Log::warning('Rate limit exceeded for request validation', [
                 'ip' => $request->ip(),
                 'url' => $request->fullUrl()
             ]);
         }
-        
+
         RateLimiter::hit($key, 60); // 100 tentatives par minute
     }
-    
+
     private function sanitizeInputs(Request $request)
     {
         $input = $request->all();
-        
+
         foreach ($input as $key => $value) {
             if (is_string($value)) {
                 // Supprimer les caractères de contrôle
                 $value = preg_replace('/[\x00-\x1F\x7F]/', '', $value);
-                
+
                 // Limiter la longueur
                 if (strlen($value) > 10000) {
                     $value = substr($value, 0, 10000);
                 }
-                
+
                 $input[$key] = $value;
             }
         }
-        
+
         $request->merge($input);
     }
 }

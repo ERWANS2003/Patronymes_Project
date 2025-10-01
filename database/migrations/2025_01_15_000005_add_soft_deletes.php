@@ -11,21 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Ajouter soft deletes aux tables principales
-        Schema::table('patronymes', function (Blueprint $table) {
-            $table->softDeletes();
-        });
-        
-        Schema::table('users', function (Blueprint $table) {
-            $table->softDeletes();
-        });
-        
+        // Ajouter soft deletes aux tables principales (seulement si les colonnes n'existent pas déjà)
+        // Les colonnes deleted_at ont déjà été ajoutées aux tables patronymes et users
+
         Schema::table('commentaires', function (Blueprint $table) {
-            $table->softDeletes();
+            if (!Schema::hasColumn('commentaires', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
-        
+
         Schema::table('contributions', function (Blueprint $table) {
-            $table->softDeletes();
+            if (!Schema::hasColumn('contributions', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 
@@ -34,20 +32,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('patronymes', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
-        
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
-        
         Schema::table('commentaires', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+            if (Schema::hasColumn('commentaires', 'deleted_at')) {
+                $table->dropSoftDeletes();
+            }
         });
-        
+
         Schema::table('contributions', function (Blueprint $table) {
-            $table->dropSoftDeletes();
+            if (Schema::hasColumn('contributions', 'deleted_at')) {
+                $table->dropSoftDeletes();
+            }
         });
     }
 };

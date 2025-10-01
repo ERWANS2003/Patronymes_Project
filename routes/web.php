@@ -10,10 +10,21 @@ use App\Http\Controllers\StatisticsController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
+
+Route::get('/welcome', function () {
+    return view('welcome');
+})->name('welcome');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $statisticsService = app(\App\Services\StatisticsService::class);
+    $stats = $statisticsService->getDashboardStats();
+
+    // Extraire les données spécifiques pour la vue
+    $recentPatronymes = $stats['recent_patronymes'] ?? collect();
+    $popularPatronymes = $stats['most_viewed'] ?? collect();
+
+    return view('dashboard', compact('stats', 'recentPatronymes', 'popularPatronymes'));
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -23,6 +34,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', function () {
         return view('profile.info', ['user' => auth()->user()]);
     })->name('profile.info');
+
+    // Route pour profile.show (Jetstream)
+    Route::get('/user/profile', function () {
+        return view('profile.show');
+    })->name('profile.show');
 });
 
 // Routes pour les patronymes avec permissions
@@ -32,10 +48,16 @@ Route::get('patronymes', [PatronymeController::class, 'index'])->name('patronyme
 // Routes protégées (contribution) - DOIT être avant les routes avec paramètres
 Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
     Route::get('patronymes/create', [PatronymeController::class, 'create'])->name('patronymes.create');
-    Route::post('patronymes', [PatronymeController::class, 'store'])->name('patronymes.store');
+    Route::post('patronymes', [PatronymeController::class, 'store'])
+        ->middleware('rate.limit:10,1')
+        ->name('patronymes.store');
     Route::get('patronymes/{patronyme}/edit', [PatronymeController::class, 'edit'])->name('patronymes.edit');
-    Route::put('patronymes/{patronyme}', [PatronymeController::class, 'update'])->name('patronymes.update');
-    Route::delete('patronymes/{patronyme}', [PatronymeController::class, 'destroy'])->name('patronymes.destroy');
+    Route::put('patronymes/{patronyme}', [PatronymeController::class, 'update'])
+        ->middleware('rate.limit:20,1')
+        ->name('patronymes.update');
+    Route::delete('patronymes/{patronyme}', [PatronymeController::class, 'destroy'])
+        ->middleware('rate.limit:5,1')
+        ->name('patronymes.destroy');
 });
 
 // Route publique avec paramètre (DOIT être après les routes spécifiques)
@@ -48,8 +70,28 @@ Route::resource('commentaires', \App\Http\Controllers\CommentaireController::cla
 Route::get('get-provinces', [PatronymeController::class, 'getProvinces'])->name('get.provinces');
 Route::get('get-communes', [PatronymeController::class, 'getCommunes'])->name('get.communes');
 
-// Route pour les suggestions de recherche
-Route::get('search-suggestions', [PatronymeController::class, 'getSearchSuggestions'])->name('search.suggestions');
+// Routes API pour les listes dépendantes
+Route::get('api/regions/{region}/provinces', function ($region) {
+    $provinces = \App\Models\Province::where('region_id', $region)->get();
+    return response()->json($provinces);
+});
+
+Route::get('api/provinces/{province}/communes', function ($province) {
+    $communes = \App\Models\Commune::where('province_id', $province)->get();
+    return response()->json($communes);
+});
+
+// Route pour les suggestions de recherche avec rate limiting
+Route::get('search-suggestions', [PatronymeController::class, 'getSearchSuggestions'])
+    ->middleware('rate.limit:30,1')
+    ->name('search.suggestions');
+
+// Routes pour les recherches optimisées
+Route::get('api/popular-patronymes', [PatronymeController::class, 'getPopularPatronymes'])
+    ->name('api.popular.patronymes');
+
+Route::get('api/patronymes/letter/{letter}', [PatronymeController::class, 'getPatronymesByLetter'])
+    ->name('api.patronymes.letter');
 
 // Minimal API docs route
 Route::get('/docs', function () {
@@ -81,6 +123,21 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     // Gestion des utilisateurs (seuls les admins)
     Route::middleware([\App\Http\Middleware\CanManageRolesMiddleware::class])->group(function () {
         Route::resource('users', \App\Http\Controllers\AdminUserController::class);
+    });
+
+    // Routes de monitoring
+    Route::prefix('monitoring')->name('monitoring.')->group(function () {
+        Route::get('/', [App\Http\Controllers\MonitoringController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\MonitoringController::class, 'dashboard'])->name('dashboard');
+        Route::get('/health', [App\Http\Controllers\MonitoringController::class, 'health'])->name('health');
+        Route::get('/metrics', [App\Http\Controllers\MonitoringController::class, 'metrics'])->name('metrics');
+        Route::get('/performance-report', [App\Http\Controllers\MonitoringController::class, 'performanceReport'])->name('performance-report');
+        Route::post('/cleanup-logs', [App\Http\Controllers\MonitoringController::class, 'cleanupLogs'])->name('cleanup-logs');
+        Route::get('/logs', [App\Http\Controllers\MonitoringController::class, 'logs'])->name('logs');
+        Route::get('/export', [App\Http\Controllers\MonitoringController::class, 'exportMetrics'])->name('export');
+        Route::get('/application', function () {
+            return view('monitoring.application');
+        })->name('application');
     });
 });
 

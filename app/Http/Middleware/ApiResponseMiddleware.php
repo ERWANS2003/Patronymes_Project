@@ -14,11 +14,11 @@ class ApiResponseMiddleware
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
-        
+
         // Standardiser les réponses API
         if ($request->is('api/*') && $response instanceof JsonResponse) {
             $data = $response->getData(true);
-            
+
             // Ajouter des métadonnées standard
             $standardizedData = [
                 'success' => $response->getStatusCode() < 400,
@@ -28,13 +28,13 @@ class ApiResponseMiddleware
                 'timestamp' => now()->toISOString(),
                 'version' => '1.0'
             ];
-            
+
             $response->setData($standardizedData);
         }
-        
+
         return $response;
     }
-    
+
     private function getStatusMessage($statusCode)
     {
         $messages = [
@@ -47,7 +47,7 @@ class ApiResponseMiddleware
             422 => 'Validation Error',
             500 => 'Internal Server Error'
         ];
-        
+
         return $messages[$statusCode] ?? 'Unknown';
     }
 }

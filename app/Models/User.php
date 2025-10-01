@@ -110,6 +110,11 @@ class User extends Authenticatable
         return $this->hasMany(Commentaire::class, 'utilisateur_id');
     }
 
+    public function searchLogs()
+    {
+        return $this->hasMany(\App\Models\SearchLog::class, 'user_id');
+    }
+
     // Helper methods
     public function isAdmin(): bool
     {
@@ -155,19 +160,19 @@ class User extends Authenticatable
     public function getActivityScoreAttribute()
     {
         $score = 0;
-        
+
         // Score basé sur les contributions
         $score += $this->contributions()->count() * 2;
-        
+
         // Score basé sur les commentaires
         $score += $this->commentaires()->count() * 1;
-        
+
         // Score basé sur les favoris
         $score += $this->favorites()->count() * 0.5;
-        
+
         // Score basé sur les connexions
         $score += $this->login_count * 0.1;
-        
+
         return round($score, 2);
     }
 
