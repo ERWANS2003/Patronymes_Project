@@ -22,6 +22,68 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search Bar -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <form method="GET" action="{{ route('patronymes.index') }}" class="space-y-4">
+                <div>
+                    <label class="form-label">Recherche rapide</label>
+                    <div class="relative" x-data="searchAutocomplete()">
+                        <input
+                            type="text"
+                            name="search"
+                            placeholder="Tapez un nom de patronyme... (ex: 'e' pour voir tous les patronymes commençant par 'e')"
+                            class="form-input pl-10"
+                            x-model="searchQuery"
+                            @input="getSuggestions($event.target.value)"
+                            @focus="showSuggestions = true"
+                            @blur="setTimeout(() => showSuggestions = false, 200)"
+                            autocomplete="off"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="showSuggestions && suggestions.length > 0"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            <template x-for="suggestion in suggestions" :key="suggestion.value">
+                                <div @click="selectSuggestion(suggestion)"
+                                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900" x-text="suggestion.label"></div>
+                                            <div class="text-sm text-gray-500" x-text="suggestion.description" x-show="suggestion.description"></div>
+                                        </div>
+                                        <div class="text-xs text-gray-400" x-text="suggestion.type"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-search mr-2"></i>Rechercher
+                    </button>
+                    <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1">
+                        <i class="fas fa-list mr-2"></i>Voir tous les patronymes
+                    </a>
+                    @if(Auth::user()->canContribute())
+                        <a href="{{ route('patronymes.create') }}" class="btn btn-success flex-1">
+                            <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+
         <!-- Statistiques principales -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Patronymes -->
@@ -258,9 +320,11 @@
                 <a href="{{ route('patronymes.index') }}" class="btn btn-primary w-full justify-center">
                     <i class="fas fa-search mr-2"></i>Explorer les patronymes
                 </a>
-                <a href="{{ route('patronymes.create') }}" class="btn btn-success w-full justify-center">
-                    <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
-                </a>
+                @if(Auth::user()->canContribute())
+                    <a href="{{ route('patronymes.create') }}" class="btn btn-success w-full justify-center">
+                        <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
+                    </a>
+                @endif
                 <a href="{{ route('favorites.index') }}" class="btn btn-secondary w-full justify-center">
                     <i class="fas fa-heart mr-2"></i>Mes favoris
                 </a>
@@ -271,4 +335,49 @@
         </div>
         </div>
     </div>
+
+    <!-- Search Autocomplete JavaScript -->
+    <script>
+        // Search Autocomplete Function
+        function searchAutocomplete() {
+            return {
+                searchQuery: '',
+                suggestions: [],
+                showSuggestions: false,
+                debounceTimer: null,
+
+                getSuggestions(query) {
+                    if (query.length < 2) {
+                        this.suggestions = [];
+                        return;
+                    }
+
+                    // Debounce the request
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => {
+                        fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                this.suggestions = data;
+                            })
+                            .catch(error => {
+                                console.error('Error fetching suggestions:', error);
+                                this.suggestions = [];
+                            });
+                    }, 300);
+                },
+
+                selectSuggestion(suggestion) {
+                    this.searchQuery = suggestion.value;
+                    this.showSuggestions = false;
+
+                    // Update the form input
+                    const searchInput = document.querySelector('input[name="search"]');
+                    if (searchInput) {
+                        searchInput.value = suggestion.value;
+                    }
+                }
+            }
+        }
+    </script>
 </x-app-layout>

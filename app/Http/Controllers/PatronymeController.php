@@ -34,7 +34,8 @@ class PatronymeController extends Controller
             $filters = $request->only([
                 'search', 'region_id', 'province_id', 'commune_id',
                 'groupe_ethnique_id', 'ethnie_id', 'langue_id',
-                'patronyme_sexe', 'transmission', 'min_frequence', 'max_frequence'
+                'patronyme_sexe', 'transmission', 'min_frequence', 'max_frequence',
+                'featured', 'sort'
             ]);
 
             // Utiliser le service de recherche optimisé
@@ -262,92 +263,87 @@ class PatronymeController extends Controller
         }
     }
 
+
+
+
     public function create()
     {
         $regions = Region::orderBy('name')->get();
         $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
+        $ethnies = \App\Models\Ethnie::orderBy('nom')->get();
         $langues = \App\Models\Langue::orderBy('nom')->get();
-        return view('patronymes.create', compact('regions', 'groupesEthniques', 'langues'));
+        $modesTransmission = \App\Models\ModeTransmission::orderBy('nom')->get();
+
+        return view('patronymes.create', compact('regions', 'groupesEthniques', 'ethnies', 'langues', 'modesTransmission'));
     }
 
     public function store(StorePatronymeRequest $request)
     {
         try {
-            $validated = $request->validated();
+            $patronyme = Patronyme::create($request->validated());
 
-            $patronyme = Patronyme::create($validated);
-
-            // Log de la création
             Log::info('Patronyme created', [
                 'patronyme_id' => $patronyme->id,
                 'nom' => $patronyme->nom,
-                'user_id' => auth()->id(),
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
-            ]);
-
-            // Nettoyer le cache
-            Cache::forget('popular_patronymes_*');
-            Cache::forget('recent_patronymes_*');
-            Cache::forget('featured_patronymes_*');
-
-            return redirect()->route('patronymes.index')->with('success', 'Patronyme ajouté avec succès.');
-
-        } catch (\Exception $e) {
-            Log::error('Error creating patronyme', [
-                'error' => $e->getMessage(),
-                'data' => $request->validated(),
                 'user_id' => auth()->id()
             ]);
 
-            return redirect()->back()->with('error', 'Une erreur est survenue lors de la création du patronyme.');
+            return redirect()->route('patronymes.show', $patronyme)
+                ->with('success', 'Patronyme créé avec succès.');
+        } catch (\Exception $e) {
+            Log::error('Error creating patronyme', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+                'request_data' => $request->all()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Une erreur est survenue lors de la création du patronyme.');
         }
     }
 
     public function edit(Patronyme $patronyme)
     {
         $regions = Region::orderBy('name')->get();
+        $provinces = $patronyme->region_id
+            ? Province::where('region_id', $patronyme->region_id)->orderBy('nom')->get()
+            : collect();
+        $communes = $patronyme->province_id
+            ? Commune::where('province_id', $patronyme->province_id)->orderBy('nom')->get()
+            : collect();
         $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
+        $ethnies = \App\Models\Ethnie::orderBy('nom')->get();
         $langues = \App\Models\Langue::orderBy('nom')->get();
+        $modesTransmission = \App\Models\ModeTransmission::orderBy('nom')->get();
 
-        // Load the patronyme with its relations
-        $patronyme->load(['region', 'province', 'commune', 'groupeEthnique', 'langue']);
-
-        return view('patronymes.edit', compact('patronyme', 'regions', 'groupesEthniques', 'langues'));
+        return view('patronymes.edit', compact('patronyme', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues', 'modesTransmission'));
     }
 
     public function update(UpdatePatronymeRequest $request, Patronyme $patronyme)
     {
         try {
-            $validated = $request->validated();
+            $patronyme->update($request->validated());
 
-            $patronyme->update($validated);
-
-            // Log de la mise à jour
             Log::info('Patronyme updated', [
                 'patronyme_id' => $patronyme->id,
                 'nom' => $patronyme->nom,
-                'user_id' => auth()->id(),
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'user_id' => auth()->id()
             ]);
 
-            // Nettoyer le cache
-            Cache::forget('popular_patronymes_*');
-            Cache::forget('recent_patronymes_*');
-            Cache::forget('featured_patronymes_*');
-
-            return redirect()->route('patronymes.index')->with('success', 'Patronyme mis à jour avec succès.');
-
+            return redirect()->route('patronymes.show', $patronyme)
+                ->with('success', 'Patronyme mis à jour avec succès.');
         } catch (\Exception $e) {
             Log::error('Error updating patronyme', [
                 'error' => $e->getMessage(),
                 'patronyme_id' => $patronyme->id,
-                'data' => $request->validated(),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'request_data' => $request->all()
             ]);
 
-            return redirect()->back()->with('error', 'Une erreur est survenue lors de la mise à jour du patronyme.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Une erreur est survenue lors de la mise à jour du patronyme.');
         }
     }
 
@@ -379,5 +375,79 @@ class PatronymeController extends Controller
     {
         $communes = Commune::where('province_id', $request->province_id)->orderBy('nom')->get();
         return response()->json($communes);
+    }
+
+    /**
+     * Partager un patronyme
+     */
+    public function share(Patronyme $patronyme)
+    {
+        $patronyme->load(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue']);
+
+        return response()->json([
+            'patronyme' => $patronyme,
+            'share_url' => route('patronymes.show', $patronyme),
+            'share_text' => "Découvrez l'origine du patronyme {$patronyme->nom} sur Patronymes BF"
+        ]);
+    }
+
+    /**
+     * Exporter les patronymes
+     */
+    public function export($format = 'json')
+    {
+        $patronymes = Patronyme::with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue'])
+                              ->orderBy('nom')
+                              ->get();
+
+        switch ($format) {
+            case 'csv':
+                $filename = 'patronymes-' . date('Y-m-d') . '.csv';
+                $headers = [
+                    'Content-Type' => 'text/csv',
+                    'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                ];
+
+                $callback = function() use ($patronymes) {
+                    $file = fopen('php://output', 'w');
+
+                    // En-têtes CSV
+                    fputcsv($file, [
+                        'Nom', 'Signification', 'Origine', 'Histoire', 'Totem',
+                        'Région', 'Province', 'Commune', 'Groupe ethnique', 'Ethnie', 'Langue',
+                        'Fréquence', 'Vues', 'Date création'
+                    ]);
+
+                    // Données
+                    foreach ($patronymes as $patronyme) {
+                        fputcsv($file, [
+                            $patronyme->nom,
+                            $patronyme->signification,
+                            $patronyme->origine,
+                            $patronyme->histoire,
+                            $patronyme->totem,
+                            $patronyme->region ? $patronyme->region->name : '',
+                            $patronyme->province ? $patronyme->province->nom : '',
+                            $patronyme->commune ? $patronyme->commune->nom : '',
+                            $patronyme->groupeEthnique ? $patronyme->groupeEthnique->nom : '',
+                            $patronyme->ethnie ? $patronyme->ethnie->nom : '',
+                            $patronyme->langue ? $patronyme->langue->nom : '',
+                            $patronyme->frequence,
+                            $patronyme->views_count,
+                            $patronyme->created_at->format('Y-m-d H:i:s')
+                        ]);
+                    }
+
+                    fclose($file);
+                };
+
+                return response()->stream($callback, 200, $headers);
+
+            case 'json':
+            default:
+                $filename = 'patronymes-' . date('Y-m-d') . '.json';
+                return response()->json($patronymes)
+                               ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+        }
     }
 }

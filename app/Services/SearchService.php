@@ -33,11 +33,35 @@ class SearchService
             // Appliquer tous les filtres disponibles
             $search->advancedSearch($filters);
 
-            return $search->with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue'])
-                         ->orderByRaw("CASE WHEN nom LIKE ? THEN 1 ELSE 2 END", ["{$query}%"])
-                         ->orderBy('views_count', 'desc')
-                         ->orderBy('created_at', 'desc')
-                         ->paginate(15);
+            $search = $search->with(['region', 'province', 'commune', 'groupeEthnique', 'ethnie', 'langue']);
+
+            // Appliquer le tri selon le paramètre
+            $sort = $filters['sort'] ?? 'nom';
+            switch ($sort) {
+                case 'created_at':
+                    $search->orderBy('created_at', 'desc');
+                    break;
+                case 'views_count':
+                    $search->orderBy('views_count', 'desc');
+                    break;
+                case 'nom':
+                default:
+                    if (!empty($query)) {
+                        $search->orderByRaw("CASE WHEN nom LIKE ? THEN 1 ELSE 2 END", ["{$query}%"]);
+                    }
+                    $search->orderBy('nom', 'asc');
+                    break;
+            }
+
+            // Tri secondaire
+            if ($sort !== 'views_count') {
+                $search->orderBy('views_count', 'desc');
+            }
+            if ($sort !== 'created_at') {
+                $search->orderBy('created_at', 'desc');
+            }
+
+            return $search->paginate(15);
         });
     }
 

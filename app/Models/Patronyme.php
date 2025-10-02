@@ -182,6 +182,10 @@ class Patronyme extends Model
             $query->where('frequence', '<=', $filters['max_frequence']);
         }
 
+        if (!empty($filters['featured'])) {
+            $query->featured();
+        }
+
         return $query;
     }
 

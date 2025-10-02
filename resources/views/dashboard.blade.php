@@ -4,21 +4,163 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">
                     <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>
-                    Tableau de bord
+                    @if(Auth::user()->role === 'admin')
+                        Tableau de bord Administrateur
+                    @elseif(Auth::user()->canContribute())
+                        Tableau de bord Contributeur
+                    @else
+                        Tableau de bord Utilisateur
+                    @endif
                 </h1>
                 <p class="text-gray-600 mt-1">
-                    Bienvenue, {{ Auth::user()->name }} ! Voici un aperçu de votre activité.
+                    Bienvenue, {{ Auth::user()->name }} !
+                    @if(Auth::user()->role === 'admin')
+                        Voici l'aperçu complet du système.
+                    @elseif(Auth::user()->canContribute())
+                        Voici vos contributions et l'aperçu de votre activité.
+                    @else
+                        Voici un aperçu de votre activité.
+                    @endif
                 </p>
             </div>
             <div class="mt-4 sm:mt-0">
-                <span class="text-sm text-gray-500">
-                    Dernière connexion: {{ Auth::user()->last_login_at ? Auth::user()->last_login_at->diffForHumans() : 'Jamais' }}
-                </span>
+                <div class="flex items-center space-x-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                        @if(Auth::user()->role === 'admin') bg-red-100 text-red-800
+                        @elseif(Auth::user()->canContribute()) bg-green-100 text-green-800
+                        @else bg-blue-100 text-blue-800
+                        @endif">
+                        @if(Auth::user()->role === 'admin')
+                            <i class="fas fa-crown mr-1"></i>Administrateur
+                        @elseif(Auth::user()->canContribute())
+                            <i class="fas fa-edit mr-1"></i>Contributeur
+                        @else
+                            <i class="fas fa-user mr-1"></i>Utilisateur
+                        @endif
+                    </span>
+                    <span class="text-sm text-gray-500">
+                        Dernière connexion: {{ Auth::user()->last_login_at ? Auth::user()->last_login_at->diffForHumans() : 'Jamais' }}
+                    </span>
+                </div>
             </div>
         </div>
     </x-slot>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search Bar -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <form method="GET" action="{{ route('patronymes.index') }}" class="space-y-4">
+                <div>
+                    <label class="form-label">Recherche rapide</label>
+                    <div class="relative" x-data="searchAutocomplete()">
+                        <input
+                            type="text"
+                            name="search"
+                            placeholder="Tapez un nom de patronyme... (ex: 'e' pour voir tous les patronymes commençant par 'e')"
+                            class="form-input pl-10"
+                            x-model="searchQuery"
+                            @input="getSuggestions($event.target.value)"
+                            @focus="showSuggestions = true"
+                            @blur="setTimeout(() => showSuggestions = false, 200)"
+                            autocomplete="off"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="showSuggestions && suggestions.length > 0"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            <template x-for="suggestion in suggestions" :key="suggestion.value">
+                                <div @click="selectSuggestion(suggestion)"
+                                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900" x-text="suggestion.label"></div>
+                                            <div class="text-sm text-gray-500" x-text="suggestion.description" x-show="suggestion.description"></div>
+                                        </div>
+                                        <div class="text-xs text-gray-400" x-text="suggestion.type"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-search mr-2"></i>Rechercher
+                    </button>
+                    <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1">
+                        <i class="fas fa-list mr-2"></i>Voir tous les patronymes
+                    </a>
+                    <a href="{{ route('patronymes.create') }}" class="btn btn-success flex-1">
+                        <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Role-specific Quick Actions -->
+        @if(Auth::user()->role === 'admin')
+            <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-red-800 mb-4">
+                    <i class="fas fa-crown mr-2"></i>Actions Administrateur
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{{ route('admin.dashboard') }}" class="btn btn-red">
+                        <i class="fas fa-cog mr-2"></i>Administration
+                    </a>
+                    <a href="{{ route('patronymes.create') }}" class="btn btn-green">
+                        <i class="fas fa-plus mr-2"></i>Ajouter Patronyme
+                    </a>
+                    <a href="{{ route('statistics.index') }}" class="btn btn-blue">
+                        <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                    </a>
+                </div>
+            </div>
+        @elseif(Auth::user()->canContribute())
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-green-800 mb-4">
+                    <i class="fas fa-edit mr-2"></i>Actions Contributeur
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{{ route('patronymes.create') }}" class="btn btn-green">
+                        <i class="fas fa-plus mr-2"></i>Ajouter Patronyme
+                    </a>
+                    <a href="{{ route('favorites.index') }}" class="btn btn-blue">
+                        <i class="fas fa-heart mr-2"></i>Mes Favoris
+                    </a>
+                    <a href="{{ route('statistics.index') }}" class="btn btn-purple">
+                        <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                    </a>
+                </div>
+            </div>
+        @else
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-blue-800 mb-4">
+                    <i class="fas fa-user mr-2"></i>Actions Utilisateur
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{{ route('patronymes.index') }}" class="btn btn-blue">
+                        <i class="fas fa-search mr-2"></i>Explorer
+                    </a>
+                    <a href="{{ route('favorites.index') }}" class="btn btn-red">
+                        <i class="fas fa-heart mr-2"></i>Mes Favoris
+                    </a>
+                    <a href="{{ route('statistics.index') }}" class="btn btn-purple">
+                        <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Patronymes -->
@@ -268,4 +410,49 @@
             </div>
         @endauth
     </div>
+
+    <!-- Search Autocomplete JavaScript -->
+    <script>
+        // Search Autocomplete Function
+        function searchAutocomplete() {
+            return {
+                searchQuery: '',
+                suggestions: [],
+                showSuggestions: false,
+                debounceTimer: null,
+
+                getSuggestions(query) {
+                    if (query.length < 2) {
+                        this.suggestions = [];
+                        return;
+                    }
+
+                    // Debounce the request
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => {
+                        fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                this.suggestions = data;
+                            })
+                            .catch(error => {
+                                console.error('Error fetching suggestions:', error);
+                                this.suggestions = [];
+                            });
+                    }, 300);
+                },
+
+                selectSuggestion(suggestion) {
+                    this.searchQuery = suggestion.value;
+                    this.showSuggestions = false;
+
+                    // Update the form input
+                    const searchInput = document.querySelector('input[name="search"]');
+                    if (searchInput) {
+                        searchInput.value = suggestion.value;
+                    }
+                }
+            }
+        }
+    </script>
 </x-app-layout>

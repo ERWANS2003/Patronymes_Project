@@ -1,0 +1,49 @@
+{
+  "name": "Patronymes App",
+  "description": "Répertoire des Patronymes du Burkina Faso",
+  "repository": "https://github.com/votre-username/patronymes-app",
+  "logo": "https://via.placeholder.com/150x150/667eea/ffffff?text=PA",
+  "keywords": ["laravel", "patronymes", "burkina-faso", "culture"],
+  "env": {
+    "APP_ENV": {
+      "description": "Environment",
+      "value": "production"
+    },
+    "APP_DEBUG": {
+      "description": "Debug mode",
+      "value": "false"
+    },
+    "APP_KEY": {
+      "description": "Application key",
+      "generator": "secret"
+    },
+    "DB_CONNECTION": {
+      "description": "Database connection",
+      "value": "pgsql"
+    },
+    "DB_HOST": {
+      "description": "Database host"
+    },
+    "DB_PORT": {
+      "description": "Database port",
+      "value": "5432"
+    },
+    "DB_DATABASE": {
+      "description": "Database name"
+    },
+    "DB_USERNAME": {
+      "description": "Database username"
+    },
+    "DB_PASSWORD": {
+      "description": "Database password"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:mini"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/php"
+    }
+  ]
+}

@@ -342,14 +342,16 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Update heart icon
-                    const heartIcon = event.target;
-                    if (data.favorited) {
-                        heartIcon.classList.add('text-red-500');
-                    } else {
-                        heartIcon.classList.remove('text-red-500');
-                    }
+                // Update heart icon
+                const heartIcon = document.querySelector(`button[onclick="toggleFavorite(${patronymeId})"] i`);
+                if (data.isFavorited) {
+                    heartIcon.classList.add('text-red-500');
+                    heartIcon.classList.remove('far');
+                    heartIcon.classList.add('fas');
+                } else {
+                    heartIcon.classList.remove('text-red-500');
+                    heartIcon.classList.remove('fas');
+                    heartIcon.classList.add('far');
                 }
             })
             .catch(error => console.error('Error:', error));
