@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "composer install --no-dev --optimize-autoloader",
-  "outputDirectory": "public",
-  "installCommand": "composer install",
   "builds": [
     {
       "src": "public/index.php",
@@ -14,15 +11,5 @@
       "src": "/(.*)",
       "dest": "public/index.php"
     }
-  ],
-  "env": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "APP_KEY": "base64:eO4qBA6pUsxb9onJA6uclw8v6ccupBBXA6RGR21XLBA=",
-    "DB_CONNECTION": "sqlite",
-    "DB_DATABASE": ":memory:",
-    "CACHE_DRIVER": "file",
-    "SESSION_DRIVER": "file",
-    "QUEUE_CONNECTION": "sync"
-  }
+  ]
 }
