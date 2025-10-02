@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache",
+  "buildCommand": "composer install --no-dev --optimize-autoloader",
   "outputDirectory": "public",
+  "installCommand": "composer install",
   "builds": [
     {
       "src": "public/index.php",
@@ -23,10 +24,5 @@
     "CACHE_DRIVER": "file",
     "SESSION_DRIVER": "file",
     "QUEUE_CONNECTION": "sync"
-  },
-  "functions": {
-    "public/index.php": {
-      "runtime": "@vercel/php@0.6.0"
-    }
   }
 }
