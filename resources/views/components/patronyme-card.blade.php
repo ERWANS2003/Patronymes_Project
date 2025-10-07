@@ -21,7 +21,7 @@
                             </a>
                         </li>
                         @auth
-                            @if(Auth::user()->canContribute())
+                            @if(Auth::check() && Auth::user()->canContribute())
                                 <li>
                                     <a class="dropdown-item" href="{{ route('patronymes.edit', $patronyme) }}">
                                         <i class="fas fa-edit me-2"></i>Modifier

@@ -83,7 +83,7 @@
                             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'nav-link-active' : '' }}">
                                 <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
                             </a>
-                            @if(Auth::user()->canContribute())
+                            @if(Auth::check() && Auth::user()->canContribute())
                                 <a href="{{ route('patronymes.create') }}" class="nav-link {{ request()->routeIs('patronymes.create') ? 'nav-link-active' : '' }}">
                                     <i class="fas fa-plus mr-1"></i>Ajouter
                                 </a>
@@ -118,7 +118,7 @@
                                     <a href="{{ route('patronymes.index') }}?favorites=1" class="dropdown-item">
                                         <i class="fas fa-heart mr-2"></i>Mes favoris
                                     </a>
-                                    @if(Auth::user()->canContribute())
+                                    @if(Auth::check() && Auth::user()->canContribute())
                                         <a href="{{ route('contributions.index') }}" class="dropdown-item">
                                             <i class="fas fa-edit mr-2"></i>Mes contributions
                                         </a>
@@ -171,7 +171,7 @@
                         <a href="{{ route('dashboard') }}" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                             <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                         </a>
-                        @if(Auth::user()->canContribute())
+                                    @if(Auth::check() && Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                                 <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
                             </a>
@@ -187,7 +187,7 @@
                         <a href="{{ route('patronymes.index') }}?favorites=1" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                             <i class="fas fa-heart mr-2"></i>Mes favoris
                         </a>
-                        @if(Auth::user()->canContribute())
+                                    @if(Auth::check() && Auth::user()->canContribute())
                             <a href="{{ route('contributions.index') }}" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                                 <i class="fas fa-edit mr-2"></i>Mes contributions
                             </a>
@@ -228,7 +228,7 @@
         <!-- Footer -->
         <footer class="bg-gray-900 text-white py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="col-span-1 md:col-span-2">
                         <div class="flex items-center space-x-2 mb-4">
                             <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -240,20 +240,6 @@
                             Découvrez et explorez l'histoire fascinante des patronymes du Burkina Faso.
                             Une plateforme dédiée à la préservation de notre patrimoine culturel.
                         </p>
-                        <div class="flex space-x-4">
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-facebook-f text-xl"></i>
-                            </a>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-twitter text-xl"></i>
-                            </a>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-linkedin text-xl"></i>
-                            </a>
-                            <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                                <i class="fab fa-instagram text-xl"></i>
-                            </a>
-                        </div>
                     </div>
 
                     <div>
@@ -263,16 +249,6 @@
                             <li><a href="{{ route('patronymes.index') }}?featured=1" class="text-gray-400 hover:text-white transition-colors">Populaires</a></li>
                             <li><a href="#" class="text-gray-400 hover:text-white transition-colors">À propos</a></li>
                             <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-semibold mb-4">Support</h3>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Aide</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Support</a></li>
                         </ul>
                     </div>
                 </div>

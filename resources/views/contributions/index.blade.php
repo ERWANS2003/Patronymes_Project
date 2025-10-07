@@ -11,7 +11,7 @@
                 </p>
             </div>
             <div class="mt-4 sm:mt-0">
-                @if(Auth::user()->canContribute())
+                @if(Auth::check() && Auth::user()->canContribute())
                     <a href="{{ route('patronymes.create') }}" class="btn btn-success">
                         <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
                     </a>
@@ -82,7 +82,7 @@
                                                 <a href="{{ route('patronymes.show', $patronyme) }}" class="mr-3 text-indigo-600 hover:text-indigo-900">
                                                     <i class="fas fa-eye"></i> Voir
                                                 </a>
-                                                @if(Auth::user()->canContribute())
+                                                @if(Auth::check() && Auth::user()->canContribute())
                                                     <a href="{{ route('patronymes.edit', $patronyme) }}" class="mr-3 text-yellow-600 hover:text-yellow-900">
                                                         <i class="fas fa-edit"></i> Modifier
                                                     </a>
@@ -109,7 +109,7 @@
                     <p class="mt-2 text-gray-500">
                         Vous n'avez pas encore contribué à la plateforme.
                     </p>
-                    @if(Auth::user()->canContribute())
+                    @if(Auth::check() && Auth::user()->canContribute())
                         <div class="mt-6">
                             <a href="{{ route('patronymes.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
                                 <i class="fas fa-plus mr-2"></i> Ajouter votre premier patronyme

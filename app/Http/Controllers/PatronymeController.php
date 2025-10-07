@@ -11,6 +11,7 @@ use App\Models\Province;
 use App\Models\Commune;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Services\SearchService;
 use App\Services\StatisticsService;
 use App\Http\Requests\StorePatronymeRequest;
@@ -28,78 +29,167 @@ class PatronymeController extends Controller
     }
     public function index(Request $request)
     {
-        $startTime = microtime(true);
-
         try {
-            $filters = $request->only([
-                'search', 'region_id', 'province_id', 'commune_id',
-                'groupe_ethnique_id', 'ethnie_id', 'langue_id',
-                'patronyme_sexe', 'transmission', 'min_frequence', 'max_frequence',
-                'featured', 'sort'
-            ]);
+            $search = trim($request->input('search'));
+            $featured = $request->input('featured');
 
-            // Utiliser le service de recherche optimisé
-            $patronymes = $this->searchService->search($filters['search'] ?? '', $filters);
+            // Check cache for frequent searches
+            $cacheKey = 'search_' . md5($search . '_' . $featured);
+            $patronymes = Cache::remember($cacheKey, 300, function() use ($search, $featured) {
+                // Optimized search query with proper indexing
+                $query = Patronyme::with(['region', 'departement', 'groupeEthnique'])
+                    ->select(['id', 'nom', 'signification', 'origine', 'region_id', 'departement_id', 'groupe_ethnique_id', 'created_at', 'views_count', 'is_featured']);
 
-            // Cache des données de référence avec TTL optimisé
-            $regions = Cache::remember('regions_list', 3600, function () {
-                return Region::orderBy('name')->get();
+                if ($search) {
+                    // Enhanced search with fuzzy matching and variations
+                    $searchVariations = $this->getSearchVariations($search);
+
+                    $query->where(function($q) use ($search, $searchVariations) {
+                        // Exact match (highest priority)
+                        $q->where('nom', 'like', $search . '%')
+                          ->orWhere('nom', 'like', '%' . $search . '%');
+
+                        // Search in signification and origine
+                        $q->orWhere('signification', 'like', '%' . $search . '%')
+                          ->orWhere('origine', 'like', '%' . $search . '%');
+
+                        // Search variations for better matching
+                        foreach ($searchVariations as $variation) {
+                            $q->orWhere('nom', 'like', '%' . $variation . '%')
+                              ->orWhere('signification', 'like', '%' . $variation . '%');
+                        }
+                    });
+
+                    // Log search for analytics
+                    $this->logSearch($search);
+                }
+
+                // Handle featured/popular patronymes
+                if ($featured) {
+                    $query->where('is_featured', true)
+                          ->orWhere('views_count', '>', 0)
+                          ->orderBy('views_count', 'desc')
+                          ->orderBy('created_at', 'desc');
+                } else {
+                    $query->orderBy('nom');
+                }
+
+                return $query->paginate(12);
             });
 
-            $provinces = $filters['region_id']
-                ? Cache::remember("provinces_region_{$filters['region_id']}", 1800, function () use ($filters) {
-                    return Province::where('region_id', $filters['region_id'])->orderBy('nom')->get();
-                })
-                : collect();
-
-            $communes = $filters['province_id']
-                ? Cache::remember("communes_province_{$filters['province_id']}", 1800, function () use ($filters) {
-                    return Commune::where('province_id', $filters['province_id'])->orderBy('nom')->get();
-                })
-                : collect();
-
-            $groupesEthniques = Cache::remember('groupes_ethniques_list', 3600, function () {
-                return GroupeEthnique::orderBy('nom')->get();
-            });
-
-            $ethnies = Cache::remember('ethnies_list', 3600, function () {
-                return \App\Models\Ethnie::orderBy('nom')->get();
-            });
-
-            $langues = Cache::remember('langues_list', 3600, function () {
-                return \App\Models\Langue::orderBy('nom')->get();
-            });
-
-            // Log de la recherche avec temps de réponse
-            $responseTime = round((microtime(true) - $startTime) * 1000, 3);
-
-            if (!empty($filters['search'])) {
-                $this->searchService->logSearch(
-                    $filters['search'],
-                    $patronymes->total(),
-                    auth()->id()
-                );
-            }
-
-            Log::info('Patronyme search performed', [
-                'filters' => $filters,
-                'results_count' => $patronymes->total(),
-                'response_time_ms' => $responseTime,
-                'user_id' => auth()->id()
-            ]);
-
-            return view('patronymes.index', compact(
-                'patronymes', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues'
-            ))->with($filters);
+            return view('patronymes.index', compact('patronymes'));
 
         } catch (\Exception $e) {
             Log::error('Error in PatronymeController@index', [
                 'error' => $e->getMessage(),
-                'filters' => $request->all(),
-                'response_time_ms' => round((microtime(true) - $startTime) * 1000, 3)
+                'search' => $request->input('search'),
+                'featured' => $request->input('featured')
             ]);
 
             return redirect()->back()->with('error', 'Une erreur est survenue lors de la recherche.');
+        }
+    }
+
+    /**
+     * Get search suggestions for autocomplete
+     */
+    public function suggestions(Request $request)
+    {
+        $query = $request->input('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        // Cache suggestions for better performance
+        $cacheKey = 'suggestions_' . md5($query);
+        $suggestions = Cache::remember($cacheKey, 180, function() use ($query) {
+            return Patronyme::select('nom', 'signification')
+                ->where('nom', 'like', $query . '%')
+                ->orderBy('nom')
+                ->limit(10)
+                ->get()
+                ->map(function($patronyme) {
+                    return [
+                        'value' => $patronyme->nom,
+                        'label' => $patronyme->nom,
+                        'description' => $patronyme->signification ? Str::limit($patronyme->signification, 50) : null,
+                        'type' => 'Patronyme'
+                    ];
+                });
+        });
+
+        return response()->json($suggestions);
+    }
+
+    /**
+     * Generate search variations for better matching
+     */
+    private function getSearchVariations($searchTerm)
+    {
+        $variations = [];
+        $searchTerm = strtolower(trim($searchTerm));
+
+        // Common character substitutions for Burkinabé names
+        $substitutions = [
+            'é' => ['e', 'è', 'ê'],
+            'è' => ['e', 'é', 'ê'],
+            'ê' => ['e', 'é', 'è'],
+            'ô' => ['o', 'ö'],
+            'ö' => ['o', 'ô'],
+            'ü' => ['u', 'ou'],
+            'ou' => ['u', 'ü'],
+            'c' => ['k', 'q'],
+            'k' => ['c', 'q'],
+            'q' => ['c', 'k'],
+        ];
+
+        // Generate variations
+        foreach ($substitutions as $original => $replacements) {
+            if (strpos($searchTerm, $original) !== false) {
+                foreach ($replacements as $replacement) {
+                    $variations[] = str_replace($original, $replacement, $searchTerm);
+                }
+            }
+        }
+
+        // Add common prefixes/suffixes for Burkinabé names
+        $commonPrefixes = ['ou', 'oua', 'wa'];
+        $commonSuffixes = ['ou', 'oua', 'wa', 'ga', 'ba'];
+
+        foreach ($commonPrefixes as $prefix) {
+            if (strpos($searchTerm, $prefix) !== 0) {
+                $variations[] = $prefix . $searchTerm;
+            }
+        }
+
+        foreach ($commonSuffixes as $suffix) {
+            if (substr($searchTerm, -strlen($suffix)) !== $suffix) {
+                $variations[] = $searchTerm . $suffix;
+            }
+        }
+
+        return array_unique($variations);
+    }
+
+    /**
+     * Log search queries for analytics and optimization
+     */
+    private function logSearch($searchTerm)
+    {
+        try {
+            // Only log if SearchLog model exists
+            if (class_exists('\App\Models\SearchLog')) {
+                \App\Models\SearchLog::create([
+                    'search_term' => $searchTerm,
+                    'user_id' => auth()->id(),
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'results_count' => 0,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to log search', ['error' => $e->getMessage()]);
         }
     }
 

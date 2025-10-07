@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('patronymes')->name('patronymes.')->group(function () {
     // Routes publiques
     Route::get('/', [PatronymeController::class, 'index'])->name('index');
+    Route::get('/suggestions', [PatronymeController::class, 'suggestions'])->name('suggestions');
 
     // Routes protégées (contribution) - DOIT être AVANT les routes avec paramètres
     Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])->group(function () {

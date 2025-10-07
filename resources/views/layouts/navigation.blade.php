@@ -26,7 +26,7 @@
                             <i class="fas fa-heart mr-2"></i>Favoris
                         </a>
 
-                        @if(Auth::user()->canContribute())
+                        @if(Auth::check() && Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-green-600 hover:text-green-700 hover:border-green-300 focus:outline-none focus:text-green-700 focus:border-green-300 transition duration-150 ease-in-out">
                                 <i class="fas fa-plus mr-2"></i>Ajouter
                             </a>
@@ -84,7 +84,7 @@
                                     <i class="fas fa-cog mr-2"></i>Paramètres
                                 </a>
 
-                        @if(Auth::user()->canContribute())
+                        @if(Auth::check() && Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-50">
                                 <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
                             </a>

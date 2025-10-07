@@ -75,7 +75,7 @@
                     <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1">
                         <i class="fas fa-list mr-2"></i>Voir tous les patronymes
                     </a>
-                    @if(Auth::user()->canContribute())
+                    @if(Auth::check() && Auth::user()->canContribute())
                         <a href="{{ route('patronymes.create') }}" class="btn btn-success flex-1">
                             <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
                         </a>
@@ -320,7 +320,7 @@
                 <a href="{{ route('patronymes.index') }}" class="btn btn-primary w-full justify-center">
                     <i class="fas fa-search mr-2"></i>Explorer les patronymes
                 </a>
-                @if(Auth::user()->canContribute())
+                @if(Auth::check() && Auth::user()->canContribute())
                     <a href="{{ route('patronymes.create') }}" class="btn btn-success w-full justify-center">
                         <i class="fas fa-plus mr-2"></i>Ajouter un patronyme
                     </a>

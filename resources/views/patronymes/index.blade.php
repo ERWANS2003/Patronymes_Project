@@ -2,13 +2,23 @@
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">
-                    <i class="fas fa-search text-blue-600 mr-2"></i>
-                    Répertoire des Patronymes
-                </h1>
-                <p class="text-gray-600 mt-1">
-                    Découvrez l'origine et la signification des noms de famille du Burkina Faso
-                </p>
+                @if(request('featured'))
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        Patronymes Populaires
+                    </h1>
+                    <p class="text-gray-600 mt-1">
+                        Découvrez les patronymes les plus consultés et les plus populaires
+                    </p>
+                @else
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-search text-blue-600 mr-2"></i>
+                        Répertoire des Patronymes
+                    </h1>
+                    <p class="text-gray-600 mt-1">
+                        Découvrez l'origine et la signification des noms de famille du Burkina Faso
+                    </p>
+                @endif
             </div>
             <div class="mt-4 sm:mt-0">
                 <span class="text-sm text-gray-500">
@@ -19,113 +29,38 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Advanced Search Component -->
-        <x-advanced-search />
-
-        <!-- Search and Filters -->
+        <!-- Simple Search -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
             <form method="GET" action="{{ route('patronymes.index') }}" class="space-y-6">
-                <!-- Search Input with Autocomplete -->
+                @if(request('featured'))
+                    <input type="hidden" name="featured" value="1">
+                @endif
+                <!-- Optimized Search Input with Suggestions -->
                 <div>
                     <label class="form-label">Recherche</label>
-                    <div class="relative" x-data="searchAutocomplete()">
+                    <div class="relative" id="search-container">
                         <input
                             type="text"
                             name="search"
-                            placeholder="Tapez un nom de patronyme... (ex: 'e' pour voir tous les patronymes commençant par 'e')"
+                            id="search-input"
+                            placeholder="Tapez un nom de patronyme... (ex: 'Traoré', 'Ouédraogo')"
                             class="form-input pl-10"
                             value="{{ request('search') }}"
-                            x-model="searchQuery"
-                            @input="getSuggestions($event.target.value)"
-                            @focus="showSuggestions = true"
-                            @blur="setTimeout(() => showSuggestions = false, 200)"
                             autocomplete="off"
                         >
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
 
-                        <!-- Suggestions Dropdown -->
-                        <div x-show="showSuggestions && suggestions.length > 0"
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-75"
-                             x-transition:leave-start="transform opacity-100 scale-100"
-                             x-transition:leave-end="transform opacity-0 scale-95"
-                             class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                            <template x-for="suggestion in suggestions" :key="suggestion.value">
-                                <div @click="selectSuggestion(suggestion)"
-                                     class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <div class="font-medium text-gray-900" x-text="suggestion.label"></div>
-                                            <div class="text-sm text-gray-500" x-text="suggestion.description" x-show="suggestion.description"></div>
-                                        </div>
-                                        <div class="text-xs text-gray-400" x-text="suggestion.type"></div>
-                                    </div>
-                                </div>
-                            </template>
+                        <!-- Loading indicator -->
+                        <div id="loading-indicator" class="absolute inset-y-0 right-0 pr-3 items-center hidden">
+                            <i class="fas fa-spinner fa-spin text-blue-500"></i>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Filters Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Region Filter -->
-                    <div>
-                        <label class="form-label">Région</label>
-                        <select name="region_id" class="form-select" id="region-select">
-                            <option value="">Toutes les régions</option>
-                            @foreach(\App\Models\Region::all() as $region)
-                                <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
-                                    {{ $region->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Province Filter -->
-                    <div>
-                        <label class="form-label">Province</label>
-                        <select name="province_id" class="form-select" id="province-select" {{ empty($provinceId) ? 'disabled' : '' }}>
-                            <option value="">Toutes les provinces</option>
-                            @if($provinceId)
-                                @foreach(\App\Models\Province::where('region_id', $provinceId)->get() as $province)
-                                    <option value="{{ $province->id }}" {{ request('province_id') == $province->id ? 'selected' : '' }}>
-                                        {{ $province->nom }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-
-                    <!-- Commune Filter -->
-                    <div>
-                        <label class="form-label">Commune</label>
-                        <select name="commune_id" class="form-select" id="commune-select" {{ empty($provinceId) ? 'disabled' : '' }}>
-                            <option value="">Toutes les communes</option>
-                            @if($provinceId)
-                                @foreach(\App\Models\Commune::where('province_id', $provinceId)->get() as $commune)
-                                    <option value="{{ $commune->id }}" {{ request('commune_id') == $commune->id ? 'selected' : '' }}>
-                                        {{ $commune->nom }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-
-                    <!-- Groupe Ethnique Filter -->
-                    <div>
-                        <label class="form-label">Groupe ethnique</label>
-                        <select name="groupe_ethnique_id" class="form-select">
-                            <option value="">Tous les groupes</option>
-                            @foreach(\App\Models\GroupeEthnique::all() as $groupe)
-                                <option value="{{ $groupe->id }}" {{ request('groupe_ethnique_id') == $groupe->id ? 'selected' : '' }}>
-                                    {{ $groupe->nom }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <!-- Suggestions Dropdown -->
+                        <div id="suggestions-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
+                            <!-- Suggestions will be populated here -->
+                        </div>
                     </div>
                 </div>
 
@@ -134,45 +69,21 @@
                     <button type="submit" class="btn btn-primary flex-1 sm:flex-none">
                         <i class="fas fa-search mr-2"></i>Rechercher
                     </button>
-                    <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1 sm:flex-none">
-                        <i class="fas fa-times mr-2"></i>Effacer
-                    </a>
+                    @if(request('featured'))
+                        <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1 sm:flex-none">
+                            <i class="fas fa-list mr-2"></i>Tous les patronymes
+                        </a>
+                    @else
+                        <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1 sm:flex-none">
+                            <i class="fas fa-times mr-2"></i>Effacer
+                        </a>
+                    @endif
                 </div>
             </form>
         </div>
 
         <!-- Results -->
         @if($patronymes->count() > 0)
-            <!-- Sort Options -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <span class="text-sm text-gray-600">Trier par:</span>
-                    <div class="flex space-x-2">
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'nom']) }}"
-                           class="px-3 py-1 text-sm rounded-lg {{ request('sort') == 'nom' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Nom
-                        </a>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'created_at']) }}"
-                           class="px-3 py-1 text-sm rounded-lg {{ request('sort') == 'created_at' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Plus récent
-                        </a>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'views_count']) }}"
-                           class="px-3 py-1 text-sm rounded-lg {{ request('sort') == 'views_count' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Plus populaire
-                        </a>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-600">Vue:</span>
-                    <button class="p-2 rounded-lg bg-blue-100 text-blue-700">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                    <button class="p-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            </div>
 
             <!-- Patronymes Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -180,23 +91,36 @@
                     <div class="card card-hover">
                         <div class="p-6">
                             <!-- Header -->
-                            <div class="flex items-start justify-between mb-4">
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-900 mb-1">
-                                        {{ $patronyme->nom }}
-                                    </h3>
-                                    @if($patronyme->groupeEthnique)
-                                        <span class="badge badge-primary">
-                                            {{ $patronyme->groupeEthnique->nom }}
-                                        </span>
-                                    @endif
+                            <div class="mb-4">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                            {{ $patronyme->nom }}
+                                        </h3>
+                                        @if($patronyme->groupeEthnique)
+                                            <span class="badge badge-primary">
+                                                {{ $patronyme->groupeEthnique->nom }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="ml-2 flex items-center space-x-2">
+                                        @if(request('featured') && ($patronyme->is_featured || $patronyme->views_count > 0))
+                                            <div class="flex items-center space-x-1">
+                                                <i class="fas fa-star text-yellow-500 text-sm"></i>
+                                                @if($patronyme->views_count > 0)
+                                                    <span class="text-xs text-gray-500">{{ $patronyme->views_count }} vues</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                        @auth
+                                            <button class="text-gray-400 hover:text-red-500 transition-colors favorite-btn"
+                                                    data-patronyme-id="{{ $patronyme->id }}"
+                                                    onclick="toggleFavorite({{ $patronyme->id }})">
+                                                <i class="fas fa-heart {{ $patronyme->isFavoritedBy(Auth::id()) ? 'text-red-500' : '' }}"></i>
+                                            </button>
+                                        @endauth
+                                    </div>
                                 </div>
-                                @auth
-                                    <button class="text-gray-400 hover:text-red-500 transition-colors"
-                                            onclick="toggleFavorite({{ $patronyme->id }})">
-                                        <i class="fas fa-heart {{ $patronyme->isFavoritedBy(Auth::id()) ? 'text-red-500' : '' }}"></i>
-                                    </button>
-                                @endauth
                             </div>
 
                             <!-- Content -->
@@ -223,20 +147,10 @@
                                 @endif
                             </div>
 
-                            <!-- Stats -->
-                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                    <span class="flex items-center">
-                                        <i class="fas fa-eye mr-1"></i>
-                                        {{ $patronyme->views_count }}
-                                    </span>
-                                    <span class="flex items-center">
-                                        <i class="fas fa-heart mr-1"></i>
-                                        {{ $patronyme->favorites()->count() }}
-                                    </span>
-                                </div>
+                            <!-- Action Button -->
+                            <div class="mt-4 pt-4 border-t border-gray-100">
                                 <a href="{{ route('patronymes.show', $patronyme) }}"
-                                   class="btn btn-primary text-sm px-4 py-2">
+                                   class="btn btn-primary text-sm px-4 py-2 w-full text-center">
                                     Voir plus
                                 </a>
                             </div>
@@ -271,68 +185,172 @@
         @endif
     </div>
 
-    <!-- JavaScript for dynamic filters -->
+    <!-- Optimized JavaScript for fluid search -->
     <script>
+        console.log('Search script loading...');
+
         document.addEventListener('DOMContentLoaded', function() {
-            const regionSelect = document.getElementById('region-select');
-            const provinceSelect = document.getElementById('province-select');
-            const communeSelect = document.getElementById('commune-select');
+            console.log('DOM loaded, initializing search...');
 
-            // Region change handler
-            regionSelect.addEventListener('change', function() {
-                const regionId = this.value;
+            const searchInput = document.getElementById('search-input');
+            const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            let debounceTimer = null;
 
-                // Reset province and commune
-                provinceSelect.innerHTML = '<option value="">Toutes les provinces</option>';
-                communeSelect.innerHTML = '<option value="">Toutes les communes</option>';
-                provinceSelect.disabled = !regionId;
-                communeSelect.disabled = true;
+            if (!searchInput) {
+                console.error('Search input not found!');
+                return;
+            }
 
-                if (regionId) {
-                    // Fetch provinces for selected region
-                    fetch(`/api/regions/${regionId}/provinces`)
-                        .then(response => response.json())
-                        .then(provinces => {
-                            provinces.forEach(province => {
-                                const option = document.createElement('option');
-                                option.value = province.id;
-                                option.textContent = province.nom;
-                                provinceSelect.appendChild(option);
-                            });
-                            provinceSelect.disabled = false;
+            console.log('Search elements found:', {
+                searchInput: !!searchInput,
+                suggestionsDropdown: !!suggestionsDropdown,
+                loadingIndicator: !!loadingIndicator
+            });
+
+            // Show/hide suggestions
+            function showSuggestions() {
+                if (suggestionsDropdown) {
+                    suggestionsDropdown.classList.remove('hidden');
+                    console.log('Showing suggestions');
+                }
+            }
+
+            function hideSuggestions() {
+                if (suggestionsDropdown) {
+                    suggestionsDropdown.classList.add('hidden');
+                    console.log('Hiding suggestions');
+                }
+            }
+
+            // Show/hide loading indicator
+            function showLoading() {
+                if (loadingIndicator) {
+                    loadingIndicator.classList.remove('hidden');
+                    console.log('Showing loading');
+                }
+            }
+
+            function hideLoading() {
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                    console.log('Hiding loading');
+                }
+            }
+
+            // Get suggestions from server
+            function getSuggestions(query) {
+                console.log('Getting suggestions for:', query);
+
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                showLoading();
+
+                // Debounce the request
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    console.log('Making request to:', '{{ route('patronymes.suggestions') }}?q=' + encodeURIComponent(query));
+
+                    fetch('{{ route('patronymes.suggestions') }}?q=' + encodeURIComponent(query))
+                        .then(response => {
+                            console.log('Response status:', response.status);
+                            return response.json();
                         })
-                        .catch(error => console.error('Error:', error));
+                        .then(data => {
+                            console.log('Suggestions received:', data);
+                            displaySuggestions(data);
+                            hideLoading();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching suggestions:', error);
+                            hideSuggestions();
+                            hideLoading();
+                        });
+                }, 300);
+            }
+
+            // Display suggestions in dropdown
+            function displaySuggestions(suggestions) {
+                console.log('Displaying suggestions:', suggestions);
+
+                if (!suggestions || suggestions.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                const html = suggestions.map(suggestion => `
+                    <div class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 suggestion-item"
+                         data-value="${suggestion.value}">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-gray-900">${suggestion.label}</div>
+                                ${suggestion.description ? `<div class="text-sm text-gray-500">${suggestion.description}</div>` : ''}
+                            </div>
+                            <div class="text-xs text-blue-500 font-medium">${suggestion.type}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                if (suggestionsDropdown) {
+                    suggestionsDropdown.innerHTML = html;
+                    showSuggestions();
+
+                    // Add click listeners to suggestions
+                    suggestionsDropdown.querySelectorAll('.suggestion-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const value = this.getAttribute('data-value');
+                            console.log('Suggestion clicked:', value);
+                            searchInput.value = value;
+                            hideSuggestions();
+
+                            // Auto-submit the form
+                            const form = document.querySelector('form');
+                            if (form) {
+                                console.log('Submitting form...');
+                                form.submit();
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Event listeners
+            searchInput.addEventListener('input', function() {
+                console.log('Input event:', this.value);
+                getSuggestions(this.value);
+            });
+
+            searchInput.addEventListener('focus', function() {
+                console.log('Focus event');
+                if (suggestionsDropdown && suggestionsDropdown.innerHTML.trim() !== '') {
+                    showSuggestions();
                 }
             });
 
-            // Province change handler
-            provinceSelect.addEventListener('change', function() {
-                const provinceId = this.value;
-
-                // Reset commune
-                communeSelect.innerHTML = '<option value="">Toutes les communes</option>';
-                communeSelect.disabled = !provinceId;
-
-                if (provinceId) {
-                    // Fetch communes for selected province
-                    fetch(`/api/provinces/${provinceId}/communes`)
-                        .then(response => response.json())
-                        .then(communes => {
-                            communes.forEach(commune => {
-                                const option = document.createElement('option');
-                                option.value = commune.id;
-                                option.textContent = commune.nom;
-                                communeSelect.appendChild(option);
-                            });
-                            communeSelect.disabled = false;
-                        })
-                        .catch(error => console.error('Error:', error));
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#search-container')) {
+                    hideSuggestions();
                 }
             });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
+
+            console.log('Search functionality initialized successfully');
         });
 
         // Toggle favorite function
         function toggleFavorite(patronymeId) {
+            console.log('Toggling favorite for patronyme:', patronymeId);
+
             fetch(`/patronymes/${patronymeId}/favorite`, {
                 method: 'POST',
                 headers: {
@@ -340,63 +358,31 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Favorite response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Favorite response data:', data);
+
                 // Update heart icon
-                const heartIcon = document.querySelector(`button[onclick="toggleFavorite(${patronymeId})"] i`);
-                if (data.isFavorited) {
-                    heartIcon.classList.add('text-red-500');
-                    heartIcon.classList.remove('far');
-                    heartIcon.classList.add('fas');
-                } else {
-                    heartIcon.classList.remove('text-red-500');
-                    heartIcon.classList.remove('fas');
-                    heartIcon.classList.add('far');
+                const heartIcon = document.querySelector(`button[data-patronyme-id="${patronymeId}"] i`);
+                if (heartIcon) {
+                    if (data.isFavorited) {
+                        heartIcon.classList.add('text-red-500');
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas');
+                    } else {
+                        heartIcon.classList.remove('text-red-500');
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                    }
                 }
             })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Search Autocomplete Function
-        function searchAutocomplete() {
-            return {
-                searchQuery: '{{ request('search') }}',
-                suggestions: [],
-                showSuggestions: false,
-                debounceTimer: null,
-
-                getSuggestions(query) {
-                    if (query.length < 2) {
-                        this.suggestions = [];
-                        return;
-                    }
-
-                    // Debounce the request
-                    clearTimeout(this.debounceTimer);
-                    this.debounceTimer = setTimeout(() => {
-                        fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                this.suggestions = data;
-                            })
-                            .catch(error => {
-                                console.error('Error fetching suggestions:', error);
-                                this.suggestions = [];
-                            });
-                    }, 300);
-                },
-
-                selectSuggestion(suggestion) {
-                    this.searchQuery = suggestion.value;
-                    this.showSuggestions = false;
-
-                    // Update the form input
-                    const searchInput = document.querySelector('input[name="search"]');
-                    if (searchInput) {
-                        searchInput.value = suggestion.value;
-                    }
-                }
-            }
+            .catch(error => {
+                console.error('Error toggling favorite:', error);
+                alert('Erreur lors de l\'ajout aux favoris. Veuillez réessayer.');
+            });
         }
     </script>
 </x-app-layout>

@@ -6,7 +6,7 @@
                     <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>
                     @if(Auth::user()->role === 'admin')
                         Tableau de bord Administrateur
-                    @elseif(Auth::user()->canContribute())
+                    @elseif(Auth::check() && Auth::user()->canContribute())
                         Tableau de bord Contributeur
                     @else
                         Tableau de bord Utilisateur
@@ -16,7 +16,7 @@
                     Bienvenue, {{ Auth::user()->name }} !
                     @if(Auth::user()->role === 'admin')
                         Voici l'aperçu complet du système.
-                    @elseif(Auth::user()->canContribute())
+                    @elseif(Auth::check() && Auth::user()->canContribute())
                         Voici vos contributions et l'aperçu de votre activité.
                     @else
                         Voici un aperçu de votre activité.
@@ -27,12 +27,12 @@
                 <div class="flex items-center space-x-4">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                         @if(Auth::user()->role === 'admin') bg-red-100 text-red-800
-                        @elseif(Auth::user()->canContribute()) bg-green-100 text-green-800
+                        @elseif(Auth::check() && Auth::user()->canContribute()) bg-green-100 text-green-800
                         @else bg-blue-100 text-blue-800
                         @endif">
                         @if(Auth::user()->role === 'admin')
                             <i class="fas fa-crown mr-1"></i>Administrateur
-                        @elseif(Auth::user()->canContribute())
+                        @elseif(Auth::check() && Auth::user()->canContribute())
                             <i class="fas fa-edit mr-1"></i>Contributeur
                         @else
                             <i class="fas fa-user mr-1"></i>Utilisateur
@@ -125,7 +125,7 @@
                     </a>
                 </div>
             </div>
-        @elseif(Auth::user()->canContribute())
+                        @elseif(Auth::check() && Auth::user()->canContribute())
             <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
                 <h3 class="text-lg font-semibold text-green-800 mb-4">
                     <i class="fas fa-edit mr-2"></i>Actions Contributeur
