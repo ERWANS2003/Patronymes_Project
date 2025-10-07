@@ -9,7 +9,7 @@ class Region extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code'];
+    protected $fillable = ['nom', 'code'];
 
     public function provinces()
     {

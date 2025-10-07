@@ -69,6 +69,9 @@
                     <button type="submit" class="btn btn-primary flex-1 sm:flex-none">
                         <i class="fas fa-search mr-2"></i>Rechercher
                     </button>
+                    <a href="{{ route('patronymes.search.advanced') }}" class="btn btn-outline flex-1 sm:flex-none">
+                        <i class="fas fa-search-plus mr-2"></i>Recherche avancée
+                    </a>
                     @if(request('featured'))
                         <a href="{{ route('patronymes.index') }}" class="btn btn-secondary flex-1 sm:flex-none">
                             <i class="fas fa-list mr-2"></i>Tous les patronymes
@@ -80,6 +83,11 @@
                     @endif
                 </div>
             </form>
+        </div>
+
+        <!-- Real-time Search Results -->
+        <div id="real-time-results" class="hidden">
+            <!-- Real-time search results will be displayed here -->
         </div>
 
         <!-- Results -->
@@ -196,6 +204,7 @@
             const suggestionsDropdown = document.getElementById('suggestions-dropdown');
             const loadingIndicator = document.getElementById('loading-indicator');
             let debounceTimer = null;
+            let realTimeDebounceTimer = null;
 
             if (!searchInput) {
                 console.error('Search input not found!');
@@ -254,7 +263,7 @@
                 debounceTimer = setTimeout(() => {
                     console.log('Making request to:', '{{ route('patronymes.suggestions') }}?q=' + encodeURIComponent(query));
 
-                    fetch('{{ route('patronymes.suggestions') }}?q=' + encodeURIComponent(query))
+                    fetch('/search/suggestions?q=' + encodeURIComponent(query) + '&limit=8')
                         .then(response => {
                             console.log('Response status:', response.status);
                             return response.json();
@@ -270,6 +279,71 @@
                             hideLoading();
                         });
                 }, 300);
+            }
+
+            // Real-time search results
+            function performRealTimeSearch(query) {
+                console.log('Performing real-time search for:', query);
+
+                if (query.length < 2) {
+                    hideRealTimeResults();
+                    return;
+                }
+
+                showRealTimeLoading();
+
+                // Debounce the request
+                clearTimeout(realTimeDebounceTimer);
+                realTimeDebounceTimer = setTimeout(() => {
+                    // Normalize search query for better matching
+                    const normalizedQuery = normalizeSearchQuery(query);
+
+                    fetch('/patronymes?search=' + encodeURIComponent(normalizedQuery) + '&ajax=1', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            console.log('Real-time search response status:', response.status);
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Real-time search results:', data);
+                            displayRealTimeResults(data);
+                            hideRealTimeLoading();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching real-time results:', error);
+                            hideRealTimeResults();
+                            hideRealTimeLoading();
+                        });
+                }, 500);
+            }
+
+            // Normalize search query for better matching
+            function normalizeSearchQuery(query) {
+                // Common accent mappings for patronymes
+                const accentMap = {
+                    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+                    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+                    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+                    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+                    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+                    'ý': 'y', 'ÿ': 'y',
+                    'ñ': 'n',
+                    'ç': 'c'
+                };
+
+                let normalized = query.toLowerCase();
+
+                // Replace accents
+                for (const [accented, normal] of Object.entries(accentMap)) {
+                    normalized = normalized.replace(new RegExp(accented, 'g'), normal);
+                }
+
+                console.log('Normalized query:', query, '->', normalized);
+                return normalized;
             }
 
             // Display suggestions in dropdown
@@ -317,10 +391,94 @@
                 }
             }
 
+            // Real-time search functions
+            function showRealTimeLoading() {
+                const realTimeContainer = document.getElementById('real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Recherche en cours...</div>';
+                    realTimeContainer.classList.remove('hidden');
+                }
+            }
+
+            function hideRealTimeLoading() {
+                // Loading will be replaced by results
+            }
+
+            function hideRealTimeResults() {
+                const realTimeContainer = document.getElementById('real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.classList.add('hidden');
+                }
+            }
+
+            function displayRealTimeResults(data) {
+                const realTimeContainer = document.getElementById('real-time-results');
+                if (!realTimeContainer) {
+                    console.error('Real-time results container not found');
+                    return;
+                }
+
+                if (!data.patronymes || data.patronymes.length === 0) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-search text-4xl mb-4"></i><p>Aucun patronyme trouvé pour cette recherche.</p></div>';
+                    realTimeContainer.classList.remove('hidden');
+                    return;
+                }
+
+                // Create HTML for real-time results
+                const html = `
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            Résultats en temps réel (${data.patronymes.length} trouvé${data.patronymes.length > 1 ? 's' : ''})
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${data.patronymes.map(patronyme => `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h4 class="font-semibold text-lg text-gray-900">${patronyme.nom}</h4>
+                                        <button onclick="toggleFavorite(${patronyme.id})"
+                                                class="text-gray-400 hover:text-red-500 transition-colors"
+                                                data-patronyme-id="${patronyme.id}">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    ${patronyme.signification ? `<p class="text-gray-600 text-sm mb-2">${patronyme.signification}</p>` : ''}
+                                    ${patronyme.region ? `<p class="text-blue-600 text-xs"><i class="fas fa-map-marker-alt mr-1"></i>${patronyme.region.nom}</p>` : ''}
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-eye mr-1"></i>${patronyme.views_count || 0} vues
+                                        </span>
+                                        <a href="/patronymes/${patronyme.id}"
+                                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            Voir détails <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="hideRealTimeResults()"
+                                    class="text-gray-500 hover:text-gray-700 text-sm">
+                                <i class="fas fa-times mr-1"></i>Masquer les résultats en temps réel
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                realTimeContainer.innerHTML = html;
+                realTimeContainer.classList.remove('hidden');
+            }
+
             // Event listeners
             searchInput.addEventListener('input', function() {
                 console.log('Input event:', this.value);
-                getSuggestions(this.value);
+                const query = this.value.trim();
+
+                // Show suggestions for autocomplete
+                getSuggestions(query);
+
+                // Show real-time results
+                performRealTimeSearch(query);
             });
 
             searchInput.addEventListener('focus', function() {

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Services\SearchService;
 use App\Services\StatisticsService;
+use App\Services\AdvancedSearchService;
 use App\Http\Requests\StorePatronymeRequest;
 use App\Http\Requests\UpdatePatronymeRequest;
 
@@ -21,11 +22,13 @@ class PatronymeController extends Controller
 {
     protected $searchService;
     protected $statisticsService;
+    protected $advancedSearchService;
 
-    public function __construct(SearchService $searchService, StatisticsService $statisticsService)
+    public function __construct(SearchService $searchService, StatisticsService $statisticsService, AdvancedSearchService $advancedSearchService)
     {
         $this->searchService = $searchService;
         $this->statisticsService = $statisticsService;
+        $this->advancedSearchService = $advancedSearchService;
     }
     public function index(Request $request)
     {
@@ -44,20 +47,11 @@ class PatronymeController extends Controller
                     // Enhanced search with fuzzy matching and variations
                     $searchVariations = $this->getSearchVariations($search);
 
-                    $query->where(function($q) use ($search, $searchVariations) {
-                        // Exact match (highest priority)
-                        $q->where('nom', 'like', $search . '%')
-                          ->orWhere('nom', 'like', '%' . $search . '%');
-
-                        // Search in signification and origine
-                        $q->orWhere('signification', 'like', '%' . $search . '%')
-                          ->orWhere('origine', 'like', '%' . $search . '%');
-
-                        // Search variations for better matching
-                        foreach ($searchVariations as $variation) {
-                            $q->orWhere('nom', 'like', '%' . $variation . '%')
-                              ->orWhere('signification', 'like', '%' . $variation . '%');
-                        }
+                    $query->where(function($q) use ($search) {
+                        // Search in multiple fields with case insensitive matching
+                        $q->where('nom', 'ilike', '%' . $search . '%')
+                          ->orWhere('signification', 'ilike', '%' . $search . '%')
+                          ->orWhere('origine', 'ilike', '%' . $search . '%');
                     });
 
                     // Log search for analytics
@@ -74,8 +68,21 @@ class PatronymeController extends Controller
                     $query->orderBy('nom');
                 }
 
-                return $query->paginate(12);
+                return $query->with(['region', 'province', 'commune', 'groupeEthnique', 'langue'])->paginate(12);
             });
+
+            // Check if this is an AJAX request for real-time search
+            if (request()->ajax() && request()->has('ajax')) {
+                return response()->json([
+                    'patronymes' => $patronymes->items(),
+                    'total' => $patronymes->total(),
+                    'current_page' => $patronymes->currentPage(),
+                    'last_page' => $patronymes->lastPage(),
+                    'per_page' => $patronymes->perPage(),
+                    'from' => $patronymes->firstItem(),
+                    'to' => $patronymes->lastItem(),
+                ]);
+            }
 
             return view('patronymes.index', compact('patronymes'));
 
@@ -104,8 +111,9 @@ class PatronymeController extends Controller
         // Cache suggestions for better performance
         $cacheKey = 'suggestions_' . md5($query);
         $suggestions = Cache::remember($cacheKey, 180, function() use ($query) {
-            return Patronyme::select('nom', 'signification')
-                ->where('nom', 'like', $query . '%')
+            return Patronyme::select('nom', 'signification', 'views_count')
+                ->whereRaw('LOWER(nom) LIKE ?', [strtolower($query) . '%'])
+                ->orderBy('views_count', 'desc')
                 ->orderBy('nom')
                 ->limit(10)
                 ->get()
@@ -114,7 +122,8 @@ class PatronymeController extends Controller
                         'value' => $patronyme->nom,
                         'label' => $patronyme->nom,
                         'description' => $patronyme->signification ? Str::limit($patronyme->signification, 50) : null,
-                        'type' => 'Patronyme'
+                        'type' => 'Patronyme',
+                        'popularity' => $patronyme->views_count
                     ];
                 });
         });
@@ -358,11 +367,11 @@ class PatronymeController extends Controller
 
     public function create()
     {
-        $regions = Region::orderBy('name')->get();
+        $regions = Region::orderBy('nom')->get();
         $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
         $ethnies = \App\Models\Ethnie::orderBy('nom')->get();
         $langues = \App\Models\Langue::orderBy('nom')->get();
-        $modesTransmission = \App\Models\ModeTransmission::orderBy('nom')->get();
+        $modesTransmission = \App\Models\ModeTransmission::orderBy('type')->get();
 
         return view('patronymes.create', compact('regions', 'groupesEthniques', 'ethnies', 'langues', 'modesTransmission'));
     }
@@ -395,7 +404,7 @@ class PatronymeController extends Controller
 
     public function edit(Patronyme $patronyme)
     {
-        $regions = Region::orderBy('name')->get();
+        $regions = Region::orderBy('nom')->get();
         $provinces = $patronyme->region_id
             ? Province::where('region_id', $patronyme->region_id)->orderBy('nom')->get()
             : collect();
@@ -405,7 +414,7 @@ class PatronymeController extends Controller
         $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
         $ethnies = \App\Models\Ethnie::orderBy('nom')->get();
         $langues = \App\Models\Langue::orderBy('nom')->get();
-        $modesTransmission = \App\Models\ModeTransmission::orderBy('nom')->get();
+        $modesTransmission = \App\Models\ModeTransmission::orderBy('type')->get();
 
         return view('patronymes.edit', compact('patronyme', 'regions', 'provinces', 'communes', 'groupesEthniques', 'ethnies', 'langues', 'modesTransmission'));
     }
@@ -516,7 +525,7 @@ class PatronymeController extends Controller
                             $patronyme->origine,
                             $patronyme->histoire,
                             $patronyme->totem,
-                            $patronyme->region ? $patronyme->region->name : '',
+                            $patronyme->region ? $patronyme->region->nom : '',
                             $patronyme->province ? $patronyme->province->nom : '',
                             $patronyme->commune ? $patronyme->commune->nom : '',
                             $patronyme->groupeEthnique ? $patronyme->groupeEthnique->nom : '',
@@ -539,5 +548,16 @@ class PatronymeController extends Controller
                 return response()->json($patronymes)
                                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
         }
+    }
+
+    /**
+     * Remove accents from a string
+     */
+    private function removeAccents(string $string): string
+    {
+        $accents = ['à', 'á', 'â', 'ã', 'ä', 'å', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ò', 'ó', 'ô', 'õ', 'ö', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'ñ', 'ç'];
+        $noAccents = ['a', 'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'n', 'c'];
+
+        return str_replace($accents, $noAccents, strtolower($string));
     }
 }

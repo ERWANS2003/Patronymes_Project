@@ -91,7 +91,7 @@
                         <a href="{{ route('admin.users.index') }}" class="btn btn-primary w-full justify-start">
                             <i class="fas fa-list mr-2"></i>Liste des utilisateurs
                         </a>
-                        <a href="{{ route('admin.roles') }}" class="btn btn-secondary w-full justify-start">
+                        <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary w-full justify-start">
                             <i class="fas fa-user-shield mr-2"></i>Gestion des rôles
                         </a>
                     </div>
@@ -106,10 +106,10 @@
                         Gestion du contenu
                     </h3>
                     <div class="space-y-3">
-                        <a href="{{ route('admin.import') }}" class="btn btn-primary w-full justify-start">
+                        <a href="{{ route('admin.data.import') }}" class="btn btn-primary w-full justify-start">
                             <i class="fas fa-upload mr-2"></i>Importer des données
                         </a>
-                        <a href="{{ route('admin.export') }}" class="btn btn-secondary w-full justify-start">
+                        <a href="{{ route('admin.data.export') }}" class="btn btn-secondary w-full justify-start">
                             <i class="fas fa-download mr-2"></i>Exporter des données
                         </a>
                     </div>
@@ -127,30 +127,10 @@
                         <a href="{{ route('admin.statistics') }}" class="btn btn-primary w-full justify-start">
                             <i class="fas fa-chart-line mr-2"></i>Voir les statistiques
                         </a>
-                        <a href="{{ route('admin.monitoring.dashboard') }}" class="btn btn-secondary w-full justify-start">
-                            <i class="fas fa-monitor mr-2"></i>Monitoring
-                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- System -->
-            <div class="card">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-cogs text-orange-600 mr-2"></i>
-                        Système
-                    </h3>
-                    <div class="space-y-3">
-                        <a href="{{ route('admin.health.check') }}" class="btn btn-primary w-full justify-start">
-                            <i class="fas fa-heartbeat mr-2"></i>Santé du système
-                        </a>
-                        <a href="{{ route('admin.metrics') }}" class="btn btn-secondary w-full justify-start">
-                            <i class="fas fa-tachometer-alt mr-2"></i>Métriques
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Recent Activity -->

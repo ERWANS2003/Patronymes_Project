@@ -21,10 +21,10 @@ class StatisticsController extends Controller
             'total_favorites' => DB::table('favorites')->count(),
             'most_viewed' => Patronyme::orderBy('views_count', 'desc')->limit(5)->get(),
             'recent_patronymes' => Patronyme::with(['region', 'province', 'commune'])->latest()->limit(5)->get(),
-            'patronymes_by_region' => Patronyme::select('regions.name', DB::raw('count(*) as count'))
+            'patronymes_by_region' => Patronyme::select('regions.nom', DB::raw('count(*) as count'))
                 ->leftJoin('regions', 'patronymes.region_id', '=', 'regions.id')
                 ->whereNotNull('patronymes.region_id')
-                ->groupBy('regions.id', 'regions.name')
+                ->groupBy('regions.id', 'regions.nom')
                 ->orderBy('count', 'desc')
                 ->get(),
             'patronymes_by_ethnic_group' => Patronyme::select('groupe_ethniques.nom', DB::raw('count(*) as count'))
@@ -54,10 +54,10 @@ class StatisticsController extends Controller
             'total_users' => User::count(),
             'total_favorites' => DB::table('favorites')->count(),
             'most_viewed' => Patronyme::orderBy('views_count', 'desc')->limit(10)->get(['nom', 'views_count']),
-            'patronymes_by_region' => Patronyme::select('regions.name', DB::raw('count(*) as count'))
+            'patronymes_by_region' => Patronyme::select('regions.nom', DB::raw('count(*) as count'))
                 ->leftJoin('regions', 'patronymes.region_id', '=', 'regions.id')
                 ->whereNotNull('patronymes.region_id')
-                ->groupBy('regions.id', 'regions.name')
+                ->groupBy('regions.id', 'regions.nom')
                 ->orderBy('count', 'desc')
                 ->get(),
         ];

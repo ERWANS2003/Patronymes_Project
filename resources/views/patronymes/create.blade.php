@@ -247,11 +247,27 @@
                                 <!-- Question 8 -->
                                 <div>
                                     <label for="patronyme_sexe" class="block text-sm font-medium text-gray-700">8. Les hommes et les femmes ont-ils le même patronyme ? Sinon quels sont-ils ?</label>
-                                    <textarea name="patronyme_sexe" id="patronyme_sexe" rows="3"
-                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('patronyme_sexe') }}</textarea>
+                                    <select name="patronyme_sexe" id="patronyme_sexe"
+                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">Sélectionner une réponse</option>
+                                        <option value="oui" {{ old('patronyme_sexe') == 'oui' ? 'selected' : '' }}>Oui, même patronyme</option>
+                                        <option value="non" {{ old('patronyme_sexe') == 'non' ? 'selected' : '' }}>Non, patronymes différents</option>
+                                        <option value="autre" {{ old('patronyme_sexe') == 'autre' ? 'selected' : '' }}>Autre à préciser</option>
+                                    </select>
                                     @error('patronyme_sexe')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
+
+                                    <!-- Zone de texte pour "Autre à préciser" -->
+                                    <div id="patronyme_sexe_precision" style="display: {{ old('patronyme_sexe') == 'autre' ? 'block' : 'none' }};" class="mt-3">
+                                        <label for="patronyme_sexe_detail" class="block text-sm font-medium text-gray-700">Précisez votre réponse :</label>
+                                        <textarea name="patronyme_sexe_detail" id="patronyme_sexe_detail" rows="3"
+                                            placeholder="Expliquez la situation particulière..."
+                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('patronyme_sexe_detail') }}</textarea>
+                                        @error('patronyme_sexe_detail')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <!-- Question 9 -->
@@ -302,7 +318,7 @@
                                             <option value="">Sélectionnez une région</option>
                                             @foreach($regions as $region)
                                                 <option value="{{ $region->id }}" {{ old('region_id') == $region->id ? 'selected' : '' }}>
-                                                    {{ $region->name }}
+                                                    {{ $region->nom }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -360,12 +376,21 @@
             provinceSelect && (provinceSelect.innerHTML = '<option value="">Sélectionnez une province</option>');
             communeSelect && (communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>');
             if (!regionId) return;
+            
+            console.log('Chargement des provinces pour la région:', regionId);
             fetch(`/get-provinces?region_id=${regionId}`)
-                .then(res => res.json())
+                .then(res => {
+                    console.log('Réponse provinces:', res.status);
+                    return res.json();
+                })
                 .then(data => {
+                    console.log('Données provinces reçues:', data);
                     data.forEach(province => {
                         provinceSelect.innerHTML += `<option value="${province.id}">${province.nom}</option>`;
                     });
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des provinces:', error);
                 });
         });
 
@@ -373,13 +398,34 @@
             const provinceId = this.value;
             communeSelect && (communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>');
             if (!provinceId) return;
+            
+            console.log('Chargement des communes pour la province:', provinceId);
             fetch(`/get-communes?province_id=${provinceId}`)
-                .then(res => res.json())
+                .then(res => {
+                    console.log('Réponse communes:', res.status);
+                    return res.json();
+                })
                 .then(data => {
+                    console.log('Données communes reçues:', data);
                     data.forEach(commune => {
                         communeSelect.innerHTML += `<option value="${commune.id}">${commune.nom}</option>`;
                     });
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des communes:', error);
                 });
+        });
+
+        // Gestion de l'affichage de la zone de texte pour "Autre à préciser"
+        const patronymeSexeSelect = document.querySelector('select[name="patronyme_sexe"]');
+        const patronymeSexePrecision = document.getElementById('patronyme_sexe_precision');
+
+        patronymeSexeSelect?.addEventListener('change', function () {
+            if (this.value === 'autre') {
+                patronymeSexePrecision.style.display = 'block';
+            } else {
+                patronymeSexePrecision.style.display = 'none';
+            }
         });
     });
     </script>

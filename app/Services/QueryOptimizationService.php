@@ -145,13 +145,13 @@ class QueryOptimizationService
             ->leftJoin('patronymes', 'regions.id', '=', 'patronymes.region_id')
             ->select([
                 'regions.id',
-                'regions.name',
+                'regions.nom',
                 'regions.code',
                 DB::raw('COUNT(patronymes.id) as patronymes_count'),
                 DB::raw('SUM(patronymes.views_count) as total_views'),
                 DB::raw('AVG(patronymes.views_count) as avg_views')
             ])
-            ->groupBy('regions.id', 'regions.name', 'regions.code')
+            ->groupBy('regions.id', 'regions.nom', 'regions.code')
             ->orderBy('patronymes_count', 'desc')
             ->get();
     }
@@ -189,7 +189,7 @@ class QueryOptimizationService
                 'patronymes.nom',
                 'patronymes.signification',
                 'patronymes.views_count',
-                'regions.name as region_name',
+                'regions.nom as region_name',
                 'groupe_ethniques.nom as groupe_name',
                 'favorites.created_at as favorited_at'
             ])

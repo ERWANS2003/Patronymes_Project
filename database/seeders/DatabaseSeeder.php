@@ -12,19 +12,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // Données géographiques réelles du Burkina Faso
-            RegionProvinceCommuneSeeder::class,
-            ProvinceSeeder::class,
-            CommuneSeeder::class,
-            DepartementSeeder::class,
-            
-            // Données de référence (ethnies, langues, modes de transmission)
-            EthnieSeeder::class,
-            GroupeEthniqueEthnieSeeder::class,
-            LangueModeTransmissionSeeder::class,
-            
-            // Compte administrateur uniquement
-            RoleSeeder::class,
+            // Données administratives du Burkina Faso
+            BurkinaFasoDataSeeder::class,
+            // Données de base pour les patronymes
+            PatronymesSeeder::class,
+            // Patronymes réels du Burkina Faso
+            RealPatronymesSeeder::class,
+            // Utilisateurs de test
+            UsersSeeder::class,
         ]);
     }
 }

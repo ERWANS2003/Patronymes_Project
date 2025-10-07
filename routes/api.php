@@ -91,3 +91,13 @@ require __DIR__.'/api-simple.php';
 
 // Inclure l'API mobile
 require __DIR__.'/mobile.php';
+
+// Routes de synchronisation pour mobile
+Route::prefix('sync')->name('sync.')->middleware('auth:sanctum')->group(function () {
+    Route::post('/patronymes', [\App\Http\Controllers\Api\SyncController::class, 'syncPatronymes'])->name('patronymes');
+    Route::get('/patronymes', [\App\Http\Controllers\Api\SyncController::class, 'getUpdatedPatronymes'])->name('patronymes.get');
+    Route::post('/favorites', [\App\Http\Controllers\Api\SyncController::class, 'syncFavorites'])->name('favorites');
+    Route::get('/last-sync', [\App\Http\Controllers\Api\SyncController::class, 'getLastSyncTimestamp'])->name('last-sync');
+    Route::post('/resolve-conflict', [\App\Http\Controllers\Api\SyncController::class, 'resolveConflict'])->name('resolve-conflict');
+    Route::get('/health', [\App\Http\Controllers\Api\SyncController::class, 'health'])->name('health');
+});

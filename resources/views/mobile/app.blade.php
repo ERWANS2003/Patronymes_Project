@@ -203,6 +203,11 @@
                 <p class="text-gray-600">Chargement...</p>
             </div>
 
+            <!-- Real-time Search Results -->
+            <div id="mobile-real-time-results" class="hidden">
+                <!-- Real-time search results will be displayed here -->
+            </div>
+
             <!-- Search Results -->
             <div id="search-results" class="hidden">
                 <div class="flex items-center justify-between mb-4">
@@ -396,9 +401,15 @@
             }
 
             async handleSearch(query) {
-                if (query.length < 2) return;
+                if (query.length < 2) {
+                    this.hideRealTimeResults();
+                    return;
+                }
 
                 this.searchQuery = query;
+
+                // Also perform real-time search
+                this.performRealTimeSearch(query);
 
                 try {
                     const response = await fetch(`/api/mobile/patronymes/search?q=${encodeURIComponent(query)}`);
@@ -494,6 +505,134 @@
             showAddPatronyme() {
                 // Rediriger vers la page d'ajout
                 window.location.href = '/patronymes/create';
+            }
+
+            // Real-time search functionality
+            performRealTimeSearch(query) {
+                console.log('Performing real-time search for:', query);
+
+                if (query.length < 2) {
+                    this.hideRealTimeResults();
+                    return;
+                }
+
+                this.showRealTimeLoading();
+
+                // Debounce the request
+                clearTimeout(this.realTimeDebounceTimer);
+                this.realTimeDebounceTimer = setTimeout(() => {
+                    const normalizedQuery = this.normalizeSearchQuery(query);
+
+                    fetch('/patronymes?search=' + encodeURIComponent(normalizedQuery) + '&ajax=1', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.displayRealTimeResults(data);
+                            this.hideRealTimeLoading();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching real-time results:', error);
+                            this.hideRealTimeResults();
+                            this.hideRealTimeLoading();
+                        });
+                }, 500);
+            }
+
+            // Normalize search query for better matching
+            normalizeSearchQuery(query) {
+                const accentMap = {
+                    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+                    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+                    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+                    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+                    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+                    'ý': 'y', 'ÿ': 'y',
+                    'ñ': 'n',
+                    'ç': 'c'
+                };
+
+                let normalized = query.toLowerCase();
+                for (const [accented, normal] of Object.entries(accentMap)) {
+                    normalized = normalized.replace(new RegExp(accented, 'g'), normal);
+                }
+                return normalized;
+            }
+
+            // Real-time search functions
+            showRealTimeLoading() {
+                const realTimeContainer = document.getElementById('mobile-real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Recherche en cours...</div>';
+                    realTimeContainer.classList.remove('hidden');
+                }
+            }
+
+            hideRealTimeLoading() {
+                // Loading will be replaced by results
+            }
+
+            hideRealTimeResults() {
+                const realTimeContainer = document.getElementById('mobile-real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.classList.add('hidden');
+                }
+            }
+
+            displayRealTimeResults(data) {
+                const realTimeContainer = document.getElementById('mobile-real-time-results');
+                if (!realTimeContainer) {
+                    console.error('Real-time results container not found');
+                    return;
+                }
+
+                if (!data.patronymes || data.patronymes.length === 0) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-search text-4xl mb-4"></i><p>Aucun patronyme trouvé pour cette recherche.</p></div>';
+                    realTimeContainer.classList.remove('hidden');
+                    return;
+                }
+
+                // Create HTML for real-time results (mobile optimized)
+                const html = `
+                    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            Résultats en temps réel (${data.patronymes.length} trouvé${data.patronymes.length > 1 ? 's' : ''})
+                        </h3>
+                        <div class="space-y-3">
+                            ${data.patronymes.map(patronyme => `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h4 class="font-semibold text-lg text-gray-900">${patronyme.nom}</h4>
+                                    </div>
+                                    ${patronyme.signification ? `<p class="text-gray-600 text-sm mb-2">${patronyme.signification}</p>` : ''}
+                                    ${patronyme.region ? `<p class="text-blue-600 text-xs"><i class="fas fa-map-marker-alt mr-1"></i>${patronyme.region.nom}</p>` : ''}
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-eye mr-1"></i>${patronyme.views_count || 0} vues
+                                        </span>
+                                        <button onclick="mobileApp.viewPatronyme(${patronyme.id})"
+                                                class="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                            Voir détails
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="mobileApp.hideRealTimeResults()"
+                                    class="text-gray-500 hover:text-gray-700 text-sm">
+                                <i class="fas fa-times mr-1"></i>Masquer les résultats en temps réel
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                realTimeContainer.innerHTML = html;
+                realTimeContainer.classList.remove('hidden');
             }
         }
 

@@ -34,6 +34,7 @@ class Patronyme extends Model
         'langue_id',
         'transmission',
         'patronyme_sexe',
+        'patronyme_sexe_detail',
         'totem',
         'justification_totem',
         'parents_plaisanterie',
@@ -272,7 +273,7 @@ class Patronyme extends Model
         $location = [];
 
         if ($this->region) {
-            $location[] = $this->region->name;
+            $location[] = $this->region->nom;
         }
 
         if ($this->province) {

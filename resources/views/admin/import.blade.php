@@ -59,7 +59,7 @@
                     Sélectionner un fichier à importer
                 </h3>
 
-                <form action="{{ route('admin.import.run') }}" method="POST" enctype="multipart/form-data" id="importForm">
+                <form action="{{ route('admin.data.import.run') }}" method="POST" enctype="multipart/form-data" id="importForm">
                     @csrf
 
                     <!-- Upload Area -->
@@ -91,7 +91,7 @@
                         <button type="submit" class="btn btn-success" id="submitBtn" disabled>
                             <i class="fas fa-upload mr-2"></i>Lancer l'import
                         </button>
-                        <a href="{{ route('admin.export') }}" class="btn btn-outline">
+                        <a href="{{ route('admin.data.export') }}" class="btn btn-outline">
                             <i class="fas fa-download mr-2"></i>Télécharger un modèle
                         </a>
                     </div>

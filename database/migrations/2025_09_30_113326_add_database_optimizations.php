@@ -60,7 +60,7 @@ return new class extends Migration
 
         // Optimisations pour les tables de référence (seulement sur les colonnes existantes)
         Schema::table('regions', function (Blueprint $table) {
-            $table->index(['name'], 'idx_regions_name');
+            $table->index(['nom'], 'idx_regions_nom');
             // $table->index(['code'], 'idx_regions_code');
         });
 
@@ -128,7 +128,7 @@ return new class extends Migration
         });
 
         Schema::table('regions', function (Blueprint $table) {
-            $table->dropIndex('idx_regions_name');
+            $table->dropIndex('idx_regions_nom');
             $table->dropIndex('idx_regions_code');
         });
 

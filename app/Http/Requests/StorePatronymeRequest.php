@@ -50,7 +50,8 @@ class StorePatronymeRequest extends FormRequest
             'histoire' => 'nullable|string|max:5000',
             'langue_id' => 'nullable|exists:langues,id',
             'transmission' => 'nullable|in:pere,mere,autre',
-            'patronyme_sexe' => 'nullable|in:M,F,mixte',
+            'patronyme_sexe' => 'nullable|in:oui,non,autre',
+            'patronyme_sexe_detail' => 'nullable|string|max:1000',
             'totem' => 'nullable|string|max:255',
             'justification_totem' => 'nullable|string|max:1000',
             'parents_plaisanterie' => 'nullable|string|max:1000',
@@ -98,7 +99,7 @@ class StorePatronymeRequest extends FormRequest
             'groupe_ethnique_id.exists' => 'Le groupe ethnique sélectionné n\'existe pas.',
             'langue_id.exists' => 'La langue sélectionnée n\'existe pas.',
             'transmission.in' => 'La transmission doit être père, mère ou autre.',
-            'patronyme_sexe.in' => 'Le sexe du patronyme doit être M, F ou mixte.',
+            'patronyme_sexe.in' => 'La réponse doit être "Oui", "Non" ou "Autre à préciser".',
 
             'region_id.exists' => 'La région sélectionnée n\'existe pas.',
             'province_id.exists' => 'La province sélectionnée n\'existe pas.',

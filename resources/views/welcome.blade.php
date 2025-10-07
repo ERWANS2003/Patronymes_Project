@@ -189,7 +189,7 @@
                                 <option value="">Toutes les régions</option>
                                 @foreach(\App\Models\Region::all() as $region)
                                     <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
-                                        {{ $region->name }}
+                                        {{ $region->nom }}
                                     </option>
                                 @endforeach
                             </select>
@@ -212,6 +212,11 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Real-time Search Results -->
+            <div id="welcome-real-time-results" class="hidden mt-8">
+                <!-- Real-time search results will be displayed here -->
             </div>
         </div>
     </section>
@@ -501,6 +506,144 @@
                 });
             }
         }
+
+        // Real-time search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="search"]');
+            let realTimeDebounceTimer = null;
+
+            if (!searchInput) return;
+
+            // Normalize search query for better matching
+            function normalizeSearchQuery(query) {
+                const accentMap = {
+                    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+                    'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+                    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+                    'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+                    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+                    'ý': 'y', 'ÿ': 'y',
+                    'ñ': 'n',
+                    'ç': 'c'
+                };
+
+                let normalized = query.toLowerCase();
+                for (const [accented, normal] of Object.entries(accentMap)) {
+                    normalized = normalized.replace(new RegExp(accented, 'g'), normal);
+                }
+                return normalized;
+            }
+
+            // Real-time search functions
+            function showRealTimeLoading() {
+                const realTimeContainer = document.getElementById('welcome-real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Recherche en cours...</div>';
+                    realTimeContainer.classList.remove('hidden');
+                }
+            }
+
+            function hideRealTimeResults() {
+                const realTimeContainer = document.getElementById('welcome-real-time-results');
+                if (realTimeContainer) {
+                    realTimeContainer.classList.add('hidden');
+                }
+            }
+
+            function displayRealTimeResults(data) {
+                const realTimeContainer = document.getElementById('welcome-real-time-results');
+                if (!realTimeContainer) {
+                    console.error('Real-time results container not found');
+                    return;
+                }
+
+                if (!data.patronymes || data.patronymes.length === 0) {
+                    realTimeContainer.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-search text-4xl mb-4"></i><p>Aucun patronyme trouvé pour cette recherche.</p></div>';
+                    realTimeContainer.classList.remove('hidden');
+                    return;
+                }
+
+                // Create HTML for real-time results
+                const html = `
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            Résultats en temps réel (${data.patronymes.length} trouvé${data.patronymes.length > 1 ? 's' : ''})
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${data.patronymes.map(patronyme => `
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h4 class="font-semibold text-lg text-gray-900">${patronyme.nom}</h4>
+                                    </div>
+                                    ${patronyme.signification ? `<p class="text-gray-600 text-sm mb-2">${patronyme.signification}</p>` : ''}
+                                    ${patronyme.region ? `<p class="text-blue-600 text-xs"><i class="fas fa-map-marker-alt mr-1"></i>${patronyme.region.nom}</p>` : ''}
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-eye mr-1"></i>${patronyme.views_count || 0} vues
+                                        </span>
+                                        <a href="/patronymes/${patronyme.id}"
+                                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            Voir détails <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="hideWelcomeRealTimeResults()"
+                                    class="text-gray-500 hover:text-gray-700 text-sm">
+                                <i class="fas fa-times mr-1"></i>Masquer les résultats en temps réel
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                realTimeContainer.innerHTML = html;
+                realTimeContainer.classList.remove('hidden');
+            }
+
+            function performRealTimeSearch(query) {
+                console.log('Performing real-time search for:', query);
+
+                if (query.length < 2) {
+                    hideRealTimeResults();
+                    return;
+                }
+
+                showRealTimeLoading();
+
+                // Debounce the request
+                clearTimeout(realTimeDebounceTimer);
+                realTimeDebounceTimer = setTimeout(() => {
+                    const normalizedQuery = normalizeSearchQuery(query);
+
+                    fetch('/patronymes?search=' + encodeURIComponent(normalizedQuery) + '&ajax=1', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            displayRealTimeResults(data);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching real-time results:', error);
+                            hideRealTimeResults();
+                        });
+                }, 500);
+            }
+
+            // Add event listener for real-time search
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                performRealTimeSearch(query);
+            });
+
+            // Global function to hide real-time results
+            window.hideWelcomeRealTimeResults = hideRealTimeResults;
+        });
     </script>
 </body>
 </html>

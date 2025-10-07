@@ -185,3 +185,46 @@ require __DIR__.'/auth.php';
 
 // Inclure les routes des nouvelles fonctionnalités
 require __DIR__.'/features.php';
+
+// Routes AJAX pour les listes déroulantes dynamiques
+Route::get('/get-provinces', function (Illuminate\Http\Request $request) {
+    $regionId = $request->get('region_id');
+
+    if (!$regionId) {
+        return response()->json([]);
+    }
+
+    $provinces = \App\Models\Province::where('region_id', $regionId)
+        ->orderBy('nom')
+        ->get(['id', 'nom']);
+
+    return response()->json($provinces);
+})->name('get-provinces');
+
+Route::get('/get-communes', function (Illuminate\Http\Request $request) {
+    $provinceId = $request->get('province_id');
+
+    if (!$provinceId) {
+        return response()->json([]);
+    }
+
+    $communes = \App\Models\Commune::where('province_id', $provinceId)
+        ->orderBy('nom')
+        ->get(['id', 'nom']);
+
+    return response()->json($communes);
+})->name('get-communes');
+
+// Routes pour la recherche avancée
+Route::prefix('search')->name('search.')->group(function () {
+    Route::get('/suggestions', [App\Http\Controllers\SearchController::class, 'suggestions'])->name('suggestions');
+    Route::get('/popular', [App\Http\Controllers\SearchController::class, 'popular'])->name('popular');
+    Route::get('/filters', [App\Http\Controllers\SearchController::class, 'filters'])->name('filters');
+    Route::get('/stats', [App\Http\Controllers\SearchController::class, 'stats'])->name('stats');
+    Route::post('/advanced', [App\Http\Controllers\SearchController::class, 'advanced'])->name('advanced');
+});
+
+// Route pour la page de recherche avancée
+Route::get('/patronymes/search/advanced', function () {
+    return view('patronymes.search-advanced');
+})->name('patronymes.search.advanced');

@@ -7,12 +7,11 @@ use App\Services\MonitoringService;
 use App\Services\StatisticsService;
 use App\Services\CacheService;
 
-class MonitoringController extends Controller
+class MonitoringController extends \Illuminate\Routing\Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('admin');
     }
 
     /**
