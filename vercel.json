@@ -11,8 +11,5 @@
       "src": "/(.*)",
       "dest": "public/index.php"
     }
-  ],
-  "env": {
-    "APP_ENV": "production"
-  }
+  ]
 }
