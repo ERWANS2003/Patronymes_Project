@@ -104,7 +104,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
-                                            <button type="button" class="btn btn-sm btn-outline" onclick="openEditModal({{ $user->id }})">
+                                            <button type="button" class="btn btn-sm btn-outline" onclick="openEditModal({{ $user->id }}, '{{ $user->role }}', {{ $user->can_contribute ? 'true' : 'false' }}, {{ $user->can_manage_roles ? 'true' : 'false' }})">
                                                 <i class="fas fa-edit mr-1"></i>Modifier
                                             </button>
                                             @if($user->id !== Auth::id())
@@ -233,8 +233,8 @@
         }
 
         // Edit Role Modal Functions
-        function openEditModal(userId) {
-            console.log('Opening edit modal for user:', userId);
+        function openEditModal(userId, userRole, canContribute, canManageRoles) {
+            console.log('Opening edit modal for user:', userId, 'role:', userRole);
             const modal = document.getElementById('editModal');
             const form = document.getElementById('editForm');
 
@@ -246,6 +246,15 @@
             // Définir l'action du formulaire avec la route correcte
             form.action = `/admin/roles/${userId}`;
             console.log('Form action set to:', form.action);
+
+            // Pré-remplir les champs du formulaire
+            const roleSelect = form.querySelector('#role');
+            const canContributeCheckbox = form.querySelector('#can_contribute');
+            const canManageRolesCheckbox = form.querySelector('#can_manage_roles');
+
+            if (roleSelect) roleSelect.value = userRole;
+            if (canContributeCheckbox) canContributeCheckbox.checked = canContribute;
+            if (canManageRolesCheckbox) canManageRolesCheckbox.checked = canManageRoles;
 
             // Afficher le modal
             modal.classList.remove('hidden');
