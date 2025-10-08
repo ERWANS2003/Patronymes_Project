@@ -113,12 +113,12 @@
                                                     </select>
                                                     <div class="flex flex-col space-y-1">
                                                         <label class="text-xs flex items-center">
-                                                            <input type="checkbox" name="can_contribute" value="1" {{ $user->can_contribute ? 'checked' : '' }} 
+                                                            <input type="checkbox" name="can_contribute" value="1" {{ $user->can_contribute ? 'checked' : '' }}
                                                                    onchange="this.form.submit()" class="mr-1">
                                                             Contribuer
                                                         </label>
                                                         <label class="text-xs flex items-center">
-                                                            <input type="checkbox" name="can_manage_roles" value="1" {{ $user->can_manage_roles ? 'checked' : '' }} 
+                                                            <input type="checkbox" name="can_manage_roles" value="1" {{ $user->can_manage_roles ? 'checked' : '' }}
                                                                    onchange="this.form.submit()" class="mr-1">
                                                             Gérer rôles
                                                         </label>
