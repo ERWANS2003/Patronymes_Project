@@ -10,7 +10,10 @@
                     Gérez les rôles et permissions des utilisateurs
                 </p>
             </div>
-            <div class="mt-4 sm:mt-0">
+            <div class="mt-4 sm:mt-0 flex space-x-3">
+                <button type="button" onclick="openCreateRoleModal()" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>Créer un rôle
+                </button>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left mr-2"></i>Retour au dashboard
                 </a>
@@ -127,6 +130,50 @@
         </div>
     </div>
 
+    <!-- Create Role Modal -->
+    <div id="createModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Créer un nouveau rôle</h3>
+                    <button type="button" onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="createForm" method="POST" action="{{ route('admin.roles.store') }}">
+                    @csrf
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="form-label">Nom du rôle</label>
+                            <input type="text" name="name" id="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="text-sm font-semibold text-gray-900">Permissions</h4>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="can_contribute" id="create_can_contribute" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="create_can_contribute" class="ml-2 text-sm text-gray-900">Peut contribuer</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="can_manage_roles" id="create_can_manage_roles" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="create_can_manage_roles" class="ml-2 text-sm text-gray-900">Peut gérer les rôles</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeCreateModal()" class="btn btn-secondary">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Role Modal -->
     <div id="editModal" class="modal-overlay hidden">
         <div class="modal-content">
@@ -172,13 +219,26 @@
     </div>
 
     <script>
+        // Create Role Modal Functions
+        function openCreateModal() {
+            const modal = document.getElementById('createModal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            const modal = document.getElementById('createModal');
+            modal.classList.add('hidden');
+            // Reset form
+            document.getElementById('createForm').reset();
+        }
+
+        // Edit Role Modal Functions
         function openEditModal(userId) {
-            // Récupérer les données de l'utilisateur (simulation)
             const modal = document.getElementById('editModal');
             const form = document.getElementById('editForm');
 
-            // Définir l'action du formulaire
-            form.action = `/admin/roles/${userId}`;
+            // Définir l'action du formulaire avec la route correcte
+            form.action = `{{ url('/admin/roles') }}/${userId}`;
 
             // Afficher le modal
             modal.classList.remove('hidden');
@@ -189,7 +249,13 @@
             modal.classList.add('hidden');
         }
 
-        // Fermer le modal en cliquant à l'extérieur
+        // Fermer les modals en cliquant à l'extérieur
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateModal();
+            }
+        });
+
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeEditModal();
