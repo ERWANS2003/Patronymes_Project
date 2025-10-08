@@ -33,7 +33,7 @@
                     <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus mr-2"></i>Créer un utilisateur
                     </a>
-                    <a href="{{ route('admin.roles') }}" class="btn btn-outline">
+                    <a href="{{ route('admin.roles.index') }}" class="btn btn-outline">
                         <i class="fas fa-users-cog mr-2"></i>Gérer les rôles
                     </a>
                 </div>

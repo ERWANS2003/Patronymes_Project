@@ -58,7 +58,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.roles') }}">
+                        <a class="nav-link" href="{{ route('admin.roles.index') }}">
                             <i class="fas fa-users-cog me-1"></i>Gestion des rôles
                         </a>
                     </li>
