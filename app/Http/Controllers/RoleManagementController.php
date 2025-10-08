@@ -14,33 +14,6 @@ class RoleManagementController extends Controller
         return view('admin.roles', compact('users'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name',
-            'description' => 'nullable|string|max:500',
-            'can_contribute' => 'boolean',
-            'can_manage_roles' => 'boolean',
-        ]);
-
-        // Seuls les admins peuvent créer des rôles
-        if (!Auth::user()->canManageRoles()) {
-            return redirect()->back()->with('error', 'Vous n\'avez pas les permissions nécessaires.');
-        }
-
-        // Créer le rôle (pour l'instant, on simule avec un message de succès)
-        // Dans une vraie application, vous auriez une table 'roles' séparée
-        $roleData = [
-            'name' => $request->name,
-            'description' => $request->description,
-            'can_contribute' => $request->boolean('can_contribute'),
-            'can_manage_roles' => $request->boolean('can_manage_roles'),
-        ];
-
-        // Pour l'instant, on retourne un message de succès
-        // TODO: Implémenter la création réelle de rôles avec une table dédiée
-        return redirect()->back()->with('success', "Rôle '{$request->name}' créé avec succès. (Fonctionnalité en développement)");
-    }
 
     public function updateRole(Request $request, User $user)
     {

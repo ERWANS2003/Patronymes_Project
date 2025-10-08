@@ -139,7 +139,6 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])
             ->name('roles.')
             ->group(function () {
                 Route::get('/', [\App\Http\Controllers\RoleManagementController::class, 'index'])->name('index');
-                Route::post('/', [\App\Http\Controllers\RoleManagementController::class, 'store'])->name('store');
                 Route::put('/{user}', [\App\Http\Controllers\RoleManagementController::class, 'updateRole'])->name('update');
                 Route::post('/{user}/toggle-contribution', [\App\Http\Controllers\RoleManagementController::class, 'toggleContribution'])->name('toggle-contribution');
             });

@@ -10,10 +10,7 @@
                     Gérez les rôles et permissions des utilisateurs
                 </p>
             </div>
-            <div class="mt-4 sm:mt-0 flex space-x-3">
-                <button type="button" onclick="openCreateRoleModal()" class="btn btn-primary">
-                    <i class="fas fa-plus mr-2"></i>Créer un rôle
-                </button>
+            <div class="mt-4 sm:mt-0">
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left mr-2"></i>Retour au dashboard
                 </a>
@@ -104,30 +101,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
-                                            <!-- Formulaire inline pour modifier le rôle -->
-                                            <form method="POST" action="{{ route('admin.roles.update', $user) }}" class="inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <div class="flex items-center space-x-2">
-                                                    <select name="role" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
-                                                        <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>Utilisateur</option>
-                                                        <option value="contributeur" {{ $user->role === 'contributeur' ? 'selected' : '' }}>Contributeur</option>
-                                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                                    </select>
-                                                    <div class="flex flex-col space-y-1">
-                                                        <label class="text-xs">
-                                                            <input type="checkbox" name="can_contribute" value="1" {{ $user->can_contribute ? 'checked' : '' }} 
-                                                                   onchange="this.form.submit()" class="mr-1">
-                                                            Contribuer
-                                                        </label>
-                                                        <label class="text-xs">
-                                                            <input type="checkbox" name="can_manage_roles" value="1" {{ $user->can_manage_roles ? 'checked' : '' }} 
-                                                                   onchange="this.form.submit()" class="mr-1">
-                                                            Gérer rôles
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline" onclick="openEditModal({{ $user->id }}, '{{ $user->role }}', {{ $user->can_contribute ? 'true' : 'false' }}, {{ $user->can_manage_roles ? 'true' : 'false' }})">
+                                                <i class="fas fa-edit mr-1"></i>Modifier
+                                            </button>
                                             @if($user->id !== Auth::id())
                                                 <a href="{{ route('admin.roles.toggle-contribution', $user) }}"
                                                    class="btn btn-sm {{ $user->can_contribute ? 'btn-warning' : 'btn-success' }}">
@@ -151,44 +127,44 @@
         </div>
     </div>
 
-    <!-- Create Role Modal -->
-    <div id="createModal" class="modal-overlay hidden">
+    <!-- Edit Role Modal -->
+    <div id="editModal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Créer un nouveau rôle</h3>
-                    <button type="button" onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900">Modifier le rôle</h3>
+                    <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
 
-                <form id="createForm" method="POST" action="{{ route('admin.roles.store') }}">
+                <form id="editForm" method="POST" action="">
                     @csrf
+                    @method('PUT')
                     <div class="space-y-4">
                         <div>
-                            <label for="name" class="form-label">Nom du rôle</label>
-                            <input type="text" name="name" id="name" class="form-input" required>
-                        </div>
-                        <div>
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description" class="form-input" rows="3"></textarea>
+                            <label for="role" class="form-label">Rôle</label>
+                            <select name="role" id="role" class="form-select" required>
+                                <option value="user">Utilisateur</option>
+                                <option value="contributeur">Contributeur</option>
+                                <option value="admin">Administrateur</option>
+                            </select>
                         </div>
                         <div class="space-y-2">
-                            <h4 class="text-sm font-semibold text-gray-900">Permissions</h4>
                             <div class="flex items-center">
-                                <input type="checkbox" name="can_contribute" id="create_can_contribute" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="create_can_contribute" class="ml-2 text-sm text-gray-900">Peut contribuer</label>
+                                <input type="checkbox" name="can_contribute" id="can_contribute" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="can_contribute" class="ml-2 text-sm text-gray-900">Peut contribuer</label>
                             </div>
                             <div class="flex items-center">
-                                <input type="checkbox" name="can_manage_roles" id="create_can_manage_roles" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="create_can_manage_roles" class="ml-2 text-sm text-gray-900">Peut gérer les rôles</label>
+                                <input type="checkbox" name="can_manage_roles" id="can_manage_roles" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="can_manage_roles" class="ml-2 text-sm text-gray-900">Peut gérer les rôles</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" onclick="closeCreateModal()" class="btn btn-secondary">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Créer</button>
+                        <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
                     </div>
                 </form>
             </div>
@@ -197,23 +173,43 @@
 
 
     <script>
-        // Create Role Modal Functions
-        function openCreateModal() {
-            const modal = document.getElementById('createModal');
+        // Edit Role Modal Functions
+        function openEditModal(userId, userRole, canContribute, canManageRoles) {
+            console.log('Opening edit modal for user:', userId, 'role:', userRole);
+            const modal = document.getElementById('editModal');
+            const form = document.getElementById('editForm');
+
+            if (!modal || !form) {
+                console.error('Modal or form not found');
+                return;
+            }
+
+            // Définir l'action du formulaire avec la route correcte
+            form.action = `/admin/roles/${userId}`;
+            console.log('Form action set to:', form.action);
+
+            // Pré-remplir les champs du formulaire
+            const roleSelect = form.querySelector('#role');
+            const canContributeCheckbox = form.querySelector('#can_contribute');
+            const canManageRolesCheckbox = form.querySelector('#can_manage_roles');
+
+            if (roleSelect) roleSelect.value = userRole;
+            if (canContributeCheckbox) canContributeCheckbox.checked = canContribute;
+            if (canManageRolesCheckbox) canManageRolesCheckbox.checked = canManageRoles;
+
+            // Afficher le modal
             modal.classList.remove('hidden');
         }
 
-        function closeCreateModal() {
-            const modal = document.getElementById('createModal');
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
             modal.classList.add('hidden');
-            // Reset form
-            document.getElementById('createForm').reset();
         }
 
         // Fermer le modal en cliquant à l'extérieur
-        document.getElementById('createModal').addEventListener('click', function(e) {
+        document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                closeCreateModal();
+                closeEditModal();
             }
         });
     </script>
