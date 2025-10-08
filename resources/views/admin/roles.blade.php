@@ -19,83 +19,130 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Statistiques améliorées -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-blue-100 text-sm font-medium">Utilisateurs</p>
-                        <p class="text-3xl font-bold">{{ $users->where('role', 'user')->count() }}</p>
-                        <p class="text-blue-200 text-xs">Lecture seule</p>
+        <!-- Header avec actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Gestion des rôles</h1>
+                <p class="text-gray-600 mt-1">Gérez les permissions et les accès des utilisateurs</p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex space-x-3">
+                <button onclick="refreshData()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Actualiser
+                </button>
+                <button onclick="exportUsers()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-download mr-2"></i>
+                    Exporter
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques modernes style Linear -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600"></i>
+                        </div>
                     </div>
-                    <div class="bg-blue-400 rounded-full p-3">
-                        <i class="fas fa-users text-xl"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Utilisateurs</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $users->where('role', 'user')->count() }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-green-100 text-sm font-medium">Contributeurs</p>
-                        <p class="text-3xl font-bold">{{ $users->where('role', 'contributeur')->count() }}</p>
-                        <p class="text-green-200 text-xs">Peut contribuer</p>
+            <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-edit text-green-600"></i>
+                        </div>
                     </div>
-                    <div class="bg-green-400 rounded-full p-3">
-                        <i class="fas fa-user-edit text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-sm font-medium">Administrateurs</p>
-                        <p class="text-3xl font-bold">{{ $users->where('role', 'admin')->count() }}</p>
-                        <p class="text-purple-200 text-xs">Accès complet</p>
-                    </div>
-                    <div class="bg-purple-400 rounded-full p-3">
-                        <i class="fas fa-crown text-xl"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Contributeurs</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $users->where('role', 'contributeur')->count() }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-orange-100 text-sm font-medium">Actifs</p>
-                        <p class="text-3xl font-bold">{{ $users->where('can_contribute', true)->count() }}</p>
-                        <p class="text-orange-200 text-xs">Peuvent contribuer</p>
+            <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-crown text-purple-600"></i>
+                        </div>
                     </div>
-                    <div class="bg-orange-400 rounded-full p-3">
-                        <i class="fas fa-check-circle text-xl"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Administrateurs</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $users->where('role', 'admin')->count() }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-check-circle text-orange-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Actifs</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ $users->where('can_contribute', true)->count() }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Barre de recherche et filtres -->
-        <div class="card mb-6">
-            <div class="p-6">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1">
-                        <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Rechercher un utilisateur..." 
-                                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+        <!-- Barre de recherche et filtres modernes -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <!-- Recherche -->
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
                         </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="roleFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Tous les rôles</option>
-                            <option value="user">Utilisateurs</option>
-                            <option value="contributeur">Contributeurs</option>
-                            <option value="admin">Administrateurs</option>
-                        </select>
-                        <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Tous les statuts</option>
-                            <option value="active">Actifs</option>
-                            <option value="inactive">Inactifs</option>
-                        </select>
+                        <input type="text" id="searchInput" placeholder="Rechercher par nom ou email..." 
+                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
+                
+                <!-- Filtres -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative">
+                        <select id="roleFilter" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Tous les rôles</option>
+                            <option value="user">👤 Utilisateurs</option>
+                            <option value="contributeur">✏️ Contributeurs</option>
+                            <option value="admin">👑 Administrateurs</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <select id="statusFilter" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">🟢 Actifs</option>
+                            <option value="inactive">🔴 Inactifs</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Bouton de réinitialisation -->
+                    <button onclick="clearFilters()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-times mr-2"></i>
+                        Effacer
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Résultats de recherche -->
+            <div id="searchResults" class="mt-4 text-sm text-gray-600 hidden">
+                <span id="resultCount">0</span> résultat(s) trouvé(s)
             </div>
         </div>
 
@@ -182,11 +229,14 @@
                                                 </div>
                                             </form>
                                             @if($user->id !== Auth::id())
-                                                <a href="{{ route('admin.roles.toggle-contribution', $user) }}"
-                                                   class="btn btn-sm {{ $user->can_contribute ? 'btn-warning' : 'btn-success' }}">
-                                                    <i class="fas fa-{{ $user->can_contribute ? 'ban' : 'check' }} mr-1"></i>
-                                                    {{ $user->can_contribute ? 'Désactiver' : 'Activer' }} contribution
-                                                </a>
+                                                <form method="POST" action="{{ route('admin.roles.toggle-contribution', $user) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" 
+                                                            class="btn btn-sm {{ $user->can_contribute ? 'btn-warning' : 'btn-success' }}">
+                                                        <i class="fas fa-{{ $user->can_contribute ? 'ban' : 'check' }} mr-1"></i>
+                                                        {{ $user->can_contribute ? 'Désactiver' : 'Activer' }} contribution
+                                                    </button>
+                                                </form>
                                             @endif
                                         </div>
                                     </td>
@@ -205,42 +255,66 @@
     </div>
 
     <script>
-        // Fonctionnalités de recherche et filtrage
+        // Fonctionnalités modernes de gestion des rôles
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             const roleFilter = document.getElementById('roleFilter');
             const statusFilter = document.getElementById('statusFilter');
             const tableBody = document.getElementById('usersTableBody');
-            const rows = Array.from(tableBody.querySelectorAll('tr'));
+            const searchResults = document.getElementById('searchResults');
+            const resultCount = document.getElementById('resultCount');
+            const totalUsers = document.getElementById('totalUsers');
+            
+            let allRows = Array.from(tableBody.querySelectorAll('tr'));
 
+            // Fonction de filtrage améliorée
             function filterTable() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedRole = roleFilter.value;
                 const selectedStatus = statusFilter.value;
+                let visibleCount = 0;
 
-                rows.forEach(row => {
-                    const name = row.querySelector('td:first-child').textContent.toLowerCase();
-                    const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                allRows.forEach(row => {
+                    const name = row.getAttribute('data-name') || '';
+                    const email = row.getAttribute('data-email') || '';
                     const role = row.getAttribute('data-role');
                     const status = row.getAttribute('data-status');
 
-                    const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+                    const matchesSearch = !searchTerm || name.includes(searchTerm) || email.includes(searchTerm);
                     const matchesRole = !selectedRole || role === selectedRole;
                     const matchesStatus = !selectedStatus || status === selectedStatus;
 
                     if (matchesSearch && matchesRole && matchesStatus) {
                         row.style.display = '';
+                        visibleCount++;
                     } else {
                         row.style.display = 'none';
                     }
                 });
+
+                // Mise à jour du compteur de résultats
+                if (searchTerm || selectedRole || selectedStatus) {
+                    searchResults.classList.remove('hidden');
+                    resultCount.textContent = visibleCount;
+                } else {
+                    searchResults.classList.add('hidden');
+                }
             }
 
-            searchInput.addEventListener('input', filterTable);
-            roleFilter.addEventListener('change', filterTable);
-            statusFilter.addEventListener('change', filterTable);
+            // Fonction de réinitialisation des filtres
+            window.clearFilters = function() {
+                searchInput.value = '';
+                roleFilter.value = '';
+                statusFilter.value = '';
+                filterTable();
+            };
 
-            // Fonction de tri
+            // Fonction d'actualisation
+            window.refreshData = function() {
+                location.reload();
+            };
+
+            // Fonction de tri améliorée
             window.sortTable = function(columnIndex) {
                 const table = document.getElementById('usersTable');
                 const tbody = table.querySelector('tbody');
@@ -249,8 +323,20 @@
                 const isAscending = table.getAttribute('data-sort-direction') !== 'asc';
                 
                 rows.sort((a, b) => {
-                    const aText = a.cells[columnIndex].textContent.trim();
-                    const bText = b.cells[columnIndex].textContent.trim();
+                    let aText, bText;
+                    
+                    if (columnIndex === 0) {
+                        // Tri par nom
+                        aText = a.getAttribute('data-name') || '';
+                        bText = b.getAttribute('data-name') || '';
+                    } else if (columnIndex === 2) {
+                        // Tri par rôle
+                        aText = a.getAttribute('data-role') || '';
+                        bText = b.getAttribute('data-role') || '';
+                    } else {
+                        aText = a.cells[columnIndex].textContent.trim();
+                        bText = b.cells[columnIndex].textContent.trim();
+                    }
                     
                     if (isAscending) {
                         return aText.localeCompare(bText);
@@ -261,50 +347,140 @@
                 
                 rows.forEach(row => tbody.appendChild(row));
                 table.setAttribute('data-sort-direction', isAscending ? 'asc' : 'desc');
+                
+                // Mise à jour de la référence des lignes
+                allRows = Array.from(tbody.querySelectorAll('tr'));
             };
 
-            // Fonction d'export
+            // Fonction d'export améliorée
             window.exportUsers = function() {
-                const table = document.getElementById('usersTable');
-                const rows = Array.from(table.querySelectorAll('tr'));
-                let csv = '';
+                const visibleRows = allRows.filter(row => row.style.display !== 'none');
+                let csv = 'Nom,Email,Rôle,Peut contribuer,Peut gérer les rôles\n';
                 
-                rows.forEach(row => {
-                    const cells = Array.from(row.querySelectorAll('td, th'));
-                    const rowData = cells.map(cell => `"${cell.textContent.trim()}"`).join(',');
-                    csv += rowData + '\n';
+                visibleRows.forEach(row => {
+                    const cells = Array.from(row.querySelectorAll('td'));
+                    if (cells.length >= 4) {
+                        const name = cells[0].textContent.trim();
+                        const email = cells[1].textContent.trim();
+                        const role = cells[2].textContent.trim();
+                        const permissions = cells[3].textContent.trim();
+                        
+                        csv += `"${name}","${email}","${role}","${permissions}"\n`;
+                    }
                 });
                 
-                const blob = new Blob([csv], { type: 'text/csv' });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'utilisateurs.csv';
+                a.download = `utilisateurs_${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
                 window.URL.revokeObjectURL(url);
             };
 
-            // Animation des cartes de statistiques
-            const statCards = document.querySelectorAll('.bg-gradient-to-r');
-            statCards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.classList.add('animate-fade-in');
+            // Event listeners
+            searchInput.addEventListener('input', filterTable);
+            roleFilter.addEventListener('change', filterTable);
+            statusFilter.addEventListener('change', filterTable);
+
+            // Raccourcis clavier
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'f':
+                            e.preventDefault();
+                            searchInput.focus();
+                            break;
+                        case 'r':
+                            e.preventDefault();
+                            refreshData();
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            exportUsers();
+                            break;
+                    }
+                }
             });
+
+            // Animation d'entrée des cartes
+            const statCards = document.querySelectorAll('.bg-white.rounded-lg.border');
+            statCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Notifications toast
+            window.showToast = function(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg text-white font-medium transform translate-x-full transition-transform duration-300 ${
+                    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                }`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(full)';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000);
+            };
         });
 
-        // CSS pour les animations
+        // CSS pour les animations et styles modernes
         const style = document.createElement('style');
         style.textContent = `
             @keyframes fade-in {
                 from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+            
+            @keyframes slide-in {
+                from { transform: translateX(-100%); }
+                to { transform: translateX(0); }
+            }
+            
             .animate-fade-in {
                 animation: fade-in 0.6s ease-out forwards;
             }
-            .form-select-sm {
-                font-size: 0.875rem;
-                padding: 0.25rem 0.5rem;
+            
+            .animate-slide-in {
+                animation: slide-in 0.3s ease-out forwards;
+            }
+            
+            /* Styles pour les sélecteurs personnalisés */
+            select:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Amélioration des transitions */
+            * {
+                transition: all 0.2s ease-in-out;
+            }
+            
+            /* Styles pour les badges modernes */
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.25rem 0.75rem;
+                border-radius: 9999px;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+            
+            /* Amélioration des boutons */
+            button:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
         `;
         document.head.appendChild(style);
