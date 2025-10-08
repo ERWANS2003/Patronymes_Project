@@ -185,7 +185,7 @@
                     </button>
                 </div>
 
-                <form id="editForm" method="POST">
+                <form id="editForm" method="POST" action="">
                     @csrf
                     @method('PUT')
                     <div class="space-y-4">
@@ -234,11 +234,18 @@
 
         // Edit Role Modal Functions
         function openEditModal(userId) {
+            console.log('Opening edit modal for user:', userId);
             const modal = document.getElementById('editModal');
             const form = document.getElementById('editForm');
 
+            if (!modal || !form) {
+                console.error('Modal or form not found');
+                return;
+            }
+
             // Définir l'action du formulaire avec la route correcte
-            form.action = `{{ url('/admin/roles') }}/${userId}`;
+            form.action = `/admin/roles/${userId}`;
+            console.log('Form action set to:', form.action);
 
             // Afficher le modal
             modal.classList.remove('hidden');
