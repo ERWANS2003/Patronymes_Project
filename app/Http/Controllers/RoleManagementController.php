@@ -8,10 +8,50 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleManagementController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')->paginate(20);
-        return view('admin.roles', compact('users'));
+        $query = User::query();
+
+        // Filtrage par rôle
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filtrage par statut de contribution
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('can_contribute', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('can_contribute', false);
+            }
+        }
+
+        // Recherche par nom ou email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Tri
+        $sortBy = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $users = $query->paginate(20)->withQueryString();
+
+        // Statistiques pour les cartes
+        $stats = [
+            'total' => User::count(),
+            'users' => User::where('role', 'user')->count(),
+            'contributors' => User::where('role', 'contributeur')->count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'active' => User::where('can_contribute', true)->count(),
+        ];
+
+        return view('admin.roles', compact('users', 'stats'));
     }
 
 
