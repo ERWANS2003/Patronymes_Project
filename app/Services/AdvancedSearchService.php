@@ -15,7 +15,7 @@ class AdvancedSearchService
     /**
      * Perform advanced search with multiple criteria
      */
-    public function search(array $criteria): array
+    public function search(array $criteria)
     {
         $searchTerm = $criteria['search'] ?? '';
         $regionId = $criteria['region_id'] ?? null;
