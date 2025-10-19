@@ -5,7 +5,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center">
-                        <i class="fas fa-users text-indigo-600 text-2xl mr-2"></i>
+                        <i class="fas fa-users text-bfGreen-600 text-2xl mr-2"></i>
                         <span class="text-xl font-bold text-gray-900">Répertoire des Patronymes</span>
                     </a>
                 </div>
@@ -13,28 +13,28 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                        <i class="fas fa-home mr-2"></i>Accueil
+                        <i class="fas fa-home mr-2 text-bfGreen-600"></i>Accueil
                     </a>
                     <a href="{{ route('patronymes.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                        <i class="fas fa-search mr-2"></i>Explorer
+                        <i class="fas fa-search mr-2 text-bfGreen-600"></i>Explorer
                     </a>
                     <a href="{{ route('statistics.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                        <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                        <i class="fas fa-chart-bar mr-2 text-bfGold-600"></i>Statistiques
                     </a>
                     @auth
                         <a href="{{ route('favorites.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                            <i class="fas fa-heart mr-2"></i>Favoris
+                            <i class="fas fa-heart mr-2 text-bfRed-600"></i>Favoris
                         </a>
 
                         @if(Auth::check() && Auth::user()->canContribute())
                             <a href="{{ route('patronymes.create') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-green-600 hover:text-green-700 hover:border-green-300 focus:outline-none focus:text-green-700 focus:border-green-300 transition duration-150 ease-in-out">
-                                <i class="fas fa-plus mr-2"></i>Ajouter
+                                <i class="fas fa-plus mr-2 text-bfGreen-600"></i>Ajouter
                             </a>
                         @endif
 
                         @if(Auth::user()->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-red-600 hover:text-red-700 hover:border-red-300 focus:outline-none focus:text-red-700 focus:border-red-300 transition duration-150 ease-in-out">
-                                <i class="fas fa-cog mr-2"></i>Administration
+                                <i class="fas fa-cog mr-2 text-bfRed-600"></i>Administration
                             </a>
                         @endif
                     @endauth
@@ -150,11 +150,11 @@
                 <i class="fas fa-list mr-2"></i>Patronymes
             </a>
             <a href="{{ route('statistics.index') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">
-                <i class="fas fa-chart-bar mr-2"></i>Statistiques
+                <i class="fas fa-chart-bar mr-2 text-bfGold-600"></i>Statistiques
             </a>
             @auth
                 <a href="{{ route('favorites.index') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">
-                    <i class="fas fa-heart mr-2"></i>Mes Favoris
+                    <i class="fas fa-heart mr-2 text-bfRed-600"></i>Mes Favoris
                 </a>
                 <a href="{{ route('profile.info') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">
                     <i class="fas fa-user mr-2"></i>Mon Profil

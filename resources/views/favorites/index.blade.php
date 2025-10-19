@@ -49,7 +49,7 @@
                                 @if($patronyme->region)
                                     <div class="flex items-center">
                                         <i class="fas fa-map-marker-alt mr-2"></i>
-                                        {{ $patronyme->region->name }}
+                                        {{ $patronyme->region->nom }}
                                     </div>
                                 @endif
                                 @if($patronyme->province)

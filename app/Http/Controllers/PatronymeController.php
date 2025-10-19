@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use App\Models\Province;
 use App\Models\Commune;
+use App\Models\Contribution;
+use App\Models\Contributeur;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Services\SearchService;
@@ -187,15 +190,20 @@ class PatronymeController extends Controller
     private function logSearch($searchTerm)
     {
         try {
-            // Only log if SearchLog model exists
-            if (class_exists('\App\Models\SearchLog')) {
-                \App\Models\SearchLog::create([
-                    'search_term' => $searchTerm,
-                    'user_id' => auth()->id(),
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                    'results_count' => 0,
-                ]);
+            // Log search directly to search_logs table
+            \DB::table('search_logs')->insert([
+                'query' => $searchTerm,
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'results_count' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Invalider le cache des statistiques utilisateur pour les recherches
+            if (auth()->check()) {
+                $this->statisticsService->clearUserActivityCache(auth()->id());
             }
         } catch (\Exception $e) {
             Log::warning('Failed to log search', ['error' => $e->getMessage()]);
@@ -381,6 +389,31 @@ class PatronymeController extends Controller
         try {
             $patronyme = Patronyme::create($request->validated());
 
+            // Invalider le cache des statistiques utilisateur pour les contributions
+            if (auth()->check()) {
+                $this->statisticsService->clearUserActivityCache(auth()->id());
+            }
+
+            // Enregistrer une contribution liée à l'utilisateur authentifié
+            if (auth()->check()) {
+                $user = auth()->user();
+                $contributeur = Contributeur::firstOrCreate(
+                    ['utilisateur_id' => $user->id],
+                    [
+                        'nom' => $user->name ?? 'Contributeur',
+                        'contact' => $user->email ?? null,
+                    ]
+                );
+
+                Contribution::create([
+                    'contenu' => 'Création du patronyme',
+                    'patronyme_id' => $patronyme->id,
+                    'contributeur_id' => $contributeur->id,
+                    'date_contribution' => now(),
+                    'statut' => \App\Models\Contribution::STATUT_APPROUVE,
+                ]);
+            }
+
             Log::info('Patronyme created', [
                 'patronyme_id' => $patronyme->id,
                 'nom' => $patronyme->nom,
@@ -423,6 +456,31 @@ class PatronymeController extends Controller
     {
         try {
             $patronyme->update($request->validated());
+
+            // Invalider le cache des statistiques utilisateur pour les contributions
+            if (auth()->check()) {
+                $this->statisticsService->clearUserActivityCache(auth()->id());
+            }
+
+            // Enregistrer une contribution liée à l'utilisateur authentifié
+            if (auth()->check()) {
+                $user = auth()->user();
+                $contributeur = Contributeur::firstOrCreate(
+                    ['utilisateur_id' => $user->id],
+                    [
+                        'nom' => $user->name ?? 'Contributeur',
+                        'contact' => $user->email ?? null,
+                    ]
+                );
+
+                Contribution::create([
+                    'contenu' => 'Mise à jour du patronyme',
+                    'patronyme_id' => $patronyme->id,
+                    'contributeur_id' => $contributeur->id,
+                    'date_contribution' => now(),
+                    'statut' => \App\Models\Contribution::STATUT_APPROUVE,
+                ]);
+            }
 
             Log::info('Patronyme updated', [
                 'patronyme_id' => $patronyme->id,

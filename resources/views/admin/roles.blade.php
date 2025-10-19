@@ -102,11 +102,11 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input type="text" id="searchInput" placeholder="Rechercher par nom ou email..." 
+                        <input type="text" id="searchInput" placeholder="Rechercher par nom ou email..."
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                
+
                 <!-- Filtres -->
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative">
@@ -120,7 +120,7 @@
                             <i class="fas fa-chevron-down text-gray-400"></i>
                         </div>
                     </div>
-                    
+
                     <div class="relative">
                         <select id="statusFilter" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Tous les statuts</option>
@@ -131,7 +131,7 @@
                             <i class="fas fa-chevron-down text-gray-400"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Bouton de réinitialisation -->
                     <button onclick="clearFilters()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                         <i class="fas fa-times mr-2"></i>
@@ -139,7 +139,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Résultats de recherche -->
             <div id="searchResults" class="mt-4 text-sm text-gray-600 hidden">
                 <span id="resultCount">0</span> résultat(s) trouvé(s)
@@ -231,7 +231,7 @@
                                             @if($user->id !== Auth::id())
                                                 <form method="POST" action="{{ route('admin.roles.toggle-contribution', $user) }}" class="inline">
                                                     @csrf
-                                                    <button type="submit" 
+                                                    <button type="submit"
                                                             class="btn btn-sm {{ $user->can_contribute ? 'btn-warning' : 'btn-success' }}">
                                                         <i class="fas fa-{{ $user->can_contribute ? 'ban' : 'check' }} mr-1"></i>
                                                         {{ $user->can_contribute ? 'Désactiver' : 'Activer' }} contribution
@@ -264,7 +264,7 @@
             const searchResults = document.getElementById('searchResults');
             const resultCount = document.getElementById('resultCount');
             const totalUsers = document.getElementById('totalUsers');
-            
+
             let allRows = Array.from(tableBody.querySelectorAll('tr'));
 
             // Fonction de filtrage améliorée
@@ -319,12 +319,12 @@
                 const table = document.getElementById('usersTable');
                 const tbody = table.querySelector('tbody');
                 const rows = Array.from(tbody.querySelectorAll('tr'));
-                
+
                 const isAscending = table.getAttribute('data-sort-direction') !== 'asc';
-                
+
                 rows.sort((a, b) => {
                     let aText, bText;
-                    
+
                     if (columnIndex === 0) {
                         // Tri par nom
                         aText = a.getAttribute('data-name') || '';
@@ -337,17 +337,17 @@
                         aText = a.cells[columnIndex].textContent.trim();
                         bText = b.cells[columnIndex].textContent.trim();
                     }
-                    
+
                     if (isAscending) {
                         return aText.localeCompare(bText);
                     } else {
                         return bText.localeCompare(aText);
                     }
                 });
-                
+
                 rows.forEach(row => tbody.appendChild(row));
                 table.setAttribute('data-sort-direction', isAscending ? 'asc' : 'desc');
-                
+
                 // Mise à jour de la référence des lignes
                 allRows = Array.from(tbody.querySelectorAll('tr'));
             };
@@ -356,7 +356,7 @@
             window.exportUsers = function() {
                 const visibleRows = allRows.filter(row => row.style.display !== 'none');
                 let csv = 'Nom,Email,Rôle,Peut contribuer,Peut gérer les rôles\n';
-                
+
                 visibleRows.forEach(row => {
                     const cells = Array.from(row.querySelectorAll('td'));
                     if (cells.length >= 4) {
@@ -364,11 +364,11 @@
                         const email = cells[1].textContent.trim();
                         const role = cells[2].textContent.trim();
                         const permissions = cells[3].textContent.trim();
-                        
+
                         csv += `"${name}","${email}","${role}","${permissions}"\n`;
                     }
                 });
-                
+
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -423,11 +423,11 @@
                 }`;
                 toast.textContent = message;
                 document.body.appendChild(toast);
-                
+
                 setTimeout(() => {
                     toast.style.transform = 'translateX(0)';
                 }, 100);
-                
+
                 setTimeout(() => {
                     toast.style.transform = 'translateX(full)';
                     setTimeout(() => document.body.removeChild(toast), 300);
@@ -442,31 +442,31 @@
                 from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
             }
-            
+
             @keyframes slide-in {
                 from { transform: translateX(-100%); }
                 to { transform: translateX(0); }
             }
-            
+
             .animate-fade-in {
                 animation: fade-in 0.6s ease-out forwards;
             }
-            
+
             .animate-slide-in {
                 animation: slide-in 0.3s ease-out forwards;
             }
-            
+
             /* Styles pour les sélecteurs personnalisés */
             select:focus {
                 outline: none;
                 box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             }
-            
+
             /* Amélioration des transitions */
             * {
                 transition: all 0.2s ease-in-out;
             }
-            
+
             /* Styles pour les badges modernes */
             .badge {
                 display: inline-flex;
@@ -476,7 +476,7 @@
                 font-size: 0.75rem;
                 font-weight: 500;
             }
-            
+
             /* Amélioration des boutons */
             button:focus {
                 outline: none;

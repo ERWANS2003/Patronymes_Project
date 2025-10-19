@@ -92,68 +92,68 @@
         <!-- Statistiques principales -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total Patronymes -->
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-bfGreen-600 to-bfGreen-700 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-blue-100 text-sm font-medium">Total Patronymes</p>
+                        <p class="text-bfGreen-100 text-sm font-medium">Total Patronymes</p>
                         <p class="text-3xl font-bold">{{ number_format($stats['total_patronymes'] ?? 0) }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-bfGreen-500 rounded-lg flex items-center justify-center">
                         <i class="fas fa-book text-2xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-blue-100 text-sm">
+                <div class="mt-4 flex items-center text-bfGreen-100 text-sm">
                     <i class="fas fa-arrow-up mr-1"></i>
                     <span>+12% ce mois</span>
                 </div>
             </div>
 
             <!-- Régions -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-bfGold-500 to-bfGold-600 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Régions couvertes</p>
+                        <p class="text-bfGold-100 text-sm font-medium">Régions couvertes</p>
                         <p class="text-3xl font-bold">{{ number_format($stats['total_regions'] ?? 0) }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-bfGold-500 rounded-lg flex items-center justify-center">
                         <i class="fas fa-map-marker-alt text-2xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-green-100 text-sm">
+                <div class="mt-4 flex items-center text-bfGold-100 text-sm">
                     <i class="fas fa-check mr-1"></i>
                     <span>Toutes les régions</span>
                 </div>
             </div>
 
             <!-- Utilisateurs -->
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-secondary-600 to-secondary-700 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-purple-100 text-sm font-medium">Utilisateurs actifs</p>
+                        <p class="text-secondary-100 text-sm font-medium">Utilisateurs actifs</p>
                         <p class="text-3xl font-bold">{{ number_format($stats['total_users'] ?? 0) }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-purple-400 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-secondary-500 rounded-lg flex items-center justify-center">
                         <i class="fas fa-users text-2xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-purple-100 text-sm">
+                <div class="mt-4 flex items-center text-secondary-100 text-sm">
                     <i class="fas fa-user-plus mr-1"></i>
                     <span>+5 nouveaux cette semaine</span>
                 </div>
             </div>
 
             <!-- Favoris -->
-            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="bg-gradient-to-r from-bfRed-600 to-bfRed-700 rounded-xl shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-red-100 text-sm font-medium">Favoris totaux</p>
+                        <p class="text-bfRed-100 text-sm font-medium">Favoris totaux</p>
                         <p class="text-3xl font-bold">{{ number_format($stats['total_favorites'] ?? 0) }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-red-400 rounded-lg flex items-center justify-center">
+                    <div class="w-12 h-12 bg-bfRed-500 rounded-lg flex items-center justify-center">
                         <i class="fas fa-heart text-2xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-red-100 text-sm">
+                <div class="mt-4 flex items-center text-bfRed-100 text-sm">
                     <i class="fas fa-heart mr-1"></i>
                     <span>Engagement élevé</span>
                 </div>
@@ -166,7 +166,7 @@
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-eye text-blue-600 mr-2"></i>
+                        <i class="fas fa-eye text-bfGreen-600 mr-2"></i>
                         Patronymes les plus consultés
                     </h3>
                     <span class="text-sm text-gray-500">Top 10</span>
@@ -176,13 +176,13 @@
                     <div class="space-y-4">
                         @foreach($stats['most_viewed'] as $index => $patronyme)
                             <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <span class="text-sm font-bold text-blue-600">{{ $index + 1 }}</span>
+                                <div class="w-8 h-8 bg-bfGreen-100 rounded-full flex items-center justify-center">
+                                    <span class="text-sm font-bold text-bfGreen-700">{{ $index + 1 }}</span>
                                 </div>
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-900">{{ $patronyme->nom }}</h4>
                                     @if($patronyme->region)
-                                        <p class="text-sm text-gray-600">{{ $patronyme->region->name }}</p>
+                                        <p class="text-sm text-gray-600">{{ $patronyme->region->nom }}</p>
                                     @endif
                                 </div>
                                 <div class="flex items-center space-x-2">
@@ -208,7 +208,7 @@
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-clock text-green-600 mr-2"></i>
+                        <i class="fas fa-clock text-bfGold-600 mr-2"></i>
                         Patronymes récents
                     </h3>
                     <a href="{{ route('patronymes.index') }}" class="btn btn-outline text-sm">
@@ -220,8 +220,8 @@
                     <div class="space-y-4">
                         @foreach($stats['recent_patronymes'] as $patronyme)
                             <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-book text-green-600"></i>
+                                <div class="w-10 h-10 bg-bfGold-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-book text-bfGold-700"></i>
                                 </div>
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-gray-900">{{ $patronyme->nom }}</h4>
@@ -250,7 +250,7 @@
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-map text-purple-600 mr-2"></i>
+                        <i class="fas fa-map text-bfGold-600 mr-2"></i>
                         Répartition par région
                     </h3>
                     <span class="text-sm text-gray-500">{{ $stats['patronymes_by_region']->count() ?? 0 }} régions</span>
@@ -261,12 +261,12 @@
                         @foreach($stats['patronymes_by_region'] as $region)
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-map-marker-alt text-purple-600 text-sm"></i>
+                                    <div class="w-8 h-8 bg-bfGold-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-map-marker-alt text-bfGold-600 text-sm"></i>
                                     </div>
-                                    <span class="font-medium text-gray-900">{{ $region->name }}</span>
+                                    <span class="font-medium text-gray-900">{{ $region->nom }}</span>
                                 </div>
-                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <span class="bg-bfGold-100 text-bfGold-800 px-3 py-1 rounded-full text-sm font-medium">
                                     {{ $region->count }}
                                 </span>
                             </div>

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\PatronymeApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StatisticsApiController;
+use App\Http\Controllers\Api\MobilePatronymeController;
+use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Route;
 
 // API Version 1
@@ -25,6 +27,26 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // Statistiques publiques
     Route::get('statistics/overview', [StatisticsApiController::class, 'overview'])->name('statistics.overview');
+
+    // API Mobile versionnée
+    Route::prefix('mobile')->name('mobile.')->group(function () {
+        // Routes publiques
+        Route::get('patronymes', [MobilePatronymeController::class, 'mobileIndex'])->name('patronymes.index');
+        Route::get('patronymes/popular', [MobilePatronymeController::class, 'mobilePopular'])->name('patronymes.popular');
+        Route::get('patronymes/recent', [MobilePatronymeController::class, 'mobileRecent'])->name('patronymes.recent');
+        Route::get('patronymes/search', [MobilePatronymeController::class, 'mobileSearch'])->name('patronymes.search');
+        Route::get('patronymes/by-letter/{letter}', [MobilePatronymeController::class, 'mobileByLetter'])->name('patronymes.by-letter');
+        Route::get('patronymes/{patronyme}', [MobilePatronymeController::class, 'mobileShow'])->name('patronymes.show');
+        Route::get('offline', [MobilePatronymeController::class, 'getOfflineData'])->name('offline');
+
+        // Routes protégées
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('sync', [MobilePatronymeController::class, 'syncData'])->name('sync');
+            // Favoris
+            Route::get('favorites', [FavoriteController::class, 'apiIndex'])->name('favorites');
+            Route::post('patronymes/{patronyme}/favorite', [FavoriteController::class, 'toggle'])->name('patronymes.favorite');
+        });
+    });
 
     // Routes protégées
     Route::middleware('auth:sanctum')->group(function () {

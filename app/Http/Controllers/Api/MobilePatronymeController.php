@@ -35,7 +35,7 @@ class MobilePatronymeController extends Controller
             $cacheKey = "mobile_patronymes_{$page}_{$perPage}_{$search}_{$region}_{$province}_{$commune}";
 
             $patronymes = Cache::remember($cacheKey, 300, function () use ($request, $perPage) {
-                $query = Patronyme::with(['region:id,name', 'province:id,nom', 'commune:id,nom', 'groupeEthnique:id,nom'])
+                $query = Patronyme::with(['region:id,nom', 'province:id,nom', 'commune:id,nom', 'groupeEthnique:id,nom'])
                     ->select('id', 'nom', 'signification', 'origine', 'region_id', 'province_id', 'commune_id', 'groupe_ethnique_id', 'views_count', 'created_at');
 
                 if ($request->get('search')) {
@@ -69,6 +69,10 @@ class MobilePatronymeController extends Controller
                     'total' => $patronymes->total(),
                     'has_more' => $patronymes->hasMorePages()
                 ],
+                'links' => [
+                    'next' => $patronymes->nextPageUrl(),
+                    'prev' => $patronymes->previousPageUrl()
+                ],
                 'meta' => [
                     'cache_hit' => Cache::has($cacheKey),
                     'response_time' => microtime(true) - LARAVEL_START
@@ -99,7 +103,7 @@ class MobilePatronymeController extends Controller
             $patronyme->increment('views_count');
 
             $patronyme->load([
-                'region:id,name',
+                'region:id,nom',
                 'province:id,nom',
                 'commune:id,nom',
                 'groupeEthnique:id,nom',
@@ -159,7 +163,7 @@ class MobilePatronymeController extends Controller
             $limit = $request->get('limit', 10);
 
             $popular = Cache::remember("mobile_popular_{$limit}", 1800, function () use ($limit) {
-                return Patronyme::with(['region:id,name', 'province:id,nom'])
+                return Patronyme::with(['region:id,nom', 'province:id,nom'])
                     ->select('id', 'nom', 'signification', 'region_id', 'province_id', 'views_count')
                     ->orderBy('views_count', 'desc')
                     ->orderBy('frequence', 'desc')
@@ -193,7 +197,7 @@ class MobilePatronymeController extends Controller
             $limit = $request->get('limit', 10);
 
             $recent = Cache::remember("mobile_recent_{$limit}", 300, function () use ($limit) {
-                return Patronyme::with(['region:id,name', 'province:id,nom'])
+                return Patronyme::with(['region:id,nom', 'province:id,nom'])
                     ->select('id', 'nom', 'signification', 'region_id', 'province_id', 'created_at')
                     ->orderBy('created_at', 'desc')
                     ->limit($limit)
@@ -251,7 +255,14 @@ class MobilePatronymeController extends Controller
                     'total' => $results->total(),
                     'has_more' => $results->hasMorePages()
                 ],
-                'query' => $query
+                'links' => [
+                    'next' => $results->nextPageUrl(),
+                    'prev' => $results->previousPageUrl()
+                ],
+                'query' => $query,
+                'meta' => [
+                    'response_time' => microtime(true) - LARAVEL_START
+                ]
             ]);
 
         } catch (\Exception $e) {
@@ -276,7 +287,7 @@ class MobilePatronymeController extends Controller
             $limit = $request->get('limit', 20);
 
             $patronymes = Cache::remember("mobile_letter_{$letter}_{$limit}", 3600, function () use ($letter, $limit) {
-                return Patronyme::with(['region:id,name', 'province:id,nom'])
+                return Patronyme::with(['region:id,nom', 'province:id,nom'])
                     ->select('id', 'nom', 'signification', 'region_id', 'province_id', 'views_count')
                     ->where('nom', 'LIKE', "{$letter}%")
                     ->orderBy('nom')
@@ -312,7 +323,7 @@ class MobilePatronymeController extends Controller
         try {
             $offlineData = Cache::remember('mobile_offline_data', 3600, function () {
                 return [
-                    'regions' => \App\Models\Region::select('id', 'name')->get(),
+                    'regions' => \App\Models\Region::select('id', 'nom')->get(),
                     'provinces' => \App\Models\Province::select('id', 'nom', 'region_id')->get(),
                     'communes' => \App\Models\Commune::select('id', 'nom', 'province_id')->get(),
                     'groupes_ethniques' => \App\Models\GroupeEthnique::select('id', 'nom')->get(),

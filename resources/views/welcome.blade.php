@@ -55,7 +55,7 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
                     <a href="{{ route('welcome') }}" class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-bfGreen-600 to-bfRed-600 rounded-lg flex items-center justify-center ring-2 ring-bfGold-400/60">
                             <i class="fas fa-book text-white text-sm"></i>
                         </div>
                         <span class="text-xl font-bold text-gray-900">Patronymes BF</span>
@@ -72,7 +72,7 @@
                         </a>
                     @else
                         <a href="{{ route('login') }}" class="nav-link">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary">
+                        <a href="{{ route('register') }}" class="btn btn-danger">
                             <i class="fas fa-user-plus mr-2"></i>S'inscrire
                         </a>
                     @endauth
@@ -121,15 +121,15 @@
                     <a href="{{ route('patronymes.index') }}" class="btn btn-primary text-lg px-8 py-4 shadow-glow">
                         <i class="fas fa-search mr-2"></i>Explorer les patronymes
                     </a>
-                    <a href="{{ route('patronymes.index') }}?featured=1" class="btn btn-secondary text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600">
+                    <a href="{{ route('patronymes.index') }}?featured=1" class="btn btn-secondary text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-bfGreen-600">
                         <i class="fas fa-fire mr-2"></i>Patronymes populaires
                     </a>
                     @guest
-                        <a href="{{ route('register') }}" class="btn btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600">
+                        <a href="{{ route('register') }}" class="btn btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-bfGreen-600">
                             <i class="fas fa-user-plus mr-2"></i>Rejoindre la communauté
                         </a>
                     @else
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-bfGreen-600">
                             <i class="fas fa-tachometer-alt mr-2"></i>Mon tableau de bord
                         </a>
                     @endguest
@@ -207,7 +207,7 @@
                         </div>
                     </div>
                     <div class="flex justify-center">
-                        <button type="submit" class="btn btn-primary px-8 py-3">
+                        <button type="submit" class="btn btn-bfGreen-600 hover:bg-bfGreen-700 text-white px-8 py-3">
                             <i class="fas fa-search mr-2"></i>Rechercher
                         </button>
                     </div>
@@ -236,53 +236,53 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.1s">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-database text-2xl text-blue-600"></i>
+                    <div class="w-16 h-16 bg-bfGreen-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-database text-2xl text-bfGreen-700"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Base de Données Complète</h3>
                     <p class="text-gray-600 mb-4">
                         Accédez à des milliers de patronymes avec leurs origines, significations et histoires détaillées.
                     </p>
-                    <a href="{{ route('patronymes.index') }}" class="btn btn-primary text-sm">
+                    <a href="{{ route('patronymes.index') }}" class="btn btn-bfGreen-600 hover:bg-bfGreen-700 text-white text-sm">
                         <i class="fas fa-search mr-2"></i>Explorer
                     </a>
                 </div>
 
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.2s">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-search text-2xl text-green-600"></i>
+                    <div class="w-16 h-16 bg-bfGold-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-2xl text-bfGold-700"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Recherche Avancée</h3>
                     <p class="text-gray-600 mb-4">
                         Filtrez par région, groupe ethnique, langue et bien d'autres critères pour des résultats précis.
                     </p>
-                    <a href="{{ route('statistics.index') }}" class="btn btn-success text-sm">
+                    <a href="{{ route('statistics.index') }}" class="btn btn-bfGold-600 hover:bg-bfGold-700 text-white text-sm">
                         <i class="fas fa-chart-bar mr-2"></i>Statistiques
                     </a>
                 </div>
 
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.3s">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-users text-2xl text-purple-600"></i>
+                    <div class="w-16 h-16 bg-bfGreen-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users text-2xl text-bfGreen-700"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Communauté Active</h3>
                     <p class="text-gray-600 mb-4">
                         Contribuez à l'enrichissement de la base de données et partagez vos connaissances.
                     </p>
                     @auth
-                        <a href="{{ route('patronymes.create') }}" class="btn btn-purple text-sm">
+                        <a href="{{ route('patronymes.create') }}" class="btn btn-bfPurple-600 hover:bg-bfPurple-700 text-white text-sm">
                             <i class="fas fa-plus mr-2"></i>Contribuer
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="btn btn-outline text-sm">
+                        <a href="{{ route('register') }}" class="btn btn-bfRed-600 hover:bg-bfRed-700 text-white text-sm">
                             <i class="fas fa-user-plus mr-2"></i>S'inscrire
                         </a>
                     @endauth
                 </div>
 
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.4s">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-heart text-2xl text-yellow-600"></i>
+                    <div class="w-16 h-16 bg-bfRed-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart text-2xl text-bfRed-600"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Favoris Personnalisés</h3>
                     <p class="text-gray-600 mb-4">
@@ -300,8 +300,8 @@
                 </div>
 
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.5s">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-mobile-alt text-2xl text-red-600"></i>
+                    <div class="w-16 h-16 bg-bfGreen-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-2xl text-bfGreen-700"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Interface Responsive</h3>
                     <p class="text-gray-600 mb-4">
@@ -313,8 +313,8 @@
                 </div>
 
                 <div class="feature-card animate-fade-in-up" style="animation-delay: 0.6s">
-                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-share-alt text-2xl text-indigo-600"></i>
+                    <div class="w-16 h-16 bg-bfGold-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-share-alt text-2xl text-bfGold-700"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">Partage Social</h3>
                     <p class="text-gray-600 mb-4">
@@ -329,13 +329,13 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 bg-blue-600 text-white">
+    <section class="py-16 bg-bfGreen-600 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">
                     Notre Impact
                 </h2>
-                <p class="text-xl text-blue-100">
+                <p class="text-xl text-bfGreen-100">
                     Des chiffres qui témoignent de notre engagement pour la préservation du patrimoine
                 </p>
             </div>
@@ -343,19 +343,19 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                 <div class="animate-fade-in-up" style="animation-delay: 0.1s">
                     <div class="stats-counter text-4xl md:text-5xl font-bold mb-2" data-count="{{ \App\Models\Patronyme::count() }}">0</div>
-                    <p class="text-blue-100">Patronymes enregistrés</p>
+                    <p class="text-bfGreen-100">Patronymes enregistrés</p>
                 </div>
                 <div class="animate-fade-in-up" style="animation-delay: 0.2s">
                     <div class="stats-counter text-4xl md:text-5xl font-bold mb-2" data-count="{{ \App\Models\User::count() }}">0</div>
-                    <p class="text-blue-100">Utilisateurs actifs</p>
+                    <p class="text-bfGreen-100">Utilisateurs actifs</p>
                 </div>
                 <div class="animate-fade-in-up" style="animation-delay: 0.3s">
                     <div class="stats-counter text-4xl md:text-5xl font-bold mb-2" data-count="{{ \App\Models\Region::count() }}">0</div>
-                    <p class="text-blue-100">Régions couvertes</p>
+                    <p class="text-bfGreen-100">Régions couvertes</p>
                 </div>
                 <div class="animate-fade-in-up" style="animation-delay: 0.4s">
                     <div class="stats-counter text-4xl md:text-5xl font-bold mb-2" data-count="{{ \App\Models\GroupeEthnique::count() }}">0</div>
-                    <p class="text-blue-100">Groupes ethniques</p>
+                    <p class="text-bfGreen-100">Groupes ethniques</p>
                 </div>
             </div>
         </div>
@@ -388,7 +388,7 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-2 mb-4">
                         <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -400,20 +400,6 @@
                         Découvrez et explorez l'histoire fascinante des patronymes du Burkina Faso.
                         Une plateforme dédiée à la préservation de notre patrimoine culturel.
                     </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-instagram text-xl"></i>
-                        </a>
-                    </div>
                 </div>
 
                 <div>
@@ -426,15 +412,6 @@
                     </ul>
                 </div>
 
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Support</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Aide</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Support</a></li>
-                    </ul>
-                </div>
             </div>
 
             <div class="border-t border-gray-800 mt-8 pt-8 text-center">

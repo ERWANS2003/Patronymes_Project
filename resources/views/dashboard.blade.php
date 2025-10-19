@@ -3,7 +3,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">
-                    <i class="fas fa-tachometer-alt text-blue-600 mr-2"></i>
+                    <i class="fas fa-tachometer-alt text-bfGreen-600 mr-2"></i>
                     @if(Auth::user()->role === 'admin')
                         Tableau de bord Administrateur
                     @elseif(Auth::check() && Auth::user()->canContribute())
@@ -25,10 +25,18 @@
             </div>
             <div class="mt-4 sm:mt-0">
                 <div class="flex items-center space-x-4">
+                    <button
+                        id="refresh-stats-btn"
+                        onclick="refreshStats()"
+                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-bfGreen-600 hover:bg-bfGreen-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-bfGreen-500 transition-colors duration-200"
+                        title="Rafraîchir les statistiques">
+                        <i class="fas fa-sync-alt mr-2" id="refresh-icon"></i>
+                        <span id="refresh-text">Actualiser</span>
+                    </button>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                        @if(Auth::user()->role === 'admin') bg-red-100 text-red-800
-                        @elseif(Auth::check() && Auth::user()->canContribute()) bg-green-100 text-green-800
-                        @else bg-blue-100 text-blue-800
+                        @if(Auth::user()->role === 'admin') bg-bfRed-100 text-bfRed-800
+                        @elseif(Auth::check() && Auth::user()->canContribute()) bg-bfGreen-100 text-bfGreen-800
+                        @else bg-bfGold-100 text-bfGold-800
                         @endif">
                         @if(Auth::user()->role === 'admin')
                             <i class="fas fa-crown mr-1"></i>Administrateur
@@ -114,8 +122,8 @@
 
         <!-- Role-specific Quick Actions -->
         @if(Auth::user()->role === 'admin')
-            <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
-                <h3 class="text-lg font-semibold text-red-800 mb-4">
+            <div class="bg-bfRed-50 border border-bfRed-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-bfRed-800 mb-4">
                     <i class="fas fa-crown mr-2"></i>Actions Administrateur
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -125,31 +133,31 @@
                     <a href="{{ route('patronymes.create') }}" class="btn btn-green">
                         <i class="fas fa-plus mr-2"></i>Ajouter Patronyme
                     </a>
-                    <a href="{{ route('statistics.index') }}" class="btn btn-blue">
+                    <a href="{{ route('statistics.index') }}" class="btn btn-gold">
                         <i class="fas fa-chart-bar mr-2"></i>Statistiques
                     </a>
                 </div>
             </div>
                         @elseif(Auth::check() && Auth::user()->canContribute())
-            <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
-                <h3 class="text-lg font-semibold text-green-800 mb-4">
+            <div class="bg-bfGreen-50 border border-bfGreen-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-bfGreen-800 mb-4">
                     <i class="fas fa-edit mr-2"></i>Actions Contributeur
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <a href="{{ route('patronymes.create') }}" class="btn btn-green">
                         <i class="fas fa-plus mr-2"></i>Ajouter Patronyme
                     </a>
-                    <a href="{{ route('favorites.index') }}" class="btn btn-blue">
+                    <a href="{{ route('favorites.index') }}" class="btn btn-red">
                         <i class="fas fa-heart mr-2"></i>Mes Favoris
                     </a>
-                    <a href="{{ route('statistics.index') }}" class="btn btn-purple">
+                    <a href="{{ route('statistics.index') }}" class="btn btn-gold">
                         <i class="fas fa-chart-bar mr-2"></i>Statistiques
                     </a>
                 </div>
             </div>
         @else
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-                <h3 class="text-lg font-semibold text-blue-800 mb-4">
+            <div class="bg-bfGold-50 border border-bfGold-200 rounded-xl p-6 mb-8">
+                <h3 class="text-lg font-semibold text-bfGold-800 mb-4">
                     <i class="fas fa-user mr-2"></i>Actions Utilisateur
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -172,8 +180,8 @@
             <div class="card">
                 <div class="p-6">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-book text-2xl text-blue-600"></i>
+                        <div class="w-12 h-12 bg-bfGreen-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-book text-2xl text-bfGreen-700"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Total Patronymes</p>
@@ -187,8 +195,8 @@
             <div class="card">
                 <div class="p-6">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-heart text-2xl text-red-600"></i>
+                        <div class="w-12 h-12 bg-bfRed-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heart text-2xl text-bfRed-600"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Mes Favoris</p>
@@ -202,8 +210,8 @@
             <div class="card">
                 <div class="p-6">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-search text-2xl text-green-600"></i>
+                        <div class="w-12 h-12 bg-bfGold-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-search text-2xl text-bfGold-700"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Recherches</p>
@@ -217,8 +225,8 @@
             <div class="card">
                 <div class="p-6">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-plus text-2xl text-purple-600"></i>
+                        <div class="w-12 h-12 bg-bfGreen-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-plus text-2xl text-bfGreen-700"></i>
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Contributions</p>
@@ -237,7 +245,7 @@
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-xl font-bold text-gray-900">
-                                <i class="fas fa-clock text-blue-600 mr-2"></i>
+                                <i class="fas fa-clock text-bfGold-600 mr-2"></i>
                                 Patronymes récents
                             </h2>
                             <a href="{{ route('patronymes.index') }}" class="btn btn-outline text-sm">
@@ -249,8 +257,8 @@
                             <div class="space-y-4">
                                 @foreach($recentPatronymes as $patronyme)
                                     <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-book text-blue-600"></i>
+                                        <div class="w-10 h-10 bg-bfGold-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-book text-bfGold-700"></i>
                                         </div>
                                         <div class="flex-1">
                                             <h3 class="font-semibold text-gray-900">{{ $patronyme->nom }}</h3>
@@ -294,7 +302,7 @@
                 <div class="card">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            <i class="fas fa-bolt text-bfGold-600 mr-2"></i>
                             Actions rapides
                         </h3>
                         <div class="space-y-3">
@@ -317,7 +325,7 @@
                 <div class="card">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-fire text-orange-500 mr-2"></i>
+                            <i class="fas fa-fire text-bfRed-600 mr-2"></i>
                             Patronymes populaires
                         </h3>
 
@@ -326,7 +334,7 @@
                                 @foreach($popularPatronymes as $patronyme)
                                     <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                                         <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <span class="text-sm font-bold text-orange-600">{{ $loop->iteration }}</span>
+                                            <span class="text-sm font-bold text-bfRed-700">{{ $loop->iteration }}</span>
                                         </div>
                                         <div class="flex-1">
                                             <h4 class="font-medium text-gray-900">{{ $patronyme->nom }}</h4>
@@ -351,7 +359,7 @@
                 <div class="card">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            <i class="fas fa-chart-bar text-green-500 mr-2"></i>
+                            <i class="fas fa-chart-bar text-bfGreen-600 mr-2"></i>
                             Statistiques
                         </h3>
                         <div class="space-y-3">
@@ -383,14 +391,14 @@
                 <div class="card">
                     <div class="p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-6">
-                            <i class="fas fa-history text-blue-600 mr-2"></i>
+                            <i class="fas fa-history text-bfGreen-600 mr-2"></i>
                             Activité récente
                         </h2>
 
                         <div class="space-y-4">
                             <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-sign-in-alt text-blue-600"></i>
+                                <div class="w-10 h-10 bg-bfGreen-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-sign-in-alt text-bfGreen-700"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-sm text-gray-900">Vous vous êtes connecté</p>
@@ -400,8 +408,8 @@
 
                             @if($stats['my_favorites'] > 0)
                                 <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                        <i class="fas fa-heart text-red-600"></i>
+                                    <div class="w-10 h-10 bg-bfRed-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-heart text-bfRed-600"></i>
                                     </div>
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">Vous avez {{ $stats['my_favorites'] }} patronyme{{ $stats['my_favorites'] > 1 ? 's' : '' }} en favori</p>
@@ -605,6 +613,48 @@
                     realTimeContainer.classList.remove('hidden');
                 }
             }
+        }
+
+        // Fonction pour rafraîchir les statistiques
+        function refreshStats() {
+            const btn = document.getElementById('refresh-stats-btn');
+            const icon = document.getElementById('refresh-icon');
+            const text = document.getElementById('refresh-text');
+
+            // Désactiver le bouton et montrer l'animation
+            btn.disabled = true;
+            icon.classList.add('fa-spin');
+            text.textContent = 'Actualisation...';
+
+            // Envoyer la requête AJAX
+            fetch('{{ route("dashboard.refresh-stats") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recharger la page pour afficher les nouvelles statistiques
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    throw new Error('Erreur lors du rafraîchissement');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                // Réactiver le bouton en cas d'erreur
+                btn.disabled = false;
+                icon.classList.remove('fa-spin');
+                text.textContent = 'Actualiser';
+
+                // Afficher un message d'erreur
+                alert('Erreur lors du rafraîchissement des statistiques. Veuillez réessayer.');
+            });
         }
     </script>
 </x-app-layout>

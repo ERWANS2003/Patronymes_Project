@@ -70,7 +70,7 @@
                                                 {{ $patronyme->origine ?? 'Non spécifiée' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                {{ $patronyme->region->name ?? 'Non spécifiée' }}
+                                                {{ $patronyme->region->nom ?? 'Non spécifiée' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{ $patronyme->groupeEthnique->nom ?? 'Non spécifié' }}

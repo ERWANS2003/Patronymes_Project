@@ -74,7 +74,7 @@
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Région</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->region->name ?? 'Non spécifiée' }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $patronyme->region->nom ?? 'Non spécifiée' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Groupe ethnique</dt>

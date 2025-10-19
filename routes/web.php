@@ -24,6 +24,17 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('stats', 'recentPatronymes', 'popularPatronymes'));
 })->middleware(['auth'])->name('dashboard');
 
+// Route pour rafraîchir les statistiques du dashboard
+Route::post('/dashboard/refresh-stats', function () {
+    $statisticsService = app(\App\Services\StatisticsService::class);
+    $statisticsService->clearDashboardCache();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Statistiques rafraîchies avec succès'
+    ]);
+})->middleware(['auth'])->name('dashboard.refresh-stats');
+
 // Routes d'authentification et profil
 Route::middleware('auth')->group(function () {
     // Profil utilisateur

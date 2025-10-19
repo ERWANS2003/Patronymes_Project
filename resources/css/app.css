@@ -46,7 +46,7 @@ body {
 
 /* Focus styles */
 .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-bfGreen-500 focus:ring-offset-2;
 }
 
 /* Animations personnalisées */
@@ -104,7 +104,7 @@ body {
 }
 
 .loading-spinner {
-    @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin;
+    @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-bfGreen-600 rounded-full animate-spin;
 }
 
 /* Glass morphism effect */
@@ -116,7 +116,8 @@ body {
 
 /* Gradient backgrounds */
 .gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Burkina Faso palette gradient */
+    background: linear-gradient(135deg, #0faa4e 0%, #ef2b2d 60%, #f7bf00 100%);
 }
 
 .gradient-secondary {
@@ -142,7 +143,7 @@ body {
 }
 
 .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800;
+    @apply bg-bfGreen-600 text-white hover:bg-bfGreen-700 active:bg-bfGreen-800;
 }
 
 .btn-secondary {
@@ -150,15 +151,15 @@ body {
 }
 
 .btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700 active:bg-green-800;
+    @apply bg-bfGreen-600 text-white hover:bg-bfGreen-700 active:bg-bfGreen-800;
 }
 
 .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 active:bg-red-800;
+    @apply bg-bfRed-600 text-white hover:bg-bfRed-700 active:bg-bfRed-800;
 }
 
 .btn-outline {
-    @apply border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white;
+    @apply border-2 border-bfGreen-600 text-bfGreen-600 hover:bg-bfGreen-600 hover:text-white;
 }
 
 .btn-ghost {
@@ -167,11 +168,11 @@ body {
 
 /* Form styles */
 .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bfGreen-500 focus:border-bfGreen-500 transition-colors;
 }
 
 .form-select {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bfGreen-500 focus:border-bfGreen-500 bg-white;
 }
 
 .form-label {
@@ -184,19 +185,19 @@ body {
 }
 
 .badge-primary {
-    @apply bg-blue-100 text-blue-800;
+    @apply bg-bfGreen-100 text-bfGreen-800;
 }
 
 .badge-success {
-    @apply bg-green-100 text-green-800;
+    @apply bg-bfGreen-100 text-bfGreen-800;
 }
 
 .badge-warning {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-bfGold-100 text-bfGold-800;
 }
 
 .badge-danger {
-    @apply bg-red-100 text-red-800;
+    @apply bg-bfRed-100 text-bfRed-800;
 }
 
 /* Alert styles */
@@ -205,19 +206,19 @@ body {
 }
 
 .alert-success {
-    @apply bg-green-50 border-green-200 text-green-800;
+    @apply bg-bfGreen-50 border-bfGreen-200 text-bfGreen-800;
 }
 
 .alert-warning {
-    @apply bg-yellow-50 border-yellow-200 text-yellow-800;
+    @apply bg-bfGold-50 border-bfGold-200 text-bfGold-800;
 }
 
 .alert-danger {
-    @apply bg-red-50 border-red-200 text-red-800;
+    @apply bg-bfRed-50 border-bfRed-200 text-bfRed-800;
 }
 
 .alert-info {
-    @apply bg-blue-50 border-blue-200 text-blue-800;
+    @apply bg-bfGreen-50 border-bfGreen-200 text-bfGreen-800;
 }
 
 /* Navigation styles */
@@ -226,7 +227,7 @@ body {
 }
 
 .nav-link-active {
-    @apply text-blue-600 bg-blue-50;
+    @apply text-bfGreen-600 bg-bfGreen-50;
 }
 
 /* Hero section */
@@ -263,7 +264,7 @@ body {
 }
 
 .pagination-link-active {
-    @apply bg-blue-600 text-white border-blue-600;
+    @apply bg-bfGreen-600 text-white border-bfGreen-600;
 }
 
 /* Table styles */
@@ -303,11 +304,11 @@ body {
 
 /* Utility classes */
 .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-bfGreen-600 to-bfGold-600 bg-clip-text text-transparent;
 }
 
 .shadow-glow {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(15, 170, 78, 0.3);
 }
 
 /* Responsive utilities */

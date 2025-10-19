@@ -58,7 +58,7 @@
             @if($patronyme->region)
                 <div class="col-6">
                     <small class="text-muted">
-                        <i class="fas fa-globe me-1"></i>{{ $patronyme->region->name }}
+                        <i class="fas fa-globe me-1"></i>{{ $patronyme->region->nom }}
                     </small>
                 </div>
             @endif

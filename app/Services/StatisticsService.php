@@ -13,7 +13,7 @@ class StatisticsService
 {
     public function getDashboardStats()
     {
-        return Cache::remember('dashboard_stats', 300, function () {
+        return Cache::remember('dashboard_stats', 60, function () {
             $userId = auth()->id();
 
             return [
@@ -203,6 +203,27 @@ class StatisticsService
                 'system_load' => $this->getSystemLoad(),
             ];
         });
+    }
+
+    /**
+     * Invalider le cache des statistiques du dashboard
+     */
+    public function clearDashboardCache()
+    {
+        Cache::forget('dashboard_stats');
+    }
+
+    /**
+     * Invalider le cache des statistiques d'activité d'un utilisateur
+     */
+    public function clearUserActivityCache($userId = null)
+    {
+        $userId = $userId ?? auth()->id();
+        if ($userId) {
+            Cache::forget("user_activity_{$userId}");
+        }
+        // Invalider aussi le cache général du dashboard
+        $this->clearDashboardCache();
     }
 
     private function getOnlineUsersCount()
