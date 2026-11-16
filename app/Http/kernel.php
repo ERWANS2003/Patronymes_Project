@@ -1,3 +1,7 @@
+<?php
+
+namespace App\Http;
+
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Http\Request;
 use App\Http\Middleware\ExampleMiddleware;
@@ -8,10 +12,6 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
 use App\Http\Middleware\TrimStrings;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
-
-<?php
-
-namespace App\Http;
 
 
 class Kernel extends HttpKernel

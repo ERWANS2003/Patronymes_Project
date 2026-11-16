@@ -378,7 +378,7 @@
             if (!regionId) return;
             
             console.log('Chargement des provinces pour la région:', regionId);
-            fetch(`/get-provinces?region_id=${regionId}`)
+            fetch(`{{ url('/get-provinces') }}?region_id=${regionId}`)
                 .then(res => {
                     console.log('Réponse provinces:', res.status);
                     return res.json();
@@ -400,7 +400,7 @@
             if (!provinceId) return;
             
             console.log('Chargement des communes pour la province:', provinceId);
-            fetch(`/get-communes?province_id=${provinceId}`)
+            fetch(`{{ url('/get-communes') }}?province_id=${provinceId}`)
                 .then(res => {
                     console.log('Réponse communes:', res.status);
                     return res.json();

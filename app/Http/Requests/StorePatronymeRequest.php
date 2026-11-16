@@ -24,9 +24,9 @@ class StorePatronymeRequest extends FormRequest
     {
         return [
             // Section I: Informations sur l'enquêté
-            'date_collecte' => 'required|date',
-            'collecteur' => 'required|string|max:255|min:2',
-            'code_fiche' => 'required|string|max:50|min:1',
+            'date_collecte' => 'nullable|date',
+            'collecteur' => 'nullable|string|max:255|min:2',
+            'code_fiche' => 'nullable|string|max:50|min:1',
             'contact' => 'nullable|string|max:255',
             'enquete_nom' => 'required|string|max:255|min:2',
             'enquete_age' => 'nullable|integer|min:1|max:120',

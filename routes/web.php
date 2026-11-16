@@ -6,6 +6,7 @@ use App\Http\Controllers\PatronymeController;
 use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\ContributionController;
 
 // Routes publiques
 Route::get('/', function () {
@@ -60,6 +61,9 @@ Route::prefix('patronymes')->name('patronymes.')->group(function () {
     // Routes protégées (contribution) - DOIT être AVANT les routes avec paramètres
     Route::middleware(['auth', \App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
         Route::get('/create', [PatronymeController::class, 'create'])->name('create');
+        Route::get('/create/step1', [PatronymeController::class, 'createStep1'])->name('create.step1');
+        Route::match(['get', 'post'], '/create/step2', [PatronymeController::class, 'createStep2'])->name('create.step2');
+        Route::match(['get', 'post'], '/create/step3', [PatronymeController::class, 'createStep3'])->name('create.step3');
         Route::post('/', [PatronymeController::class, 'store'])
             ->middleware('rate.limit:10,1')
             ->name('store');
@@ -179,9 +183,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/patronymes/{patronyme}/favorite', [FavoriteController::class, 'toggle'])->name('patronymes.favorite.toggle');
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
 
+    // Contributions
+    Route::get('/my-contributions', [ContributionController::class, 'myContributions'])->name('contributions.my');
+    Route::get('/contributions/{contribution}', [ContributionController::class, 'show'])->name('contributions.show');
+    Route::delete('/contributions/{contribution}', [ContributionController::class, 'destroy'])->name('contributions.destroy');
+
     // Contributions (pour les contributeurs)
     Route::middleware([\App\Http\Middleware\CanContributeMiddleware::class])->group(function () {
         Route::get('/contributions', [\App\Http\Controllers\UserContributionsController::class, 'index'])->name('contributions.index');
+    });
+
+    // Routes admin pour les contributions
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('/all-contributions', [ContributionController::class, 'allContributions'])->name('contributions.all');
     });
 });
 
@@ -192,10 +206,10 @@ Route::prefix('statistics')->name('statistics.')->group(function () {
 });
 
 // Inclure les routes d'authentification
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // Inclure les routes des nouvelles fonctionnalités
-require __DIR__.'/features.php';
+require __DIR__ . '/features.php';
 
 // Routes AJAX pour les listes déroulantes dynamiques
 Route::get('/get-provinces', function (Illuminate\Http\Request $request) {

@@ -94,10 +94,10 @@ class QueryOptimizationService
         if (!empty($filters['search'])) {
             $searchTerm = $filters['search'];
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('nom', 'ILIKE', "%{$searchTerm}%")
-                  ->orWhere('signification', 'ILIKE', "%{$searchTerm}%")
-                  ->orWhere('origine', 'ILIKE', "%{$searchTerm}%")
-                  ->orWhere('histoire', 'ILIKE', "%{$searchTerm}%");
+                $q->where('nom', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('signification', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('origine', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('histoire', 'LIKE', "%{$searchTerm}%");
             });
         }
 
@@ -229,7 +229,7 @@ class QueryOptimizationService
         // Recherche dans les patronymes
         $patronymes = DB::table('patronymes')
             ->select(['nom', 'signification'])
-            ->where('nom', 'ILIKE', "%{$query}%")
+            ->where('nom', 'LIKE', "%{$query}%")
             ->limit($limit)
             ->get();
 
@@ -245,7 +245,7 @@ class QueryOptimizationService
         // Recherche dans les régions
         $regions = DB::table('regions')
             ->select(['name'])
-            ->where('name', 'ILIKE', "%{$query}%")
+            ->where('name', 'LIKE', "%{$query}%")
             ->limit(5)
             ->get();
 

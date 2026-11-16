@@ -23,12 +23,17 @@ class SecurityHeadersMiddleware
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
         // Content Security Policy
+        $viteOrigins = "";
+        if (config('app.env') === 'local') {
+            $viteOrigins = " localhost:5173 127.0.0.1:5173 [::1]:5173";
+        }
+
         $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.bunny.net; " .
-               "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.bunny.net; " .
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.bunny.net{$viteOrigins}; " .
+               "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.bunny.net{$viteOrigins}; " .
                "font-src 'self' https://fonts.bunny.net https://cdnjs.cloudflare.com; " .
                "img-src 'self' data: https:; " .
-               "connect-src 'self'; " .
+               "connect-src 'self'{$viteOrigins}; " .
                "frame-ancestors 'none';";
 
         $response->headers->set('Content-Security-Policy', $csp);

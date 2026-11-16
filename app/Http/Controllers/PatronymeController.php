@@ -20,6 +20,7 @@ use App\Services\StatisticsService;
 use App\Services\AdvancedSearchService;
 use App\Http\Requests\StorePatronymeRequest;
 use App\Http\Requests\UpdatePatronymeRequest;
+use Illuminate\Support\Facades\Validator;
 
 class PatronymeController extends Controller
 {
@@ -42,36 +43,27 @@ class PatronymeController extends Controller
             // Check cache for frequent searches
             $cacheKey = 'search_' . md5($search . '_' . $featured);
             $patronymes = Cache::remember($cacheKey, 300, function() use ($search, $featured) {
-                // Optimized search query with proper indexing
-                $query = Patronyme::with(['region', 'departement', 'groupeEthnique'])
-                    ->select(['id', 'nom', 'signification', 'origine', 'region_id', 'departement_id', 'groupe_ethnique_id', 'created_at', 'views_count', 'is_featured']);
+                // Use model scopes for search and filtering
+                $query = Patronyme::with(['region', 'province', 'commune', 'groupeEthnique', 'langue', 'ethnie'])
+                    ->select([
+                        'id', 'nom', 'signification', 'origine', 'histoire',
+                        'region_id', 'province_id', 'commune_id', 'groupe_ethnique_id', 'langue_id', 'ethnie_id',
+                        'views_count', 'is_featured', 'created_at'
+                    ]);
 
                 if ($search) {
-                    // Enhanced search with fuzzy matching and variations
-                    $searchVariations = $this->getSearchVariations($search);
-
-                    $query->where(function($q) use ($search) {
-                        // Search in multiple fields with case insensitive matching
-                        $q->where('nom', 'ilike', '%' . $search . '%')
-                          ->orWhere('signification', 'ilike', '%' . $search . '%')
-                          ->orWhere('origine', 'ilike', '%' . $search . '%');
-                    });
-
+                    $query->search($search);
                     // Log search for analytics
                     $this->logSearch($search);
                 }
 
-                // Handle featured/popular patronymes
                 if ($featured) {
-                    $query->where('is_featured', true)
-                          ->orWhere('views_count', '>', 0)
-                          ->orderBy('views_count', 'desc')
-                          ->orderBy('created_at', 'desc');
+                    $query->featured()->popular();
                 } else {
                     $query->orderBy('nom');
                 }
 
-                return $query->with(['region', 'province', 'commune', 'groupeEthnique', 'langue'])->paginate(12);
+                return $query->paginate(12);
             });
 
             // Check if this is an AJAX request for real-time search
@@ -230,8 +222,6 @@ class PatronymeController extends Controller
             'kone' => ['koné', 'kone', 'koné'],
             'sangare' => ['sangaré', 'sangare', 'sangaré'],
             'dabire' => ['dabiré', 'dabire', 'dabiré'],
-            'kabore' => ['kaboré', 'kabore', 'kaboré'],
-            'ouedraogo' => ['ouédraogo', 'ouedraogo', 'wédraogo'],
         ];
 
         // Chercher des variations pour le terme de recherche
@@ -375,19 +365,112 @@ class PatronymeController extends Controller
 
     public function create()
     {
-        $regions = Region::orderBy('nom')->get();
-        $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
-        $ethnies = \App\Models\Ethnie::orderBy('nom')->get();
-        $langues = \App\Models\Langue::orderBy('nom')->get();
-        $modesTransmission = \App\Models\ModeTransmission::orderBy('type')->get();
-
-        return view('patronymes.create', compact('regions', 'groupesEthniques', 'ethnies', 'langues', 'modesTransmission'));
+        return redirect()->route('patronymes.create.step1');
     }
 
-    public function store(StorePatronymeRequest $request)
+    /**
+     * Étape 1 : Identité de l'enquêté
+     */
+    public function createStep1()
+    {
+        $patronymeData = session('patronyme_data', []);
+        return view('patronymes.create-step1', compact('patronymeData'));
+    }
+
+    /**
+     * Étape 2 : Informations sur le patronyme
+     */
+    public function createStep2(Request $request)
+    {
+        // Si c'est un POST (depuis étape 1), valider et stocker
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'enquete_nom' => 'required|string|max:255|min:2',
+                'enquete_age' => 'nullable|integer|min:1|max:120',
+                'enquete_sexe' => 'nullable|in:M,F',
+                'enquete_fonction' => 'nullable|string|max:255',
+                'enquete_telephone' => 'nullable|string|max:20',
+                'enquete_email' => 'nullable|email|max:255',
+                'date_collecte' => 'nullable|date',
+                'collecteur' => 'nullable|string|max:255|min:2',
+                'code_fiche' => 'nullable|string|max:50|min:1',
+                'contact' => 'nullable|string|max:255',
+            ]);
+
+            $patronymeData = session('patronyme_data', []);
+            $patronymeData = array_merge($patronymeData, $validated);
+            session(['patronyme_data' => $patronymeData]);
+        }
+
+        $groupesEthniques = GroupeEthnique::orderBy('nom')->get();
+        $langues = \App\Models\Langue::orderBy('nom')->get();
+        $patronymeData = session('patronyme_data', []);
+
+        return view('patronymes.create-step2', compact('groupesEthniques', 'langues', 'patronymeData'));
+    }
+
+    /**
+     * Étape 3 : Localisation et récapitulatif
+     */
+    public function createStep3(Request $request)
+    {
+        // Si c'est un POST (depuis étape 2), valider et stocker
+        if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'nom' => 'required|string|max:255|min:2',
+                'groupe_ethnique_id' => 'nullable|exists:groupe_ethniques,id',
+                'origine' => 'nullable|string',
+                'signification' => 'nullable|string',
+                'histoire' => 'nullable|string',
+                'langue_id' => 'nullable|exists:langues,id',
+                'transmission' => 'nullable|in:pere,mere,autre',
+                'patronyme_sexe' => 'nullable|in:oui,non,autre',
+                'patronyme_sexe_detail' => 'nullable|string',
+                'totem' => 'nullable|string|max:255',
+                'justification_totem' => 'nullable|string',
+                'parents_plaisanterie' => 'nullable|string',
+            ]);
+
+            // Ajouter les noms pour le récapitulatif
+            if (isset($validated['groupe_ethnique_id'])) {
+                $validated['groupe_ethnique_nom'] = GroupeEthnique::find($validated['groupe_ethnique_id'])->nom ?? 'N/A';
+            }
+            if (isset($validated['langue_id'])) {
+                $validated['langue_nom'] = \App\Models\Langue::find($validated['langue_id'])->nom ?? 'N/A';
+            }
+
+            $patronymeData = session('patronyme_data', []);
+            $patronymeData = array_merge($patronymeData, $validated);
+            session(['patronyme_data' => $patronymeData]);
+        }
+
+        $regions = Region::orderBy('nom')->get();
+        $patronymeData = session('patronyme_data', []);
+
+        return view('patronymes.create-step3', compact('regions', 'patronymeData'));
+    }
+
+    public function store(Request $request)
     {
         try {
-            $patronyme = Patronyme::create($request->validated());
+            // Fusionner les données de la session avec les données du dernier formulaire (localisation)
+            $patronymeData = session('patronyme_data', []);
+            $finalData = array_merge($patronymeData, $request->all());
+
+            // Valider via le StorePatronymeRequest manuellement ou adapter
+            // Note: Comme on fusionne, StorePatronymeRequest ne peut pas être injecté directement s'il attend tout en POST.
+            // On va donc utiliser le validateur manuellement avec StorePatronymeRequest::rules()
+            $storeRequest = new StorePatronymeRequest();
+            $validator = Validator::make($finalData, $storeRequest->rules(), $storeRequest->messages(), $storeRequest->attributes());
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+            $patronyme = Patronyme::create($finalData);
+
+            // Nettoyer la session
+            session()->forget('patronyme_data');
 
             // Invalider le cache des statistiques utilisateur pour les contributions
             if (auth()->check()) {

@@ -315,7 +315,7 @@
             if (!regionId) return;
             
             console.log('Chargement des provinces pour la région:', regionId);
-            fetch(`/get-provinces?region_id=${regionId}`)
+            fetch(`{{ url('/get-provinces') }}?region_id=${regionId}`)
                 .then(res => {
                     console.log('Réponse provinces:', res.status);
                     return res.json();
@@ -337,7 +337,7 @@
             if (!provinceId) return;
             
             console.log('Chargement des communes pour la province:', provinceId);
-            fetch(`/get-communes?province_id=${provinceId}`)
+            fetch(`{{ url('/get-communes') }}?province_id=${provinceId}`)
                 .then(res => {
                     console.log('Réponse communes:', res.status);
                     return res.json();
@@ -372,7 +372,7 @@
         provinceSelect.innerHTML = '<option value="">Sélectionnez une province</option>';
         communeSelect && (communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>');
         if (!regionId) return;
-        fetch(`/get-provinces?region_id=${regionId}`)
+        fetch(`{{ url('/get-provinces') }}?region_id=${regionId}`)
             .then(response => response.json())
             .then(data => {
                 data.forEach(province => {
@@ -387,7 +387,7 @@
         if (!communeSelect) return;
         communeSelect.innerHTML = '<option value="">Sélectionnez une commune</option>';
         if (!provinceId) return;
-        fetch(`/get-communes?province_id=${provinceId}`)
+        fetch(`{{ url('/get-communes') }}?province_id=${provinceId}`)
             .then(response => response.json())
             .then(data => {
                 data.forEach(commune => {
