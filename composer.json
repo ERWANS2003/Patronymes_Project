@@ -38,6 +38,11 @@
         }
     },
     "scripts": {
+        "vercel": [
+            "@php artisan migrate --force",
+            "@php artisan app:import-local-data",
+            "@php artisan cache:clear database"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

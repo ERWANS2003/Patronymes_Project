@@ -5,6 +5,9 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+// Dossier des journaux. Sur un hébergement en lecture seule (Vercel), LOG_PATH=/tmp.
+$logPath = env('LOG_PATH', storage_path('logs'));
+
 return [
 
     /*
@@ -60,14 +63,14 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $logPath.'/laravel.log',
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $logPath.'/laravel.log',
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -124,13 +127,13 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $logPath.'/laravel.log',
         ],
 
         // Canaux spécialisés pour le monitoring
         'performance' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/performance.log'),
+            'path' => $logPath.'/performance.log',
             'level' => 'info',
             'days' => 30,
             'replace_placeholders' => true,
@@ -138,7 +141,7 @@ return [
 
         'errors' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/errors.log'),
+            'path' => $logPath.'/errors.log',
             'level' => 'error',
             'days' => 30,
             'replace_placeholders' => true,
@@ -146,7 +149,7 @@ return [
 
         'activity' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/activity.log'),
+            'path' => $logPath.'/activity.log',
             'level' => 'info',
             'days' => 30,
             'replace_placeholders' => true,
@@ -154,7 +157,7 @@ return [
 
         'security' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/security.log'),
+            'path' => $logPath.'/security.log',
             'level' => 'warning',
             'days' => 90,
             'replace_placeholders' => true,
@@ -162,7 +165,7 @@ return [
 
         'queries' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/queries.log'),
+            'path' => $logPath.'/queries.log',
             'level' => 'warning',
             'days' => 7,
             'replace_placeholders' => true,

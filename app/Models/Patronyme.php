@@ -126,14 +126,15 @@ class Patronyme extends Model
             return $query;
         }
 
+        // whereLike est insensible à la casse sous SQLite comme sous PostgreSQL (ILIKE).
         return $query->where(function ($q) use ($search) {
-            $q->where('nom', 'LIKE', "%{$search}%")
-              ->orWhere('signification', 'LIKE', "%{$search}%")
-              ->orWhere('origine', 'LIKE', "%{$search}%")
-              ->orWhere('histoire', 'LIKE', "%{$search}%")
-              ->orWhere('totem', 'LIKE', "%{$search}%")
-              ->orWhere('justification_totem', 'LIKE', "%{$search}%")
-              ->orWhere('parents_plaisanterie', 'LIKE', "%{$search}%");
+            $q->whereLike('nom', "%{$search}%")
+              ->orWhereLike('signification', "%{$search}%")
+              ->orWhereLike('origine', "%{$search}%")
+              ->orWhereLike('histoire', "%{$search}%")
+              ->orWhereLike('totem', "%{$search}%")
+              ->orWhereLike('justification_totem', "%{$search}%")
+              ->orWhereLike('parents_plaisanterie', "%{$search}%");
         });
     }
 

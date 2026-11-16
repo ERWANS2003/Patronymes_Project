@@ -1,0 +1,29 @@
+# Fichiers à ne pas envoyer sur Vercel
+
+# Secrets et données locales
+.env
+.env.*
+!.env.example
+database/database.sqlite
+storage/logs
+storage/app/backups
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/views
+
+# Réinstallés ou reconstruits pendant le déploiement
+/vendor
+/node_modules
+/public/build
+# Laisse croire à Laravel que le serveur Vite de développement tourne
+/public/hot
+/public/storage
+
+# Inutiles en production
+/tests
+/docs
+/scripts
+*.md
+*.doc
+Makefile
+phpunit.xml
